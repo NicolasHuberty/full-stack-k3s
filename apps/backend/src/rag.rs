@@ -1,5 +1,5 @@
-use crate::models::Claims;
 use crate::db;
+use crate::models::Claims;
 use crate::models::{
     RagQueryRequest, RagQueryResponse, SearchRequest, SearchResponse, SearchResult,
 };

@@ -134,10 +134,7 @@ impl QdrantService {
         // Delete all points with this file_id using a filter
         use qdrant_client::qdrant::{Condition, Filter};
 
-        let filter = Filter::must([Condition::matches(
-            "file_id",
-            file_id.to_string(),
-        )]);
+        let filter = Filter::must([Condition::matches("file_id", file_id.to_string())]);
 
         self.client
             .delete_points(&collection_name, None, &filter.into(), None)

@@ -45,6 +45,7 @@ impl MinioClient {
         Ok(object_path)
     }
 
+    #[allow(dead_code)]
     pub async fn download_file(
         &self,
         object_path: &str,

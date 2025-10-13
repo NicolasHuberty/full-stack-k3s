@@ -1,22 +1,22 @@
-use qdrant_client::prelude::*;
-use qdrant_client::qdrant::vectors_config::Config;
 use qdrant_client::qdrant::{
-    CreateCollection, Distance, SearchPoints, VectorParams, VectorsConfig,
+    CreateCollectionBuilder, DeletePointsBuilder, Distance, PointStruct, SearchPointsBuilder,
+    UpsertPointsBuilder, VectorParamsBuilder,
 };
+use qdrant_client::{Payload, Qdrant};
 use std::env;
 use std::sync::Arc;
 use uuid::Uuid;
 
 #[derive(Clone)]
 pub struct QdrantService {
-    client: Arc<QdrantClient>,
+    client: Arc<Qdrant>,
 }
 
 impl QdrantService {
     pub async fn new() -> Result<Self, Box<dyn std::error::Error>> {
         let url = env::var("QDRANT_URL").unwrap_or_else(|_| "http://localhost:6333".to_string());
 
-        let client = Arc::new(QdrantClient::from_url(&url).build()?);
+        let client = Arc::new(Qdrant::from_url(&url).build()?);
 
         Ok(QdrantService { client })
     }
@@ -31,17 +31,10 @@ impl QdrantService {
             Ok(_) => Ok(()),
             Err(_) => {
                 self.client
-                    .create_collection(&CreateCollection {
-                        collection_name: collection_name.clone(),
-                        vectors_config: Some(VectorsConfig {
-                            config: Some(Config::Params(VectorParams {
-                                size: 1536,
-                                distance: Distance::Cosine.into(),
-                                ..Default::default()
-                            })),
-                        }),
-                        ..Default::default()
-                    })
+                    .create_collection(
+                        CreateCollectionBuilder::new(&collection_name)
+                            .vectors_config(VectorParamsBuilder::new(1536, Distance::Cosine)),
+                    )
                     .await?;
                 Ok(())
             }
@@ -76,7 +69,7 @@ impl QdrantService {
             .collect();
 
         self.client
-            .upsert_points_blocking(&collection_name, None, points, None)
+            .upsert_points(UpsertPointsBuilder::new(&collection_name, points))
             .await?;
 
         Ok(())
@@ -92,13 +85,10 @@ impl QdrantService {
 
         let search_result = self
             .client
-            .search_points(&SearchPoints {
-                collection_name,
-                vector: query_vector,
-                limit: limit as u64,
-                with_payload: Some(true.into()),
-                ..Default::default()
-            })
+            .search_points(
+                SearchPointsBuilder::new(&collection_name, query_vector, limit as u64)
+                    .with_payload(true),
+            )
             .await?;
 
         let results = search_result
@@ -137,7 +127,7 @@ impl QdrantService {
         let filter = Filter::must([Condition::matches("file_id", file_id.to_string())]);
 
         self.client
-            .delete_points(&collection_name, None, &filter.into(), None)
+            .delete_points(DeletePointsBuilder::new(&collection_name).points(filter))
             .await?;
 
         Ok(())

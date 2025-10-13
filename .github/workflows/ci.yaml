@@ -69,21 +69,18 @@ jobs:
           sudo mv kustomize /usr/local/bin/
 
       - name: Validate Dev Environment
-        working-directory: infra
         run: |
-          kustomize build environments/dev > /dev/null
+          cd infra && kustomize build environments/dev > /dev/null
           echo "✅ Dev environment is valid"
 
       - name: Validate Staging Environment
-        working-directory: infra
         run: |
-          kustomize build environments/staging > /dev/null
+          cd infra && kustomize build environments/staging > /dev/null
           echo "✅ Staging environment is valid"
 
       - name: Validate Production Environment
-        working-directory: infra
         run: |
-          kustomize build environments/production > /dev/null
+          cd infra && kustomize build environments/production > /dev/null
           echo "✅ Production environment is valid"
 
   security-scan:

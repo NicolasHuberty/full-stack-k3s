@@ -226,11 +226,9 @@ fn chunk_text(text: &str, chunk_size: usize) -> Vec<String> {
     let mut current_chunk = String::new();
 
     for word in words {
-        if current_chunk.len() + word.len() + 1 > chunk_size {
-            if !current_chunk.is_empty() {
-                chunks.push(current_chunk.clone());
-                current_chunk.clear();
-            }
+        if current_chunk.len() + word.len() + 1 > chunk_size && !current_chunk.is_empty() {
+            chunks.push(current_chunk.clone());
+            current_chunk.clear();
         }
         if !current_chunk.is_empty() {
             current_chunk.push(' ');

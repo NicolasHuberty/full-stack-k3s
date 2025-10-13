@@ -1,28 +1,21 @@
 # Multi-stage build for Rust backend
 
 # Stage 1: Build
-FROM rust:1.82-alpine AS builder
+FROM rust:1.83-alpine AS builder
 
 # Install build dependencies
-RUN apk add --no-cache musl-dev openssl-dev pkgconfig
+RUN apk add --no-cache musl-dev openssl-dev openssl-libs-static pkgconfig
 
 WORKDIR /app
 
 # Copy manifests
-COPY Cargo.toml ./
+COPY Cargo.toml Cargo.lock* ./
 
-# Create a dummy main.rs to cache dependencies
-RUN mkdir src && \
-    echo "fn main() {}" > src/main.rs && \
-    cargo build --release && \
-    rm -rf src target/release/deps/k3s_backend*
-
-# Copy actual source code
+# Copy source code
 COPY src ./src
 
-# Build for release (dependencies are cached)
-RUN touch src/main.rs && \
-    cargo build --release
+# Build for release
+RUN cargo build --release
 
 # Stage 2: Runtime
 FROM alpine:3.19

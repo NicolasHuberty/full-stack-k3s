@@ -46,7 +46,8 @@ jobs:
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
             apps/backend/target/
-          key: ${{ runner.os }}-cargo-${{ hashFiles('apps/backend/Cargo.lock') }}
+          key: >-
+            ${{ runner.os }}-cargo-${{ hashFiles('apps/backend/Cargo.lock') }}
 
       - name: Check formatting
         working-directory: apps/backend
@@ -120,6 +121,6 @@ jobs:
       - name: Notify deployment
         run: |
           echo "🚀 Backend image built and pushed"
-          echo "📦 Image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}"
+          echo "📦 Image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}"
           echo "🌍 Environment: ${{ steps.env.outputs.environment }}"
           echo "✅ Argo CD will automatically sync the changes"

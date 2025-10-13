@@ -1,6 +1,8 @@
 use crate::auth::Claims;
 use crate::db;
-use crate::models::{RagQueryRequest, RagQueryResponse, SearchRequest, SearchResponse, SearchResult};
+use crate::models::{
+    RagQueryRequest, RagQueryResponse, SearchRequest, SearchResponse, SearchResult,
+};
 use crate::qdrant_service::{create_mock_embedding, QdrantService};
 use actix_web::{web, Error, HttpResponse};
 use sqlx::{Pool, Postgres};
@@ -42,7 +44,11 @@ pub async fn search(
 
     let mut results = Vec::new();
     for (file_id, chunk_text, score) in search_results {
-        if let Some(file) = db::get_file_by_id(&pool, &file_id, &user_id).await.ok().flatten() {
+        if let Some(file) = db::get_file_by_id(&pool, &file_id, &user_id)
+            .await
+            .ok()
+            .flatten()
+        {
             results.push(SearchResult {
                 file_id,
                 filename: file.filename,
@@ -94,7 +100,11 @@ pub async fn rag_query(
 
     for (file_id, chunk_text, _score) in search_results {
         context_parts.push(chunk_text);
-        if let Some(file) = db::get_file_by_id(&pool, &file_id, &user_id).await.ok().flatten() {
+        if let Some(file) = db::get_file_by_id(&pool, &file_id, &user_id)
+            .await
+            .ok()
+            .flatten()
+        {
             if !sources.contains(&file.filename) {
                 sources.push(file.filename);
             }

@@ -1,167 +1,165 @@
+mod auth;
+mod db;
+mod files;
+mod minio_service;
+mod models;
+mod qdrant_service;
+mod rag;
+
 use actix_cors::Cors;
-use actix_web::{web, App, HttpResponse, HttpServer, Responder};
-use serde::{Deserialize, Serialize};
+use actix_web::{middleware, web, App, HttpResponse, HttpServer, Responder};
+use actix_web_httpauth::middleware::HttpAuthentication;
+use minio_service::MinioClient;
+use qdrant_service::QdrantService;
+use sqlx::postgres::PgPoolOptions;
 use std::env;
-use utoipa::{OpenApi, ToSchema};
+use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
-
-#[derive(Serialize, Deserialize, ToSchema)]
-struct HealthResponse {
-    status: String,
-    version: String,
-    environment: String,
-    timestamp: String,
-}
-
-#[derive(Serialize, Deserialize, ToSchema)]
-struct ApiResponse<T> {
-    success: bool,
-    data: Option<T>,
-    message: String,
-}
-
-#[derive(Serialize, Deserialize, ToSchema)]
-struct User {
-    id: u32,
-    name: String,
-    email: String,
-}
 
 #[derive(OpenApi)]
 #[openapi(
     paths(
         health,
-        get_users,
-        get_user,
+        auth::register,
+        auth::login,
+        auth::me,
+        files::upload_file,
+        files::list_files,
+        files::delete_file,
+        rag::search,
+        rag::rag_query,
+        rag::get_history,
     ),
     components(
-        schemas(HealthResponse, ApiResponse<Vec<User>>, ApiResponse<User>, User)
+        schemas(
+            models::RegisterRequest,
+            models::LoginRequest,
+            models::AuthResponse,
+            models::UserResponse,
+            models::FileResponse,
+            models::SearchRequest,
+            models::SearchResponse,
+            models::SearchResult,
+            models::RagQueryRequest,
+            models::RagQueryResponse,
+            models::ChatMessage,
+            models::ErrorResponse,
+        )
     ),
     tags(
-        (name = "health", description = "Health check endpoints"),
-        (name = "users", description = "User management endpoints")
+        (name = "auth", description = "Authentication endpoints"),
+        (name = "files", description = "File management endpoints"),
+        (name = "rag", description = "RAG query endpoints")
     ),
     info(
-        title = "K3s Backend API",
+        title = "K3s RAG API",
         version = "0.1.0",
-        description = "Backend API for K3s GitOps Demo",
-        contact(
-            name = "Nicolas Huberty",
-            email = "nicolas@datanest.be"
-        )
+        description = "Multi-tenant RAG application with authentication, file upload, and vector search"
     )
 )]
 struct ApiDoc;
 
-/// Health check endpoint
 #[utoipa::path(
     get,
     path = "/api/health",
-    tag = "health",
     responses(
-        (status = 200, description = "Service is healthy", body = HealthResponse)
+        (status = 200, description = "API is healthy")
     )
 )]
 async fn health() -> impl Responder {
-    let environment = env::var("ENVIRONMENT").unwrap_or_else(|_| "unknown".to_string());
-    let version = env::var("VERSION").unwrap_or_else(|_| "0.1.0".to_string());
-
-    HttpResponse::Ok().json(HealthResponse {
-        status: "healthy".to_string(),
-        version,
-        environment,
-        timestamp: chrono::Utc::now().to_rfc3339(),
-    })
-}
-
-/// Get all users
-#[utoipa::path(
-    get,
-    path = "/api/users",
-    tag = "users",
-    responses(
-        (status = 200, description = "List of users", body = ApiResponse<Vec<User>>)
-    )
-)]
-async fn get_users() -> impl Responder {
-    let users = vec![
-        User {
-            id: 1,
-            name: "Alice".to_string(),
-            email: "alice@example.com".to_string(),
-        },
-        User {
-            id: 2,
-            name: "Bob".to_string(),
-            email: "bob@example.com".to_string(),
-        },
-    ];
-
-    HttpResponse::Ok().json(ApiResponse {
-        success: true,
-        data: Some(users),
-        message: "Users retrieved successfully".to_string(),
-    })
-}
-
-/// Get user by ID
-#[utoipa::path(
-    get,
-    path = "/api/users/{id}",
-    tag = "users",
-    params(
-        ("id" = u32, Path, description = "User ID")
-    ),
-    responses(
-        (status = 200, description = "User found", body = ApiResponse<User>),
-        (status = 404, description = "User not found")
-    )
-)]
-async fn get_user(id: web::Path<u32>) -> impl Responder {
-    let user = User {
-        id: *id,
-        name: "Sample User".to_string(),
-        email: format!("user{}@example.com", id),
-    };
-
-    HttpResponse::Ok().json(ApiResponse {
-        success: true,
-        data: Some(user),
-        message: "User retrieved successfully".to_string(),
-    })
+    HttpResponse::Ok().json(serde_json::json!({
+        "status": "healthy",
+        "service": "k3s-backend",
+        "environment": env::var("ENVIRONMENT").unwrap_or_else(|_| "unknown".to_string())
+    }))
 }
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     env_logger::init();
-    dotenv::dotenv().ok();
+
+    let database_url =
+        env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+
+    log::info!("Connecting to database...");
+    let pool = PgPoolOptions::new()
+        .max_connections(5)
+        .connect(&database_url)
+        .await
+        .expect("Failed to connect to database");
+
+    log::info!("Database connected successfully");
+
+    log::info!("Initializing MinIO client...");
+    let minio = MinioClient::new().expect("Failed to initialize MinIO client");
+    minio
+        .ensure_bucket_exists()
+        .await
+        .expect("Failed to ensure bucket exists");
+    log::info!("MinIO client initialized");
+
+    log::info!("Initializing Qdrant client...");
+    let qdrant = QdrantService::new()
+        .await
+        .expect("Failed to initialize Qdrant client");
+    log::info!("Qdrant client initialized");
 
     let host = env::var("HOST").unwrap_or_else(|_| "0.0.0.0".to_string());
     let port = env::var("PORT").unwrap_or_else(|_| "8080".to_string());
     let bind_address = format!("{}:{}", host, port);
 
-    log::info!("Starting server on {}", bind_address);
-    log::info!("API documentation available at /docs");
+    log::info!("Starting server at {}", bind_address);
     log::info!(
         "Environment: {}",
         env::var("ENVIRONMENT").unwrap_or_else(|_| "unknown".to_string())
     );
 
-    HttpServer::new(|| {
-        let cors = Cors::default()
-            .allow_any_origin()
-            .allow_any_method()
-            .allow_any_header()
-            .max_age(3600);
+    HttpServer::new(move || {
+        let cors = Cors::permissive();
+
+        let bearer_middleware = HttpAuthentication::bearer(auth::validator);
 
         App::new()
+            .app_data(web::Data::new(pool.clone()))
+            .app_data(web::Data::new(minio.clone()))
+            .app_data(web::Data::new(qdrant.clone()))
+            .wrap(middleware::Logger::default())
             .wrap(cors)
+            .service(
+                web::scope("/api")
+                    .service(web::resource("/health").route(web::get().to(health)))
+                    .service(
+                        web::scope("/auth")
+                            .route("/register", web::post().to(auth::register))
+                            .route("/login", web::post().to(auth::login))
+                            .service(
+                                web::resource("/me")
+                                    .wrap(bearer_middleware.clone())
+                                    .route(web::get().to(auth::me)),
+                            ),
+                    )
+                    .service(
+                        web::scope("/files")
+                            .wrap(bearer_middleware.clone())
+                            .route("/upload", web::post().to(files::upload_file))
+                            .route("", web::get().to(files::list_files))
+                            .route("/{file_id}", web::delete().to(files::delete_file)),
+                    )
+                    .service(
+                        web::scope("/rag")
+                            .wrap(bearer_middleware.clone())
+                            .route("/query", web::post().to(rag::rag_query))
+                            .route("/history", web::get().to(rag::get_history)),
+                    )
+                    .service(
+                        web::resource("/search")
+                            .wrap(bearer_middleware.clone())
+                            .route(web::post().to(rag::search)),
+                    ),
+            )
             .service(
                 SwaggerUi::new("/docs/{_:.*}").url("/api-docs/openapi.json", ApiDoc::openapi()),
             )
-            .route("/api/health", web::get().to(health))
-            .route("/api/users", web::get().to(get_users))
-            .route("/api/users/{id}", web::get().to(get_user))
     })
     .bind(&bind_address)?
     .run()

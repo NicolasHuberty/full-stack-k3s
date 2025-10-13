@@ -1,4 +1,4 @@
-use crate::auth::Claims;
+use crate::models::Claims;
 use crate::db;
 use crate::minio_service::MinioClient;
 use crate::models::FileResponse;

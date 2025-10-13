@@ -1,4 +1,4 @@
-use crate::auth::Claims;
+use crate::models::Claims;
 use crate::db;
 use crate::models::{
     RagQueryRequest, RagQueryResponse, SearchRequest, SearchResponse, SearchResult,

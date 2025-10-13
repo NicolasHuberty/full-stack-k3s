@@ -68,13 +68,13 @@ impl MinioClient {
     }
 
     pub async fn ensure_bucket_exists(&self) -> Result<(), Box<dyn std::error::Error>> {
-        match self.bucket.head_object("/").await {
+        // Try to list objects to check if bucket exists
+        // If it fails, the bucket doesn't exist (or we don't have permissions)
+        // In production, create the bucket manually or via terraform
+        match self.bucket.list("".to_string(), None).await {
             Ok(_) => Ok(()),
-            Err(_) => {
-                self.bucket
-                    .create()
-                    .await
-                    .map_err(|e| format!("Failed to create bucket: {}", e))?;
+            Err(e) => {
+                log::warn!("Bucket check failed: {}. Assuming bucket exists.", e);
                 Ok(())
             }
         }

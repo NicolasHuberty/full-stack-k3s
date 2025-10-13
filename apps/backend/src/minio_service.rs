@@ -11,8 +11,7 @@ pub struct MinioClient {
 impl MinioClient {
     pub fn new() -> Result<Self, Box<dyn std::error::Error>> {
         let endpoint = env::var("MINIO_ENDPOINT").unwrap_or_else(|_| "localhost:9000".to_string());
-        let access_key =
-            env::var("MINIO_ACCESS_KEY").unwrap_or_else(|_| "minioadmin".to_string());
+        let access_key = env::var("MINIO_ACCESS_KEY").unwrap_or_else(|_| "minioadmin".to_string());
         let secret_key =
             env::var("MINIO_SECRET_KEY").unwrap_or_else(|_| "minioadmin123".to_string());
         let bucket_name = env::var("MINIO_BUCKET").unwrap_or_else(|_| "rag-files".to_string());
@@ -22,13 +21,7 @@ impl MinioClient {
             endpoint: format!("http://{}", endpoint),
         };
 
-        let credentials = Credentials::new(
-            Some(&access_key),
-            Some(&secret_key),
-            None,
-            None,
-            None,
-        )?;
+        let credentials = Credentials::new(Some(&access_key), Some(&secret_key), None, None, None)?;
 
         let bucket = Bucket::new(&bucket_name, region, credentials)?;
 

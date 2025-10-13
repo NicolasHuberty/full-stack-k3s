@@ -61,10 +61,13 @@ pub async fn upload_file(
         })));
     }
 
-    qdrant.ensure_collection_exists(&user_id).await.map_err(|e| {
-        log::error!("Qdrant error: {}", e);
-        actix_web::error::ErrorInternalServerError("Vector DB error")
-    })?;
+    qdrant
+        .ensure_collection_exists(&user_id)
+        .await
+        .map_err(|e| {
+            log::error!("Qdrant error: {}", e);
+            actix_web::error::ErrorInternalServerError("Vector DB error")
+        })?;
 
     let minio_path = minio
         .upload_file(&user_id, &filename, &file_data)
@@ -77,12 +80,19 @@ pub async fn upload_file(
     let file_size = file_data.len() as i64;
     let mime_type = Some("application/octet-stream");
 
-    let file = db::create_file(&pool, &user_id, &filename, &minio_path, file_size, mime_type)
-        .await
-        .map_err(|e| {
-            log::error!("Database error: {}", e);
-            actix_web::error::ErrorInternalServerError("Database error")
-        })?;
+    let file = db::create_file(
+        &pool,
+        &user_id,
+        &filename,
+        &minio_path,
+        file_size,
+        mime_type,
+    )
+    .await
+    .map_err(|e| {
+        log::error!("Database error: {}", e);
+        actix_web::error::ErrorInternalServerError("Database error")
+    })?;
 
     let text_content = String::from_utf8_lossy(&file_data).to_string();
     let chunks = chunk_text(&text_content, 500);
@@ -131,12 +141,10 @@ pub async fn list_files(
         actix_web::error::ErrorBadRequest("Invalid user ID")
     })?;
 
-    let files = db::get_user_files(&pool, &user_id)
-        .await
-        .map_err(|e| {
-            log::error!("Database error: {}", e);
-            actix_web::error::ErrorInternalServerError("Database error")
-        })?;
+    let files = db::get_user_files(&pool, &user_id).await.map_err(|e| {
+        log::error!("Database error: {}", e);
+        actix_web::error::ErrorInternalServerError("Database error")
+    })?;
 
     let response: Vec<FileResponse> = files
         .into_iter()

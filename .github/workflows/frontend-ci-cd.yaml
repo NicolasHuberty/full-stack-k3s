@@ -114,6 +114,6 @@ jobs:
       - name: Notify deployment
         run: |
           echo "🚀 Frontend image built and pushed"
-          echo "📦 Image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}"
+          echo "📦 Image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}"
           echo "🌍 Environment: ${{ steps.env.outputs.environment }}"
-          echo "✅ Argo CD will automatically sync the changes"
+          echo "✅ Argo CD will automatically sync"

@@ -48,7 +48,8 @@ jobs:
           for file in $(find . -name '*.yaml' -o -name '*.yml'); do
             if grep -q "apiVersion:" "$file" 2>/dev/null; then
               echo "Validating $file"
-              kubectl apply --dry-run=client -f "$file" || echo "⚠️  Failed to validate $file"
+              kubectl apply --dry-run=client -f "$file" || \
+                echo "⚠️  Failed: $file"
             fi
           done
 
@@ -61,22 +62,24 @@ jobs:
 
       - name: Set up Kustomize
         run: |
-          curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
+          curl -s \
+            "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" \
+            | bash
           sudo mv kustomize /usr/local/bin/
 
       - name: Validate Dev Environment
         run: |
-          kustomize build environments/dev > /dev/null
+          kustomize build infra/environments/dev > /dev/null
           echo "✅ Dev environment is valid"
 
       - name: Validate Staging Environment
         run: |
-          kustomize build environments/staging > /dev/null
+          kustomize build infra/environments/staging > /dev/null
           echo "✅ Staging environment is valid"
 
       - name: Validate Production Environment
         run: |
-          kustomize build environments/production > /dev/null
+          kustomize build infra/environments/production > /dev/null
           echo "✅ Production environment is valid"
 
   security-scan:

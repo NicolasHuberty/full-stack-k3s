@@ -78,8 +78,7 @@ async fn health() -> impl Responder {
 async fn main() -> std::io::Result<()> {
     env_logger::init();
 
-    let database_url =
-        env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+    let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
 
     log::info!("Connecting to database...");
     let pool = PgPoolOptions::new()

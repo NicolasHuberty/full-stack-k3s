@@ -56,17 +56,19 @@ impl QdrantService {
 
         let points: Vec<PointStruct> = chunks
             .into_iter()
-            .map(|(idx, text, embedding)| PointStruct::new(
-                Uuid::new_v4().to_string(),
-                embedding,
-                [
-                    ("file_id", file_id.to_string().into()),
-                    ("chunk_index", (idx as i64).into()),
-                    ("text", text.into()),
-                ]
-                .into_iter()
-                .collect(),
-            ))
+            .map(|(idx, text, embedding)| {
+                PointStruct::new(
+                    Uuid::new_v4().to_string(),
+                    embedding,
+                    [
+                        ("file_id", file_id.to_string().into()),
+                        ("chunk_index", (idx as i64).into()),
+                        ("text", text.into()),
+                    ]
+                    .into_iter()
+                    .collect(),
+                )
+            })
             .collect();
 
         self.client

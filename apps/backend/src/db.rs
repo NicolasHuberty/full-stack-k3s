@@ -84,13 +84,11 @@ pub async fn get_file_by_id(
     file_id: &Uuid,
     user_id: &Uuid,
 ) -> Result<Option<File>, sqlx::Error> {
-    let file = sqlx::query_as::<_, File>(
-        "SELECT * FROM files WHERE id = $1 AND user_id = $2",
-    )
-    .bind(file_id)
-    .bind(user_id)
-    .fetch_optional(pool)
-    .await?;
+    let file = sqlx::query_as::<_, File>("SELECT * FROM files WHERE id = $1 AND user_id = $2")
+        .bind(file_id)
+        .bind(user_id)
+        .fetch_optional(pool)
+        .await?;
 
     Ok(file)
 }

@@ -169,12 +169,10 @@ pub async fn me(
         actix_web::error::ErrorBadRequest("Invalid user ID")
     })?;
 
-    let user = db::get_user_by_id(&pool, &user_id)
-        .await
-        .map_err(|e| {
-            log::error!("Database error: {}", e);
-            actix_web::error::ErrorInternalServerError("Database error")
-        })?;
+    let user = db::get_user_by_id(&pool, &user_id).await.map_err(|e| {
+        log::error!("Database error: {}", e);
+        actix_web::error::ErrorInternalServerError("Database error")
+    })?;
 
     match user {
         Some(u) => Ok(HttpResponse::Ok().json(UserResponse {

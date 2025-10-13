@@ -4,6 +4,7 @@ use s3::region::Region;
 use std::env;
 use uuid::Uuid;
 
+#[derive(Clone)]
 pub struct MinioClient {
     bucket: Bucket,
 }

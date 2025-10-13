@@ -62,9 +62,10 @@ jobs:
 
       - name: Set up Kustomize
         run: |
-          curl -s \
-            "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" \
-            | bash
+          URL="https://raw.githubusercontent.com"
+          URL="${URL}/kubernetes-sigs/kustomize"
+          URL="${URL}/master/hack/install_kustomize.sh"
+          curl -s "${URL}" | bash
           sudo mv kustomize /usr/local/bin/
 
       - name: Validate Dev Environment

@@ -6,6 +6,7 @@ use qdrant_client::qdrant::{
 use std::env;
 use uuid::Uuid;
 
+#[derive(Clone)]
 pub struct QdrantService {
     client: QdrantClient,
 }

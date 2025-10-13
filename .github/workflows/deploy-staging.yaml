@@ -1,0 +1,44 @@
+---
+# Deploy to Staging Environment
+name: Deploy to Staging
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'environments/staging/**'
+      - 'base/**'
+      - '.github/workflows/deploy-staging.yaml'
+
+jobs:
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    environment:
+      name: staging
+      url: https://staging.huberty.pro
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run integration tests
+        run: |
+          echo "🧪 Running integration tests"
+          # Add your test commands here
+
+      - name: Notify Argo CD
+        run: |
+          echo "🚀 Deploying to Staging environment"
+          echo "Argo CD will automatically sync the changes"
+
+      - name: Create deployment annotation
+        run: |
+          echo "Deployment triggered by: ${{ github.actor }}"
+          echo "Commit: ${{ github.sha }}"
+          echo "Branch: ${{ github.ref_name }}"
+
+      - name: Slack/Discord Notification (optional)
+        run: |
+          echo "📢 You can add Slack/Discord webhook here"
+          echo "✅ Staging deployment initiated"

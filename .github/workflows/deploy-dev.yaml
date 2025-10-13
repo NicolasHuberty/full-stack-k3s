@@ -1,0 +1,40 @@
+---
+# Deploy to Development Environment
+name: Deploy to Dev
+
+on:
+  push:
+    branches:
+      - develop
+      - main
+    paths:
+      - 'environments/dev/**'
+      - 'base/**'
+      - '.github/workflows/deploy-dev.yaml'
+
+jobs:
+  deploy-dev:
+    name: Deploy to Development
+    runs-on: ubuntu-latest
+    environment:
+      name: development
+      url: https://dev.huberty.pro
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Notify Argo CD
+        run: |
+          echo "🚀 Deploying to Development environment"
+          echo "Argo CD will automatically sync the changes"
+
+      - name: Create deployment annotation
+        run: |
+          echo "Deployment triggered by: ${{ github.actor }}"
+          echo "Commit: ${{ github.sha }}"
+          echo "Branch: ${{ github.ref_name }}"
+
+      - name: Slack/Discord Notification (optional)
+        run: |
+          echo "📢 You can add Slack/Discord webhook here"
+          echo "✅ Dev deployment initiated"

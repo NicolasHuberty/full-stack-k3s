@@ -1,0 +1,83 @@
+---
+# Deploy to Production Environment (Manual Approval Required)
+name: Deploy to Production
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to deploy'
+        required: true
+        type: string
+      reason:
+        description: 'Deployment reason'
+        required: true
+        type: string
+
+jobs:
+  validate:
+    name: Validate Production Deployment
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Validate manifests
+        run: |
+          echo "🔍 Validating production manifests"
+          # Add validation steps
+
+      - name: Security scan
+        run: |
+          echo "🔒 Running security scans"
+          # Add security scan steps
+
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: validate
+    environment:
+      name: production
+      url: https://prod.huberty.pro
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Create deployment record
+        run: |
+          echo "📝 Deployment Record"
+          echo "Version: ${{ inputs.version }}"
+          echo "Reason: ${{ inputs.reason }}"
+          echo "Deployed by: ${{ github.actor }}"
+          echo "Timestamp: $(date -u)"
+
+      - name: Notify Argo CD
+        run: |
+          echo "🚀 Deploying to Production environment"
+          echo "This requires manual sync in Argo CD"
+
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ inputs.version }}
+          release_name: Production Release ${{ inputs.version }}
+          body: |
+            ## Production Deployment
+
+            **Version:** ${{ inputs.version }}
+            **Deployed by:** ${{ github.actor }}
+            **Reason:** ${{ inputs.reason }}
+            **Timestamp:** $(date -u)
+
+            ### Changes
+            ${{ github.event.head_commit.message }}
+          draft: false
+          prerelease: false
+
+      - name: Slack/Discord Notification
+        run: |
+          echo "🚨 PRODUCTION DEPLOYMENT"
+          echo "Version: ${{ inputs.version }}"
+          echo "✅ Production deployment initiated"

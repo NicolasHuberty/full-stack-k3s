@@ -1,0 +1,31 @@
+---
+# Vault Ingress with TLS
+# Exposes Vault UI with automatic TLS certificate
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: vault
+  namespace: vault
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+    external-dns.alpha.kubernetes.io/hostname: vault.huberty.pro  # CHANGE THIS
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: vault.huberty.pro  # CHANGE THIS to your domain
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: vault
+                port:
+                  number: 8200
+  tls:
+    - hosts:
+        - vault.huberty.pro  # CHANGE THIS to your domain
+      secretName: vault-tls

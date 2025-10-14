@@ -1,0 +1,70 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-config
+data:
+  index.html: |
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>K3s GitOps Demo</title>
+        <style>
+            body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100vh;
+                margin: 0;
+            }
+            .container {
+                text-align: center;
+                background: rgba(255, 255, 255, 0.1);
+                padding: 3rem;
+                border-radius: 20px;
+                backdrop-filter: blur(10px);
+                box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            }
+            h1 {
+                font-size: 3rem;
+                margin: 0;
+                text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            }
+            .badge {
+                display: inline-block;
+                padding: 0.5rem 1rem;
+                margin: 1rem;
+                background: rgba(255, 255, 255, 0.2);
+                border-radius: 10px;
+                font-size: 1.2rem;
+            }
+            .environment {
+                font-size: 2rem;
+                font-weight: bold;
+                margin: 2rem 0;
+                padding: 1rem;
+                background: rgba(255, 255, 255, 0.15);
+                border-radius: 15px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>🚀 K3s GitOps Demo</h1>
+            <div class="environment">
+                Environment: <span id="env">LOADING...</span>
+            </div>
+            <div>
+                <span class="badge">✅ Deployed via Argo CD</span>
+                <span class="badge">🔄 GitOps Workflow</span>
+                <span class="badge">🔐 HTTPS Enabled</span>
+            </div>
+        </div>
+        <script>
+            // This will be replaced by environment-specific config
+            document.getElementById('env').textContent = 'BASE';
+        </script>
+    </body>
+    </html>

@@ -1,0 +1,77 @@
+---
+# Argo CD Installation
+# This installs Argo CD in the argocd namespace
+# Install with: kubectl apply -f argocd-install.yaml
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: argocd
+---
+# Install Argo CD using the official stable manifest
+# This is a placeholder - the actual installation will use:
+# kubectl create namespace argocd
+# kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+
+# For a production setup, you should download the manifest and version control it
+# Here we'll create a custom ConfigMap for Argo CD configuration
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-cm
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: argocd-cm
+    app.kubernetes.io/part-of: argocd
+data:
+  # Enable insecure mode for internal access (Traefik will handle TLS)
+  # In production, you should use proper TLS
+  url: https://argocd.mycluster.example.com  # CHANGE THIS to your domain
+
+  # Enable admin user
+  admin.enabled: "true"
+
+  # Repositories configuration (can be managed via UI or CLI as well)
+  repositories: |
+    - url: https://github.com/your-org/your-repo
+      type: git
+      name: infra-repo
+
+  # Resource customizations
+  resource.customizations: |
+    networking.k8s.io/Ingress:
+      health.lua: |
+        hs = {}
+        hs.status = "Healthy"
+        return hs
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-cmd-params-cm
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: argocd-cmd-params-cm
+    app.kubernetes.io/part-of: argocd
+data:
+  # Run server without TLS (Traefik will handle TLS termination)
+  server.insecure: "true"
+---
+# Argo CD Server Service - Exposed via LoadBalancer/Ingress
+apiVersion: v1
+kind: Service
+metadata:
+  name: argocd-server
+  namespace: argocd
+spec:
+  type: ClusterIP  # We'll use Ingress instead of LoadBalancer
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8080
+    - name: https
+      port: 443
+      targetPort: 8080
+  selector:
+    app.kubernetes.io/name: argocd-server

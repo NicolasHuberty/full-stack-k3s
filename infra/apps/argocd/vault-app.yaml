@@ -1,0 +1,91 @@
+---
+# Vault Application
+# HashiCorp Vault for centralized secrets management
+
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: vault
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    chart: vault
+    repoURL: https://helm.releases.hashicorp.com
+    targetRevision: 0.27.0
+    helm:
+      releaseName: vault
+      values: |
+        server:
+          enabled: true
+          image:
+            repository: hashicorp/vault
+            tag: 1.15.4
+
+          # Use file storage for development
+          # In production, use Raft or external storage (Consul, etc.)
+          dataStorage:
+            enabled: true
+            size: 10Gi
+            storageClass: local-path  # K3s default storage class
+
+          standalone:
+            enabled: true
+            config: |
+              ui = true
+
+              listener "tcp" {
+                tls_disable = 1
+                address = "[::]:8200"
+                cluster_address = "[::]:8201"
+              }
+
+              storage "file" {
+                path = "/vault/data"
+              }
+
+              # Enable the built-in UI
+              api_addr = "http://vault.vault.svc.cluster.local:8200"
+              cluster_addr = "https://vault.vault.svc.cluster.local:8201"
+
+          service:
+            enabled: true
+            type: ClusterIP
+            port: 8200
+
+          # HA settings (disabled for standalone)
+          ha:
+            enabled: false
+
+        ui:
+          enabled: true
+          serviceType: ClusterIP
+
+        # Injector for sidecar injection (optional)
+        injector:
+          enabled: true
+          replicas: 1
+
+        # Server telemetry
+        serverTelemetry:
+          serviceMonitor:
+            enabled: true
+          prometheusRules:
+            enabled: true
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: vault
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+    retry:
+      limit: 3
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 2m

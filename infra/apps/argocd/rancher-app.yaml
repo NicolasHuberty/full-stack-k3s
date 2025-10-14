@@ -1,0 +1,80 @@
+---
+# Rancher Application
+# Kubernetes cluster management platform
+
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: rancher
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    chart: rancher
+    repoURL: https://releases.rancher.com/server-charts/stable
+    targetRevision: 2.8.0
+    helm:
+      releaseName: rancher
+      values: |
+        hostname: rancher.mycluster.example.com  # CHANGE THIS to your domain
+
+        # Rancher Bootstrap Configuration
+        bootstrapPassword: "admin"  # CHANGE THIS! Initial admin password
+
+        # Certificate configuration
+        # We'll use cert-manager to generate certificates
+        ingress:
+          tls:
+            source: secret
+            secretName: rancher-tls
+
+        # Replica count
+        replicas: 1
+
+        # Use private CA
+        privateCA: false
+
+        # Additional trusted CAs
+        additionalTrustedCAs: false
+
+        # Audit logging
+        auditLog:
+          level: 0
+          maxAge: 10
+          maxBackup: 10
+          maxSize: 100
+
+        # Resource requests/limits
+        resources:
+          limits:
+            cpu: 1000m
+            memory: 2Gi
+          requests:
+            cpu: 500m
+            memory: 1Gi
+
+        # Liveness and readiness probes
+        livenessProbe:
+          initialDelaySeconds: 60
+          periodSeconds: 30
+
+        readinessProbe:
+          initialDelaySeconds: 5
+          periodSeconds: 30
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: cattle-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 5m

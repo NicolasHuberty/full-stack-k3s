@@ -1,0 +1,169 @@
+---
+# Demo Application Deployment
+# A simple nginx application to demonstrate the full stack
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: demo-app
+  namespace: demo-app
+  labels:
+    app: demo-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: demo-app
+  template:
+    metadata:
+      labels:
+        app: demo-app
+    spec:
+      serviceAccountName: demo-app
+      containers:
+        - name: nginx
+          image: nginx:1.25-alpine
+          ports:
+            - containerPort: 80
+              name: http
+          env:
+            # Inject secrets from External Secrets
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: demo-app-config
+                  key: DATABASE_URL
+                  optional: true
+            - name: API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: demo-app-config
+                  key: API_KEY
+                  optional: true
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          volumeMounts:
+            - name: config
+              mountPath: /usr/share/nginx/html
+      volumes:
+        - name: config
+          configMap:
+            name: demo-app-config
+---
+# ConfigMap for demo app
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: demo-app-config
+  namespace: demo-app
+data:
+  index.html: |
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>K3s GitOps Demo</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                max-width: 800px;
+                margin: 50px auto;
+                padding: 20px;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+            }
+            .container {
+                background: rgba(255, 255, 255, 0.1);
+                padding: 30px;
+                border-radius: 10px;
+                backdrop-filter: blur(10px);
+            }
+            h1 {
+                text-align: center;
+                font-size: 2.5em;
+                margin-bottom: 30px;
+            }
+            .info {
+                background: rgba(255, 255, 255, 0.2);
+                padding: 15px;
+                border-radius: 5px;
+                margin: 10px 0;
+            }
+            .success {
+                color: #4ade80;
+                font-weight: bold;
+            }
+            ul {
+                list-style-type: none;
+                padding: 0;
+            }
+            li {
+                padding: 10px;
+                margin: 5px 0;
+                background: rgba(255, 255, 255, 0.1);
+                border-radius: 5px;
+            }
+            .badge {
+                display: inline-block;
+                padding: 3px 8px;
+                background: rgba(255, 255, 255, 0.3);
+                border-radius: 3px;
+                margin-left: 10px;
+                font-size: 0.8em;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>🚀 K3s GitOps Stack</h1>
+            <div class="info">
+                <p class="success">✓ Demo Application Running Successfully!</p>
+            </div>
+
+            <h2>🎯 Deployed Components:</h2>
+            <ul>
+                <li>✓ K3s Multi-Node Cluster <span class="badge">Running</span></li>
+                <li>✓ MetalLB Load Balancer <span class="badge">Active</span></li>
+                <li>✓ Traefik Ingress Controller <span class="badge">Active</span></li>
+                <li>✓ Cert-Manager <span class="badge">TLS Ready</span></li>
+                <li>✓ ExternalDNS <span class="badge">Cloudflare</span></li>
+                <li>✓ Vault <span class="badge">Secrets</span></li>
+                <li>✓ External Secrets Operator <span class="badge">Synced</span></li>
+                <li>✓ Argo CD <span class="badge">GitOps</span></li>
+                <li>✓ Prometheus + Grafana <span class="badge">Monitoring</span></li>
+                <li>✓ Loki + Promtail <span class="badge">Logging</span></li>
+                <li>✓ Rancher <span class="badge">Management</span></li>
+            </ul>
+
+            <h2>🔗 Access URLs:</h2>
+            <ul>
+                <li>🎯 Argo CD: https://argocd.mycluster.example.com</li>
+                <li>📊 Grafana: https://grafana.mycluster.example.com</li>
+                <li>🔐 Vault: https://vault.mycluster.example.com</li>
+                <li>🐄 Rancher: https://rancher.mycluster.example.com</li>
+            </ul>
+
+            <div class="info">
+                <p><strong>Note:</strong> This is a fully automated GitOps infrastructure deployed on K3s.</p>
+                <p>All certificates are automatically managed by cert-manager using Let's Encrypt.</p>
+                <p>DNS records are automatically created by ExternalDNS in Cloudflare.</p>
+            </div>
+        </div>
+    </body>
+    </html>

@@ -1,0 +1,47 @@
+# Local configuration files with secrets
+*.local.env
+config.local.env
+
+# Kubernetes secrets
+*-secret.yaml
+secret-*.yaml
+
+# Helm dependencies
+charts/*/charts/
+charts/*/*.tgz
+
+# Terraform/Terragrunt
+*.tfstate
+*.tfstate.backup
+.terraform/
+.terragrunt-cache/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.bak
+*.backup
+
+# Kubeconfig files (should not be committed)
+kubeconfig*
+*.kubeconfig
+
+# Vault unseal keys and credentials
+vault-keys.json
+unseal-keys.txt
+VAULT_CREDENTIALS.md
+vault-init.json
+
+# Credentials
+credentials.json
+service-account.json

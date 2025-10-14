@@ -1,0 +1,132 @@
+---
+# Kube-Prometheus-Stack Application
+# Complete monitoring stack with Prometheus, Grafana, and Alertmanager
+
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kube-prometheus-stack
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    chart: kube-prometheus-stack
+    repoURL: https://prometheus-community.github.io/helm-charts
+    targetRevision: 55.5.0
+    helm:
+      releaseName: kube-prometheus-stack
+      values: |
+        # Prometheus configuration
+        prometheus:
+          enabled: true
+          prometheusSpec:
+            retention: 30d
+            storageSpec:
+              volumeClaimTemplate:
+                spec:
+                  storageClassName: local-path
+                  accessModes: ["ReadWriteOnce"]
+                  resources:
+                    requests:
+                      storage: 50Gi
+            podMonitorSelectorNilUsesHelmValues: false
+            serviceMonitorSelectorNilUsesHelmValues: false
+
+        # Grafana configuration
+        grafana:
+          enabled: true
+          adminPassword: admin  # CHANGE THIS!
+          ingress:
+            enabled: false  # We'll create a separate Ingress with cert-manager
+          persistence:
+            enabled: true
+            storageClassName: local-path
+            size: 10Gi
+          datasources:
+            datasources.yaml:
+              apiVersion: 1
+              datasources:
+              - name: Prometheus
+                type: prometheus
+                url: http://kube-prometheus-stack-prometheus.monitoring:9090
+                access: proxy
+                isDefault: true
+              - name: Loki
+                type: loki
+                url: http://loki.monitoring:3100
+                access: proxy
+          dashboardProviders:
+            dashboardproviders.yaml:
+              apiVersion: 1
+              providers:
+              - name: 'default'
+                orgId: 1
+                folder: ''
+                type: file
+                disableDeletion: false
+                editable: true
+                options:
+                  path: /var/lib/grafana/dashboards/default
+          dashboards:
+            default:
+              k8s-cluster:
+                gnetId: 7249
+                revision: 1
+                datasource: Prometheus
+              k8s-nodes:
+                gnetId: 15759
+                revision: 1
+                datasource: Prometheus
+              k8s-pods:
+                gnetId: 15760
+                revision: 1
+                datasource: Prometheus
+
+        # Alertmanager configuration
+        alertmanager:
+          enabled: true
+          config:
+            global:
+              resolve_timeout: 5m
+            route:
+              group_by: ['alertname', 'cluster']
+              group_wait: 10s
+              group_interval: 10s
+              repeat_interval: 12h
+              receiver: 'null'
+              routes:
+              - match:
+                  alertname: Watchdog
+                receiver: 'null'
+            receivers:
+            - name: 'null'
+
+        # Node Exporter
+        nodeExporter:
+          enabled: true
+
+        # Kube State Metrics
+        kubeStateMetrics:
+          enabled: true
+
+        # Prometheus Operator
+        prometheusOperator:
+          enabled: true
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitoring
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+    retry:
+      limit: 3
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m

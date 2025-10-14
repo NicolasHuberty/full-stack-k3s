@@ -1,0 +1,59 @@
+---
+# Backend Ingress for Production
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: backend
+  namespace: production
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+    external-dns.alpha.kubernetes.io/hostname: api.huberty.pro
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: api.huberty.pro
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: prod-backend
+                port:
+                  number: 8080
+  tls:
+    - hosts:
+        - api.huberty.pro
+      secretName: backend-tls
+
+---
+# Frontend Ingress for Production
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: frontend
+  namespace: production
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+    external-dns.alpha.kubernetes.io/hostname: app.huberty.pro
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: app.huberty.pro
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: prod-frontend
+                port:
+                  number: 3000
+  tls:
+    - hosts:
+        - app.huberty.pro
+      secretName: frontend-tls

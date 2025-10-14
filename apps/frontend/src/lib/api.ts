@@ -1,4 +1,33 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+// Determine API URL based on environment
+const getApiUrl = () => {
+  // If explicitly set, use that
+  if (process.env.NEXT_PUBLIC_API_URL) {
+    return process.env.NEXT_PUBLIC_API_URL;
+  }
+
+  // In browser, detect based on current hostname
+  if (typeof window !== 'undefined') {
+    const hostname = window.location.hostname;
+
+    // Production
+    if (hostname === 'app.huberty.pro') {
+      return 'https://api.huberty.pro';
+    }
+    // Staging
+    if (hostname === 'staging.huberty.pro') {
+      return 'https://api-staging.huberty.pro';
+    }
+    // Dev
+    if (hostname === 'dev.huberty.pro') {
+      return 'https://api-dev.huberty.pro';
+    }
+  }
+
+  // Fallback to localhost for development
+  return 'http://localhost:8080';
+};
+
+const API_URL = getApiUrl();
 
 export interface User {
   id: string;

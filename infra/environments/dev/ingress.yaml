@@ -20,9 +20,9 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: backend-service
+                name: dev-backend
                 port:
-                  number: 8000
+                  number: 8080
   tls:
     - hosts:
         - api-dev.huberty.pro
@@ -50,9 +50,9 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: frontend-service
+                name: dev-frontend
                 port:
-                  number: 8000
+                  number: 3000
   tls:
     - hosts:
         - dev.huberty.pro

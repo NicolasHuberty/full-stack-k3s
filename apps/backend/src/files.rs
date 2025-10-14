@@ -61,13 +61,12 @@ pub async fn upload_file(
         })));
     }
 
-    qdrant
-        .ensure_collection_exists(&user_id)
-        .await
-        .map_err(|e| {
-            log::error!("Qdrant error: {}", e);
-            actix_web::error::ErrorInternalServerError("Vector DB error")
-        })?;
+    if let Err(e) = qdrant.ensure_collection_exists(&user_id).await {
+        log::error!("Qdrant error: {}", e);
+        return Ok(HttpResponse::InternalServerError().json(serde_json::json!({
+            "error": "Vector DB error"
+        })));
+    }
 
     let minio_path = minio
         .upload_file(&user_id, &filename, &file_data)
@@ -103,13 +102,12 @@ pub async fn upload_file(
         embeddings.push((idx, chunk.clone(), embedding));
     }
 
-    qdrant
-        .upsert_vectors(&user_id, &file.id, embeddings)
-        .await
-        .map_err(|e| {
-            log::error!("Qdrant error: {}", e);
-            actix_web::error::ErrorInternalServerError("Vector DB error")
-        })?;
+    if let Err(e) = qdrant.upsert_vectors(&user_id, &file.id, embeddings).await {
+        log::error!("Qdrant error: {}", e);
+        return Ok(HttpResponse::InternalServerError().json(serde_json::json!({
+            "error": "Vector DB error"
+        })));
+    }
 
     Ok(HttpResponse::Ok().json(FileResponse {
         id: file.id,

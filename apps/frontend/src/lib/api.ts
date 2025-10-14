@@ -1,33 +1,47 @@
 // Determine API URL based on environment
 const getApiUrl = () => {
+  console.log('=== API URL DETECTION START ===');
+  console.log('process.env.NEXT_PUBLIC_API_URL:', process.env.NEXT_PUBLIC_API_URL);
+
   // If explicitly set, use that
   if (process.env.NEXT_PUBLIC_API_URL) {
+    console.log('Using env variable:', process.env.NEXT_PUBLIC_API_URL);
     return process.env.NEXT_PUBLIC_API_URL;
   }
 
   // In browser, detect based on current hostname
   if (typeof window !== 'undefined') {
     const hostname = window.location.hostname;
+    console.log('Browser hostname:', hostname);
 
     // Production
     if (hostname === 'app.huberty.pro') {
+      console.log('Detected production, using https://api.huberty.pro');
       return 'https://api.huberty.pro';
     }
     // Staging
     if (hostname === 'staging.huberty.pro') {
+      console.log('Detected staging, using https://api-staging.huberty.pro');
       return 'https://api-staging.huberty.pro';
     }
     // Dev
     if (hostname === 'dev.huberty.pro') {
+      console.log('Detected dev, using https://api-dev.huberty.pro');
       return 'https://api-dev.huberty.pro';
     }
+
+    console.log('No hostname match, using fallback');
+  } else {
+    console.log('Not in browser context');
   }
 
   // Fallback to localhost for development
+  console.log('Using fallback: http://localhost:8080');
   return 'http://localhost:8080';
 };
 
 const API_URL = getApiUrl();
+console.log('=== FINAL API_URL:', API_URL, '===');
 
 export interface User {
   id: string;

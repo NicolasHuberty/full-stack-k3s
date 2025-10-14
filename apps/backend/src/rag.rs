@@ -34,13 +34,15 @@ pub async fn search(
     let query_embedding = create_mock_embedding(&req.query).await;
     let limit = req.limit.unwrap_or(10);
 
-    let search_results = qdrant
-        .search(&user_id, query_embedding, limit)
-        .await
-        .map_err(|e| {
+    let search_results = match qdrant.search(&user_id, query_embedding, limit).await {
+        Ok(results) => results,
+        Err(e) => {
             log::error!("Qdrant search error: {}", e);
-            actix_web::error::ErrorInternalServerError("Search error")
-        })?;
+            return Ok(HttpResponse::InternalServerError().json(serde_json::json!({
+                "error": "Search error"
+            })));
+        }
+    };
 
     let mut results = Vec::new();
     for (file_id, chunk_text, score) in search_results {
@@ -87,13 +89,18 @@ pub async fn rag_query(
     let query_embedding = create_mock_embedding(&req.query).await;
     let context_limit = req.context_limit.unwrap_or(5);
 
-    let search_results = qdrant
+    let search_results = match qdrant
         .search(&user_id, query_embedding, context_limit)
         .await
-        .map_err(|e| {
+    {
+        Ok(results) => results,
+        Err(e) => {
             log::error!("Qdrant search error: {}", e);
-            actix_web::error::ErrorInternalServerError("Search error")
-        })?;
+            return Ok(HttpResponse::InternalServerError().json(serde_json::json!({
+                "error": "Search error"
+            })));
+        }
+    };
 
     let mut context_parts = Vec::new();
     let mut sources = Vec::new();

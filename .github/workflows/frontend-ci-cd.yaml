@@ -47,7 +47,7 @@ jobs:
       - name: Build application
         working-directory: apps/frontend
         env:
-          NEXT_PUBLIC_API_URL: http://backend:8080
+          NEXT_PUBLIC_API_URL: https://api-dev.huberty.pro
           NEXT_PUBLIC_ENVIRONMENT: dev
         run: npm run build
 
@@ -94,7 +94,7 @@ jobs:
           cache-to: type=gha,mode=max
           platforms: linux/amd64
           build-args: |
-            NEXT_PUBLIC_API_URL=http://backend:8080
+            NEXT_PUBLIC_API_URL=https://api-dev.huberty.pro
             NEXT_PUBLIC_ENVIRONMENT=production
 
   trigger-deployment:

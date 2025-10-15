@@ -24,7 +24,8 @@ impl MinioClient {
 
         let credentials = Credentials::new(Some(&access_key), Some(&secret_key), None, None, None)?;
 
-        let bucket = Bucket::new(&bucket_name, region, credentials)?;
+        let mut bucket = Bucket::new(&bucket_name, region, credentials)?;
+        bucket = bucket.with_path_style();
 
         Ok(MinioClient { bucket })
     }

@@ -68,18 +68,20 @@ pub async fn upload_file(
         })));
     }
 
-    let minio_path = minio
-        .upload_file(&user_id, &filename, &file_data)
-        .await
-        .map_err(|e| {
+    let minio_path = match minio.upload_file(&user_id, &filename, &file_data).await {
+        Ok(path) => path,
+        Err(e) => {
             log::error!("MinIO error: {}", e);
-            actix_web::error::ErrorInternalServerError("Storage error")
-        })?;
+            return Ok(HttpResponse::InternalServerError().json(serde_json::json!({
+                "error": "Storage error"
+            })));
+        }
+    };
 
     let file_size = file_data.len() as i64;
     let mime_type = Some("application/octet-stream");
 
-    let file = db::create_file(
+    let file = match db::create_file(
         &pool,
         &user_id,
         &filename,
@@ -88,10 +90,15 @@ pub async fn upload_file(
         mime_type,
     )
     .await
-    .map_err(|e| {
-        log::error!("Database error: {}", e);
-        actix_web::error::ErrorInternalServerError("Database error")
-    })?;
+    {
+        Ok(f) => f,
+        Err(e) => {
+            log::error!("Database error: {}", e);
+            return Ok(HttpResponse::InternalServerError().json(serde_json::json!({
+                "error": "Database error"
+            })));
+        }
+    };
 
     let text_content = String::from_utf8_lossy(&file_data).to_string();
     let chunks = chunk_text(&text_content, 500);
@@ -139,10 +146,15 @@ pub async fn list_files(
         actix_web::error::ErrorBadRequest("Invalid user ID")
     })?;
 
-    let files = db::get_user_files(&pool, &user_id).await.map_err(|e| {
-        log::error!("Database error: {}", e);
-        actix_web::error::ErrorInternalServerError("Database error")
-    })?;
+    let files = match db::get_user_files(&pool, &user_id).await {
+        Ok(files) => files,
+        Err(e) => {
+            log::error!("Database error: {}", e);
+            return Ok(HttpResponse::InternalServerError().json(serde_json::json!({
+                "error": "Database error"
+            })));
+        }
+    };
 
     let response: Vec<FileResponse> = files
         .into_iter()
@@ -186,12 +198,15 @@ pub async fn delete_file(
         actix_web::error::ErrorBadRequest("Invalid user ID")
     })?;
 
-    let file = db::get_file_by_id(&pool, &file_id, &user_id)
-        .await
-        .map_err(|e| {
+    let file = match db::get_file_by_id(&pool, &file_id, &user_id).await {
+        Ok(file) => file,
+        Err(e) => {
             log::error!("Database error: {}", e);
-            actix_web::error::ErrorInternalServerError("Database error")
-        })?;
+            return Ok(HttpResponse::InternalServerError().json(serde_json::json!({
+                "error": "Database error"
+            })));
+        }
+    };
 
     let file = match file {
         Some(f) => f,
@@ -206,12 +221,12 @@ pub async fn delete_file(
 
     qdrant.delete_file_vectors(&user_id, &file_id).await.ok();
 
-    db::delete_file(&pool, &file_id, &user_id)
-        .await
-        .map_err(|e| {
-            log::error!("Database error: {}", e);
-            actix_web::error::ErrorInternalServerError("Database error")
-        })?;
+    if let Err(e) = db::delete_file(&pool, &file_id, &user_id).await {
+        log::error!("Database error: {}", e);
+        return Ok(HttpResponse::InternalServerError().json(serde_json::json!({
+            "error": "Database error"
+        })));
+    }
 
     Ok(HttpResponse::Ok().json(serde_json::json!({
         "message": "File deleted successfully"

@@ -11,8 +11,8 @@ spec:
   project: default
   source:
     repoURL: https://github.com/NicolasHuberty/full-stack-k3s.git
-    targetRevision: main
-    path: environments/dev
+    targetRevision: dev
+    path: infra/environments/dev
   destination:
     server: https://kubernetes.default.svc
     namespace: dev

@@ -14,6 +14,12 @@ commonLabels:
   environment: dev
   managed-by: argocd
 
+images:
+  - name: ghcr.io/nicolashuberty/k3s-backend
+    newTag: dev
+  - name: ghcr.io/nicolashuberty/k3s-frontend
+    newTag: dev
+
 patches:
   - target:
       kind: Deployment

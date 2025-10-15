@@ -48,6 +48,8 @@ spec:
               value: "your-super-secret-jwt-key-change-in-production"
             - name: MINIO_BUCKET
               value: "rag-files"
+            - name: REDIS_URL
+              value: "redis://redis.dev:6379"
           resources:
             requests:
               cpu: 100m

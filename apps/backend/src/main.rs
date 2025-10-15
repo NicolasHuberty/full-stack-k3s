@@ -54,7 +54,7 @@ use utoipa_swagger_ui::SwaggerUi;
     ),
     info(
         title = "K3s RAG API",
-        version = "0.1.0",
+        version = "0.1.1",
         description = "Multi-tenant RAG application with authentication, file upload, and vector search"
     )
 )]

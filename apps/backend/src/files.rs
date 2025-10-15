@@ -284,11 +284,16 @@ pub async fn download_file(
         }
     };
 
-    let content_type = file.mime_type.unwrap_or_else(|| "application/octet-stream".to_string());
+    let content_type = file
+        .mime_type
+        .unwrap_or_else(|| "application/octet-stream".to_string());
 
     Ok(HttpResponse::Ok()
         .content_type(content_type)
-        .insert_header(("Content-Disposition", format!("inline; filename=\"{}\"", file.filename)))
+        .insert_header((
+            "Content-Disposition",
+            format!("inline; filename=\"{}\"", file.filename),
+        ))
         .body(file_data))
 }
 

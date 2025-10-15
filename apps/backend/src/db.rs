@@ -192,6 +192,7 @@ pub async fn get_memo_by_id(
     Ok(memo)
 }
 
+#[allow(dead_code)]
 pub async fn update_memo(
     pool: &Pool<Postgres>,
     memo_id: &Uuid,

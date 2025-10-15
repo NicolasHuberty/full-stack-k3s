@@ -298,7 +298,7 @@ pub async fn download_file(
 }
 
 fn guess_mime_type(filename: &str) -> &'static str {
-    let extension = filename.split('.').last().unwrap_or("");
+    let extension = filename.split('.').next_back().unwrap_or("");
     match extension.to_lowercase().as_str() {
         "pdf" => "application/pdf",
         "txt" => "text/plain",

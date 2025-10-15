@@ -26,6 +26,7 @@ use utoipa_swagger_ui::SwaggerUi;
         files::upload_file,
         files::list_files,
         files::delete_file,
+        files::download_file,
         rag::search,
         rag::rag_query,
         rag::get_history,
@@ -142,7 +143,8 @@ async fn main() -> std::io::Result<()> {
                             .wrap(bearer_middleware.clone())
                             .route("/upload", web::post().to(files::upload_file))
                             .route("", web::get().to(files::list_files))
-                            .route("/{file_id}", web::delete().to(files::delete_file)),
+                            .route("/{file_id}", web::delete().to(files::delete_file))
+                            .route("/{file_id}/download", web::get().to(files::download_file)),
                     )
                     .service(
                         web::scope("/rag")

@@ -141,6 +141,10 @@ class ApiClient {
     return userStr ? JSON.parse(userStr) : null;
   }
 
+  getToken(): string | null {
+    return localStorage.getItem('token');
+  }
+
   isAuthenticated(): boolean {
     return !!localStorage.getItem('token');
   }

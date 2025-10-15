@@ -103,6 +103,32 @@ export default function DashboardPage() {
     }
   };
 
+  const handleViewFile = (fileId: string) => {
+    const token = api.getToken();
+    if (!token) return;
+
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+    const fileUrl = `${apiUrl}/api/files/${fileId}/download`;
+
+    // Open file in new tab with auth header
+    // We'll use a fetch + blob URL approach to pass the auth header
+    fetch(fileUrl, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    })
+    .then(response => response.blob())
+    .then(blob => {
+      const url = window.URL.createObjectURL(blob);
+      window.open(url, '_blank');
+      setTimeout(() => window.URL.revokeObjectURL(url), 100);
+    })
+    .catch(err => {
+      console.error('Failed to open file:', err);
+      alert('Failed to open file');
+    });
+  };
+
   const handleLogout = () => {
     api.logout();
     router.push('/login');
@@ -235,13 +261,25 @@ export default function DashboardPage() {
                           className="flex items-center justify-between p-3 border rounded-md bg-white dark:bg-gray-800"
                         >
                           <div className="flex-1">
-                            <p className="font-medium">{file.filename}</p>
+                            <button
+                              onClick={() => handleViewFile(file.id)}
+                              className="font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 text-left hover:underline"
+                            >
+                              {file.filename}
+                            </button>
                             <p className="text-sm text-gray-500">
                               {(file.file_size / 1024).toFixed(2)} KB
                             </p>
                           </div>
                           <div className="flex items-center gap-2">
                             <Badge variant="secondary">{file.status}</Badge>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleViewFile(file.id)}
+                            >
+                              View
+                            </Button>
                             <Button
                               variant="destructive"
                               size="sm"

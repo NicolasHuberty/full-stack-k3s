@@ -29,6 +29,9 @@ patches:
       - op: replace
         path: /spec/replicas
         value: 1
+      - op: replace
+        path: /spec/template/spec/containers/0/env/13/value
+        value: "redis://dev-redis:6379"
   - target:
       kind: Deployment
       name: frontend

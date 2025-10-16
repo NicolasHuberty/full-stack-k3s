@@ -187,7 +187,10 @@ async fn main() -> std::io::Result<()> {
                             .route("", web::get().to(files::list_files))
                             .route("/{file_id}", web::delete().to(files::delete_file))
                             .route("/{file_id}/download", web::get().to(files::download_file))
-                            .route("/{file_id}/transcribe", web::post().to(files::transcribe_audio)),
+                            .route(
+                                "/{file_id}/transcribe",
+                                web::post().to(files::transcribe_audio),
+                            ),
                     )
                     // Memos routes
                     .service(

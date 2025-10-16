@@ -33,6 +33,7 @@ use utoipa_swagger_ui::SwaggerUi;
         files::list_files,
         files::delete_file,
         files::download_file,
+        files::transcribe_audio,
         // RAG endpoints
         rag::search,
         rag::rag_query,
@@ -81,7 +82,7 @@ use utoipa_swagger_ui::SwaggerUi;
     ),
     info(
         title = "K3s Memos API",
-        version = "0.2.0",
+        version = "0.2.1",
         description = "Multi-tenant Memos application with authentication, file attachments, and AI-powered conversations"
     ),
     servers(
@@ -102,7 +103,7 @@ async fn health() -> impl Responder {
     HttpResponse::Ok().json(serde_json::json!({
         "status": "healthy",
         "service": "k3s-memos-backend",
-        "version": "0.2.0",
+        "version": "0.2.1",
         "environment": env::var("ENVIRONMENT").unwrap_or_else(|_| "unknown".to_string())
     }))
 }
@@ -185,7 +186,8 @@ async fn main() -> std::io::Result<()> {
                             .route("/upload", web::post().to(files::upload_file))
                             .route("", web::get().to(files::list_files))
                             .route("/{file_id}", web::delete().to(files::delete_file))
-                            .route("/{file_id}/download", web::get().to(files::download_file)),
+                            .route("/{file_id}/download", web::get().to(files::download_file))
+                            .route("/{file_id}/transcribe", web::post().to(files::transcribe_audio)),
                     )
                     // Memos routes
                     .service(

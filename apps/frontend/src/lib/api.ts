@@ -258,14 +258,36 @@ class ApiClient {
     const formData = new FormData();
     formData.append('file', file);
 
+    // For FormData, we need to let the browser set Content-Type with boundary
+    // So we manually construct the request without getHeaders()
     const token = localStorage.getItem('access_token');
-    const response = await this.fetchWithAuth(`${API_URL}/api/files/upload`, {
+    let response = await fetch(`${API_URL}/api/files/upload`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
       },
       body: formData,
     });
+
+    // Handle token refresh if needed
+    if (response.status === 401) {
+      try {
+        await this.refreshToken();
+        const newToken = localStorage.getItem('access_token');
+        response = await fetch(`${API_URL}/api/files/upload`, {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${newToken}`,
+          },
+          body: formData,
+        });
+      } catch (error) {
+        if (typeof window !== 'undefined') {
+          window.location.href = '/login';
+        }
+        throw error;
+      }
+    }
 
     if (!response.ok) {
       const error = await response.json();

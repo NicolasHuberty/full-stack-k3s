@@ -278,6 +278,7 @@ export default function MemoDetailPage() {
                   className="hidden"
                   onChange={handleFileUpload}
                   disabled={uploading}
+                  accept="audio/*,video/*,image/*,.pdf,.doc,.docx,.txt,.md"
                 />
                 <label htmlFor="file-upload">
                   <Button
@@ -295,7 +296,7 @@ export default function MemoDetailPage() {
               </Button>
             </form>
             <p className="text-xs text-gray-500 mt-2 text-center">
-              AI responses coming soon! For now, you can take notes and attach files.
+              AI responses coming soon! You can attach audio recordings, documents, images, and more.
             </p>
           </div>
         </div>

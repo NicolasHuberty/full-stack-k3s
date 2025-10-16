@@ -9,9 +9,18 @@ import SwiftUI
 
 @main
 struct DataNestApp: App {
+    @StateObject private var api = APIService.shared
+
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            Group {
+                if api.isAuthenticated {
+                    MemosListView()
+                } else {
+                    LoginView()
+                }
+            }
+            .environmentObject(api)
         }
     }
 }

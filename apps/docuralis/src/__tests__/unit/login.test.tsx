@@ -25,7 +25,9 @@ describe('LoginPage Component', () => {
   it('should render login form', () => {
     render(<LoginPage />)
 
-    expect(screen.getByText('Sign in')).toBeInTheDocument()
+    expect(
+      screen.getByRole('heading', { name: /sign in/i })
+    ).toBeInTheDocument()
     expect(screen.getByLabelText(/email/i)).toBeInTheDocument()
     expect(screen.getByLabelText(/password/i)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /sign in/i })).toBeInTheDocument()

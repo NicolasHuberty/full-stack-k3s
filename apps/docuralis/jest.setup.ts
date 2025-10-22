@@ -27,6 +27,10 @@ jest.mock('next/navigation', () => ({
 }))
 
 // Mock next-auth
+jest.mock('next-auth', () => ({
+  AuthError: class AuthError extends Error {},
+}))
+
 jest.mock('next-auth/react', () => ({
   useSession() {
     return {

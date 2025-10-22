@@ -20,10 +20,10 @@ export async function PATCH(request: NextRequest) {
 
     // Define storage limits based on plan
     const storageLimits = {
-      FREE: 5368709120n, // 5GB
-      STARTER: 53687091200n, // 50GB
-      PRO: 268435456000n, // 250GB
-      ENTERPRISE: 1099511627776n, // 1TB
+      FREE: BigInt(5368709120), // 5GB
+      STARTER: BigInt(53687091200), // 50GB
+      PRO: BigInt(268435456000), // 250GB
+      ENTERPRISE: BigInt(1099511627776), // 1TB
     }
 
     const user = await prisma.user.update({

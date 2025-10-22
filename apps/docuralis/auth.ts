@@ -27,12 +27,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           }),
         ]
       : []),
-    ...(process.env.AZURE_AD_CLIENT_ID && process.env.AZURE_AD_CLIENT_SECRET
+    ...(process.env.AZURE_AD_CLIENT_ID && process.env.AZURE_AD_CLIENT_SECRET && process.env.AZURE_AD_TENANT_ID
       ? [
           AzureAD({
             clientId: process.env.AZURE_AD_CLIENT_ID,
             clientSecret: process.env.AZURE_AD_CLIENT_SECRET,
-            tenantId: process.env.AZURE_AD_TENANT_ID,
+            issuer: `https://login.microsoftonline.com/${process.env.AZURE_AD_TENANT_ID}/v2.0`,
           }),
         ]
       : []),
@@ -78,7 +78,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   callbacks: {
     async signIn({ user, account, profile }) {
       // For OAuth sign-ins, link account to existing user if email matches
-      if (account?.provider !== 'credentials' && user.email) {
+      if (account && account.provider !== 'credentials' && user.email) {
         const existingUser = await prisma.user.findUnique({
           where: { email: user.email },
           include: { accounts: true },
@@ -112,7 +112,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                 token_type: account.token_type,
                 scope: account.scope,
                 id_token: account.id_token,
-                session_state: account.session_state,
+                session_state: typeof account.session_state === 'string' ? account.session_state : null,
               },
             })
           }

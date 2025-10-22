@@ -6,7 +6,7 @@ import { z } from 'zod'
 const inviteSchema = z.object({
   email: z.string().email('Invalid email address'),
   role: z.enum(['ADMIN', 'MEMBER', 'VIEWER'], {
-    errorMap: () => ({ message: 'Role must be ADMIN, MEMBER, or VIEWER' }),
+    message: 'Role must be ADMIN, MEMBER, or VIEWER',
   }),
 })
 
@@ -69,7 +69,7 @@ export async function POST(
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: 'Validation failed', details: error.errors },
+        { error: 'Validation failed', details: error.issues },
         { status: 400 }
       )
     }

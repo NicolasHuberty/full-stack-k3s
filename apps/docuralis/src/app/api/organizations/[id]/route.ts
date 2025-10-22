@@ -45,6 +45,8 @@ export async function GET(
                 name: true,
                 email: true,
                 image: true,
+                storageUsed: true,
+                storageLimit: true,
               },
             },
           },

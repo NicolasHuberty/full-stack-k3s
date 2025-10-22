@@ -128,6 +128,7 @@ export class ChunkingService {
         return Math.ceil(text.length / 4)
       }
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const encoder = encoding_for_model(model as any)
       const tokens = encoder.encode(text)
       const count = tokens.length

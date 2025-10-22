@@ -101,6 +101,12 @@ spec:
                   name: docuralis-secrets
                   key: minio-endpoint
 
+            - name: MINIO_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: docuralis-secrets
+                  key: minio-port
+
             - name: MINIO_ACCESS_KEY
               valueFrom:
                 secretKeyRef:

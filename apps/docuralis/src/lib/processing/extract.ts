@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import mammoth from 'mammoth'
 import PDFParser from 'pdf2json'
 

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { prisma } from '@/lib/prisma'
 import { getMinIOClient } from '@/lib/storage/minio'
 import { getQdrantClient } from '@/lib/vector/qdrant'

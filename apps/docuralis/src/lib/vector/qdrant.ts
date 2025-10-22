@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { QdrantClient } from '@qdrant/js-client-rest'
 import { createHash } from 'crypto'
 

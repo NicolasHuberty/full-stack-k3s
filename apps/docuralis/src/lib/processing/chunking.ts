@@ -1,9 +1,11 @@
 // Import tiktoken lazily to avoid WASM issues
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 let encoding_for_model: any = null
 try {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const tiktoken = require('tiktoken')
   encoding_for_model = tiktoken.encoding_for_model
-} catch (error) {
+} catch {
   console.warn('Tiktoken not available, will use fallback token counting')
 }
 

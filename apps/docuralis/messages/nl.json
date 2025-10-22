@@ -1,0 +1,156 @@
+{
+  "nav": {
+    "features": "Functies",
+    "agents": "AI Agenten",
+    "pricing": "Prijzen",
+    "login": "Inloggen",
+    "signup": "Aanmelden"
+  },
+  "hero": {
+    "title": "Uw Documenten, Versterkt met AI",
+    "subtitle": "Docuralis transformeert uw documenten in intelligente kennis met state-of-the-art RAG-technologie. AVG-conform, Europese servers, on-premise opties.",
+    "cta": "Start Gratis Proefperiode"
+  },
+  "demo": {
+    "title": "Zie Docuralis in Actie",
+    "categories": {
+      "legal": "Juridisch",
+      "hr": "HR",
+      "tech": "IT"
+    },
+    "aiAnswer": "AI Antwoord",
+    "sources": "Bronnen",
+    "searching": "Documenten doorzoeken..."
+  },
+  "compliance": {
+    "title": "Boost Uw Workflow Zonder Overweldiging",
+    "subtitle": "Wij regelen alles voor u. Volledig conform AVG, AI Act en Europese eisen voor gegevenssoevereiniteit. Uw gegevens blijven van u, uw rechten zijn beschermd en uw privacy is gegarandeerd.",
+    "badges": {
+      "gdpr": "AVG-Conform",
+      "aiAct": "EU AI Act Klaar",
+      "servers": "Europese Servers",
+      "multilingual": "Meertalige Ondersteuning"
+    }
+  },
+  "features": {
+    "title": "Waarom Kiezen voor Docuralis?",
+    "rag": {
+      "title": "Nieuwste RAG-Technologie",
+      "description": "Aangedreven door geavanceerde AI-modellen voor ongeëvenaarde nauwkeurigheid en prestaties"
+    },
+    "gdpr": {
+      "title": "100% AVG-Conform",
+      "description": "Europese servers, versleutelde opslag, on-premise implementatieopties"
+    },
+    "agents": {
+      "title": "Slimme AI-Agenten",
+      "description": "Contextbewuste agenten die complexe vragen behandelen, niet alleen eenvoudige zoekopdrachten"
+    },
+    "sources": {
+      "title": "Precieze Broncitaten",
+      "description": "Elk antwoord komt met exacte paginaverwijzingen en brondocumenten"
+    },
+    "data": {
+      "title": "Vooraf Geladen Kennis",
+      "description": "Start onmiddellijk met juridische databases en branchespecifieke datasets"
+    },
+    "multilingual": {
+      "title": "Standaard Meertalig",
+      "description": "Inheemse ondersteuning voor Engels, Frans, Nederlands en 50+ talen"
+    }
+  },
+  "aiAgents": {
+    "title": "AI-Agenten: Uw Document Superkrachten",
+    "subtitle": "Elke AI-agent is een domeinexpert, getraind op uw specifieke kennisbank. Ze zoeken niet alleen—ze begrijpen context, analyseren complexe informatie en bieden expertinzichten met precieze broncitaten.",
+    "catalog": {
+      "title": "AI-Agenten Catalogus",
+      "subtitle": "Gespecialiseerde AI-agenten getraind op de kennis van uw bedrijf"
+    },
+    "superpowers": {
+      "understanding": {
+        "title": "Diep Begrip",
+        "description": "Analyseert complexe documenten en haalt genuanceerde inzichten eruit, niet alleen trefwoorden"
+      },
+      "cited": {
+        "title": "Altijd Geciteerd",
+        "description": "Elke bewering wordt ondersteund door exacte documentbronnen met paginanummers en uittreksels"
+      },
+      "expertise": {
+        "title": "Domeinexpertise",
+        "description": "Gespecialiseerde kennis in juridische, HR, technische en branchespecifieke domeinen"
+      }
+    }
+  },
+  "mobileApp": {
+    "title": "Krijg Nog Sneller Antwoorden",
+    "subtitle": "Download onze mobiele app voor directe toegang tot uw AI-agenten, altijd en overal.",
+    "features": {
+      "instant": {
+        "title": "Directe Toegang",
+        "description": "Bevraag uw documenten onderweg met bliksemsnel antwoord"
+      },
+      "offline": {
+        "title": "Offline Modus",
+        "description": "Toegang tot gecachte documenten en recente zoekopdrachten zonder internet"
+      },
+      "notifications": {
+        "title": "Slimme Meldingen",
+        "description": "Ontvang meldingen wanneer nieuwe documenten zijn toegevoegd of agenten inzichten hebben"
+      }
+    },
+    "cta": "Download App",
+    "platforms": "Beschikbaar op iOS en Android"
+  },
+  "teamManagement": {
+    "title": "Gebouwd voor Teams",
+    "subtitle": "Werk naadloos samen met krachtig teambeheer en gedeelde kennisbanken.",
+    "teams": {
+      "title": "Team Werkruimte",
+      "description": "Creëer werkruimtes, nodig leden uit, wijs rollen toe en werk samen aan gedeelde documenten"
+    },
+    "rags": {
+      "title": "Gedeelde Kennisbanken",
+      "description": "Bouw organisatiebrede RAG-collecties toegankelijk voor uw hele team met toegangscontrole"
+    },
+    "access": {
+      "title": "Toegangscontrole",
+      "description": "Bepaal wie elke kennisbank kan bekijken, bewerken of beheren met rolgebaseerde rechten"
+    }
+  },
+  "pricing": {
+    "title": "Eenvoudige, Transparante Prijzen",
+    "free": {
+      "name": "Gratis",
+      "price": "€0",
+      "description": "Perfect voor individuen die beginnen",
+      "features": ["5 GB opslag", "Basis RAG-zoekopdracht", "Toegang tot publieke databases", "Communityondersteuning"],
+      "cta": "Start Gratis"
+    },
+    "pro": {
+      "name": "Professioneel",
+      "price": "€29",
+      "period": "/maand",
+      "description": "Voor professionals en kleine teams",
+      "features": ["50 GB opslag", "Geavanceerde AI-agenten", "Prioriteitsondersteuning", "Aangepaste databases", "API-toegang"],
+      "badge": "Populair",
+      "cta": "Start Proefperiode"
+    },
+    "enterprise": {
+      "name": "Enterprise",
+      "price": "Op maat",
+      "description": "Voor grote organisaties",
+      "features": ["Onbeperkte opslag", "On-premise implementatie", "Toegewijde ondersteuning", "Aangepaste integraties", "SLA-garantie"],
+      "cta": "Contacteer Verkoop"
+    }
+  },
+  "cta": {
+    "title": "Klaar om Uw Documenten te Transformeren?",
+    "button": "Start Uw Gratis Proefperiode"
+  },
+  "footer": {
+    "copyright": "© 2025 Docuralis. Alle rechten voorbehouden.",
+    "privacy": "Privacy",
+    "terms": "Voorwaarden",
+    "contact": "Contact"
+  }
+}

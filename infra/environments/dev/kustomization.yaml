@@ -4,13 +4,11 @@ kind: Kustomization
 namespace: dev
 
 resources:
-  - ../../base/backend
-  - ../../base/frontend
-  - ../../base/redis
-  - ingress.yaml
+  - ../../base/docuralis
+  - docuralis-ingress.yaml
 
 patchesStrategicMerge:
-  - backend-patch.yaml
+  - docuralis-patch.yaml
 
 namePrefix: dev-
 
@@ -19,26 +17,8 @@ commonLabels:
   managed-by: argocd
 
 images:
-  - name: ghcr.io/nicolashuberty/k3s-backend
+  - name: ghcr.io/nicolashuberty/k3s-app/docuralis
     newTag: dev
-  - name: ghcr.io/nicolashuberty/k3s-frontend
-    newTag: dev
-
-patches:
-  - target:
-      kind: Deployment
-      name: backend
-    patch: |-
-      - op: replace
-        path: /spec/replicas
-        value: 1
-  - target:
-      kind: Deployment
-      name: frontend
-    patch: |-
-      - op: replace
-        path: /spec/replicas
-        value: 1
 
 configMapGenerator:
   - name: env-config

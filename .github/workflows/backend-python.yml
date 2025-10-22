@@ -1,0 +1,165 @@
+name: Backend Python CI/CD
+
+on:
+  push:
+    branches: [main, dev, staging]
+    paths:
+      - "apps/backend-python/**"
+      - ".github/workflows/backend-python.yml"
+  pull_request:
+    branches: [main, dev, staging]
+    paths:
+      - "apps/backend-python/**"
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}/backend-python
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/backend-python
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: datanest_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install uv
+        run: curl -LsSf https://astral.sh/uv/install.sh | sh
+
+      - name: Cache uv dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/uv
+          key: ${{ runner.os }}-uv-${{ hashFiles('apps/backend-python/pyproject.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-uv-
+
+      - name: Install dependencies
+        run: uv sync
+
+      - name: Run black
+        run: uv run black --check src tests
+
+      - name: Run ruff
+        run: uv run ruff check src tests
+
+      - name: Run mypy
+        run: uv run mypy src || true
+
+      - name: Run tests
+        env:
+          DATABASE_URL: postgresql+asyncpg://postgres:password@localhost:5432/datanest_test
+          REDIS_URL: redis://localhost:6379/0
+          JWT_SECRET_KEY: test-secret-key
+          MINIO_ENDPOINT: localhost:9000
+          MINIO_ACCESS_KEY: minioadmin
+          MINIO_SECRET_KEY: minioadmin
+          QDRANT_URL: http://localhost:6333
+        run: uv run pytest --cov=src --cov-report=xml
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./apps/backend-python/coverage.xml
+          flags: backend-python
+
+  build-and-push:
+    needs: lint-and-test
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    defaults:
+      run:
+        working-directory: apps/backend-python
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: ./apps/backend-python
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy-dev:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/dev'
+    steps:
+      - name: Deploy to dev
+        run: echo "Deploy to dev environment"
+
+  deploy-staging:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/staging'
+    steps:
+      - name: Deploy to staging
+        run: echo "Deploy to staging environment"
+
+  deploy-prod:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    environment: production
+    steps:
+      - name: Deploy to production
+        run: echo "Deploy to production environment"

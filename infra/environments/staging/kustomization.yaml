@@ -4,9 +4,11 @@ kind: Kustomization
 namespace: staging
 
 resources:
-  - ../../base/backend
-  - ../../base/frontend
-  - ingress.yaml
+  - ../../base/docuralis
+  - docuralis-ingress.yaml
+
+patchesStrategicMerge:
+  - docuralis-patch.yaml
 
 namePrefix: staging-
 
@@ -15,26 +17,8 @@ commonLabels:
   managed-by: argocd
 
 images:
-  - name: ghcr.io/nicolashuberty/k3s-backend
+  - name: ghcr.io/nicolashuberty/k3s-app/docuralis
     newTag: staging
-  - name: ghcr.io/nicolashuberty/k3s-frontend
-    newTag: staging
-
-patches:
-  - target:
-      kind: Deployment
-      name: backend
-    patch: |-
-      - op: replace
-        path: /spec/replicas
-        value: 2
-  - target:
-      kind: Deployment
-      name: frontend
-    patch: |-
-      - op: replace
-        path: /spec/replicas
-        value: 2
 
 configMapGenerator:
   - name: env-config

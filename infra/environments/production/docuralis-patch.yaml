@@ -11,4 +11,4 @@ spec:
           image: ghcr.io/nicolashuberty/full-stack-k3s/docuralis:latest
           env:
             - name: NEXTAUTH_URL
-              value: "https://app.docuralis.com"
+              value: "https://docuralis.com"

@@ -6,6 +6,7 @@ namespace: production
 resources:
   - ../../base/docuralis
   - docuralis-ingress.yaml
+  - www-redirect-middleware.yaml
 
 patchesStrategicMerge:
   - docuralis-patch.yaml

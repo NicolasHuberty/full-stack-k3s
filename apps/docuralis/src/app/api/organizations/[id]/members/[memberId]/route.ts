@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/auth'
-import { removeMemberFromOrganization, updateMemberRole, checkUserPermission } from '@/lib/organization'
+import {
+  removeMemberFromOrganization,
+  updateMemberRole,
+  checkUserPermission,
+} from '@/lib/organization'
 import { z } from 'zod'
 
 const updateRoleSchema = z.object({
@@ -17,10 +21,7 @@ export async function PATCH(
     const session = await auth()
 
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const { id: organizationId, memberId } = await params
@@ -34,7 +35,10 @@ export async function PATCH(
 
     if (!hasPermission) {
       return NextResponse.json(
-        { error: 'You do not have permission to update member roles in this organization' },
+        {
+          error:
+            'You do not have permission to update member roles in this organization',
+        },
         { status: 403 }
       )
     }
@@ -56,10 +60,7 @@ export async function PATCH(
     console.error('Failed to update member role:', error)
 
     if (error instanceof Error) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: error.message }, { status: 400 })
     }
 
     return NextResponse.json(
@@ -77,10 +78,7 @@ export async function DELETE(
     const session = await auth()
 
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const { id: organizationId, memberId } = await params
@@ -94,7 +92,10 @@ export async function DELETE(
 
     if (!hasPermission) {
       return NextResponse.json(
-        { error: 'You do not have permission to remove members from this organization' },
+        {
+          error:
+            'You do not have permission to remove members from this organization',
+        },
         { status: 403 }
       )
     }
@@ -109,10 +110,7 @@ export async function DELETE(
     console.error('Failed to remove member:', error)
 
     if (error instanceof Error) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: error.message }, { status: 400 })
     }
 
     return NextResponse.json(

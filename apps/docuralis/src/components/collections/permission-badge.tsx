@@ -1,7 +1,12 @@
 'use client'
 
 import { HelpCircle } from 'lucide-react'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 
 type Permission = 'VIEWER' | 'EDITOR' | 'ADMIN'
 
@@ -15,7 +20,8 @@ const permissionConfig = {
   VIEWER: {
     fr: {
       label: 'Lecteur',
-      description: 'Peut consulter les documents et discuter avec la collection',
+      description:
+        'Peut consulter les documents et discuter avec la collection',
     },
     en: {
       label: 'Viewer',
@@ -35,16 +41,22 @@ const permissionConfig = {
   ADMIN: {
     fr: {
       label: 'Administrateur',
-      description: 'Contrôle total incluant la gestion des permissions et la suppression de la collection',
+      description:
+        'Contrôle total incluant la gestion des permissions et la suppression de la collection',
     },
     en: {
       label: 'Administrator',
-      description: 'Full control including managing permissions and deleting the collection',
+      description:
+        'Full control including managing permissions and deleting the collection',
     },
   },
 }
 
-export function PermissionBadge({ permission, locale = 'fr', showTooltip = true }: PermissionBadgeProps) {
+export function PermissionBadge({
+  permission,
+  locale = 'fr',
+  showTooltip = true,
+}: PermissionBadgeProps) {
   const config = permissionConfig[permission][locale]
 
   const badge = (
@@ -61,9 +73,7 @@ export function PermissionBadge({ permission, locale = 'fr', showTooltip = true 
   return (
     <TooltipProvider>
       <Tooltip>
-        <TooltipTrigger asChild>
-          {badge}
-        </TooltipTrigger>
+        <TooltipTrigger asChild>{badge}</TooltipTrigger>
         <TooltipContent>
           <p className="max-w-xs">{config.description}</p>
         </TooltipContent>

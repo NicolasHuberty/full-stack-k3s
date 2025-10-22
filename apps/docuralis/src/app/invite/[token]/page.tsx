@@ -6,7 +6,14 @@ import { useSession } from 'next-auth/react'
 import { useRouter, useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Users, Mail, Shield, CheckCircle, XCircle, Loader2 } from 'lucide-react'
+import {
+  Users,
+  Mail,
+  Shield,
+  CheckCircle,
+  XCircle,
+  Loader2,
+} from 'lucide-react'
 
 export default function InvitePage() {
   const { data: session, status } = useSession()
@@ -96,7 +103,8 @@ export default function InvitePage() {
             </div>
             <h1 className="text-2xl font-bold mb-2">Welcome to the team!</h1>
             <p className="text-muted-foreground mb-6">
-              You've successfully joined the organization. Redirecting to your dashboard...
+              You've successfully joined the organization. Redirecting to your
+              dashboard...
             </p>
           </div>
         </div>
@@ -152,7 +160,9 @@ export default function InvitePage() {
                 <Users className="h-5 w-5 text-muted-foreground" />
                 <div>
                   <p className="text-sm text-muted-foreground">Organization</p>
-                  <p className="font-semibold">{invitation.organization.name}</p>
+                  <p className="font-semibold">
+                    {invitation.organization.name}
+                  </p>
                 </div>
               </div>
 
@@ -169,7 +179,9 @@ export default function InvitePage() {
                 <div>
                   <p className="text-sm text-muted-foreground">Invited by</p>
                   <p className="font-semibold">
-                    {invitation.invitedBy?.name || invitation.invitedBy?.email || 'A team member'}
+                    {invitation.invitedBy?.name ||
+                      invitation.invitedBy?.email ||
+                      'A team member'}
                   </p>
                 </div>
               </div>
@@ -178,7 +190,8 @@ export default function InvitePage() {
             {/* Signed in as */}
             {session?.user && (
               <div className="text-center text-sm text-muted-foreground">
-                Signed in as <span className="font-medium">{session.user.email}</span>
+                Signed in as{' '}
+                <span className="font-medium">{session.user.email}</span>
               </div>
             )}
           </div>

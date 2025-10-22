@@ -19,10 +19,17 @@ export async function POST(
     const { id: collectionId } = await params
 
     // Check write permission
-    const hasAccess = await hasCollectionAccess(session.user.id, collectionId, 'write')
+    const hasAccess = await hasCollectionAccess(
+      session.user.id,
+      collectionId,
+      'write'
+    )
     if (!hasAccess) {
       return NextResponse.json(
-        { error: 'You do not have permission to upload documents to this collection' },
+        {
+          error:
+            'You do not have permission to upload documents to this collection',
+        },
         { status: 403 }
       )
     }
@@ -95,7 +102,11 @@ export async function GET(
     const { id: collectionId } = await params
 
     // Check read permission
-    const hasAccess = await hasCollectionAccess(session.user.id, collectionId, 'read')
+    const hasAccess = await hasCollectionAccess(
+      session.user.id,
+      collectionId,
+      'read'
+    )
     if (!hasAccess) {
       return NextResponse.json(
         { error: 'You do not have access to this collection' },

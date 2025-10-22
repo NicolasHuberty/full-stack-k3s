@@ -40,7 +40,12 @@ describe('LoginPage Component', () => {
   })
 
   it('should handle form submission with valid credentials', async () => {
-    mockSignIn.mockResolvedValueOnce({ error: null, ok: true, status: 200, url: '/dashboard' } as Awaited<ReturnType<typeof signIn>>)
+    mockSignIn.mockResolvedValueOnce({
+      error: null,
+      ok: true,
+      status: 200,
+      url: '/dashboard',
+    } as Awaited<ReturnType<typeof signIn>>)
 
     render(<LoginPage />)
 
@@ -62,7 +67,12 @@ describe('LoginPage Component', () => {
   })
 
   it('should display error message on failed login', async () => {
-    mockSignIn.mockResolvedValueOnce({ error: 'Invalid credentials', ok: false, status: 401, url: null } as Awaited<ReturnType<typeof signIn>>)
+    mockSignIn.mockResolvedValueOnce({
+      error: 'Invalid credentials',
+      ok: false,
+      status: 401,
+      url: null,
+    } as Awaited<ReturnType<typeof signIn>>)
 
     render(<LoginPage />)
 
@@ -81,7 +91,19 @@ describe('LoginPage Component', () => {
 
   it('should show loading state during sign in', async () => {
     mockSignIn.mockImplementation(
-      () => new Promise((resolve) => setTimeout(() => resolve({ error: null, ok: true, status: 200, url: '/dashboard' } as Awaited<ReturnType<typeof signIn>>), 100))
+      () =>
+        new Promise((resolve) =>
+          setTimeout(
+            () =>
+              resolve({
+                error: null,
+                ok: true,
+                status: 200,
+                url: '/dashboard',
+              } as Awaited<ReturnType<typeof signIn>>),
+            100
+          )
+        )
     )
 
     render(<LoginPage />)

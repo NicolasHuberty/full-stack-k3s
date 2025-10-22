@@ -23,7 +23,10 @@ export async function GET(
     console.error('Failed to fetch session:', error)
 
     if (error instanceof Error) {
-      if (error.message.includes('access') || error.message.includes('not found')) {
+      if (
+        error.message.includes('access') ||
+        error.message.includes('not found')
+      ) {
         return NextResponse.json({ error: error.message }, { status: 404 })
       }
       return NextResponse.json({ error: error.message }, { status: 400 })
@@ -67,7 +70,10 @@ export async function PATCH(
     console.error('Failed to update session:', error)
 
     if (error instanceof Error) {
-      if (error.message.includes('permission') || error.message.includes('access')) {
+      if (
+        error.message.includes('permission') ||
+        error.message.includes('access')
+      ) {
         return NextResponse.json({ error: error.message }, { status: 403 })
       }
       return NextResponse.json({ error: error.message }, { status: 400 })

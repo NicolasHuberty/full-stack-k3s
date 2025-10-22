@@ -23,7 +23,8 @@ describe('ChunkingService', () => {
     })
 
     it('should create overlapping chunks', () => {
-      const text = 'Sentence one. Sentence two. Sentence three. Sentence four. Sentence five.'
+      const text =
+        'Sentence one. Sentence two. Sentence three. Sentence four. Sentence five.'
       const chunks = service.chunkText(text, {
         chunkSize: 30,
         chunkOverlap: 10,
@@ -38,7 +39,8 @@ describe('ChunkingService', () => {
     })
 
     it('should respect sentence boundaries when enabled', () => {
-      const text = 'This is sentence one. This is sentence two. This is sentence three.'
+      const text =
+        'This is sentence one. This is sentence two. This is sentence three.'
       const chunks = service.chunkText(text, {
         chunkSize: 40,
         chunkOverlap: 10,

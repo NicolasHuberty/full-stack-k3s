@@ -43,7 +43,9 @@ export function ChatInterface({
   const [message, setMessage] = useState('')
   const [loading, setLoading] = useState(false)
   const [loadingSession, setLoadingSession] = useState(false)
-  const [optimisticMessage, setOptimisticMessage] = useState<string | null>(null)
+  const [optimisticMessage, setOptimisticMessage] = useState<string | null>(
+    null
+  )
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -142,11 +144,17 @@ export function ChatInterface({
       {/* Header */}
       {session && (
         <div className="border-b bg-white p-4">
-          <h2 className="text-lg font-semibold truncate" title={session.title || 'Chat Session'}>
+          <h2
+            className="text-lg font-semibold truncate"
+            title={session.title || 'Chat Session'}
+          >
             {session.title || 'Chat Session'}
           </h2>
           {session.collection && (
-            <p className="text-sm text-gray-500 truncate" title={session.collection.name}>
+            <p
+              className="text-sm text-gray-500 truncate"
+              title={session.collection.name}
+            >
               Collection: {session.collection.name}
             </p>
           )}
@@ -187,45 +195,51 @@ export function ChatInterface({
                     <ReactMarkdown>{msg.content}</ReactMarkdown>
                   )}
                 </div>
-                {Array.isArray(msg.documentChunks) && msg.documentChunks.length > 0 && (
-                  <div className="mt-4 pt-4 border-t border-gray-100">
-                    <div className="flex items-center gap-2 mb-3">
-                      <BookOpen className="h-4 w-4 text-blue-600" />
-                      <span className="text-sm font-semibold text-gray-700">
-                        {t('sources')} ({msg.documentChunks.length})
-                      </span>
-                    </div>
-                    <div className="space-y-2">
-                      {msg.documentChunks.map((chunk: any, i: number) => (
-                        <button
-                          key={i}
-                          onClick={() => window.open(`/api/documents/${chunk.documentId}/download`, '_blank')}
-                          className="w-full text-left p-3 rounded-lg border border-gray-200 hover:border-blue-400 hover:bg-blue-50 transition-all group"
-                        >
-                          <div className="flex items-start justify-between gap-2">
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2 mb-1">
-                                <FileText className="h-4 w-4 text-blue-600 flex-shrink-0" />
-                                <span className="font-medium text-sm text-gray-900 truncate">
-                                  {chunk.documentName}
-                                </span>
+                {Array.isArray(msg.documentChunks) &&
+                  msg.documentChunks.length > 0 && (
+                    <div className="mt-4 pt-4 border-t border-gray-100">
+                      <div className="flex items-center gap-2 mb-3">
+                        <BookOpen className="h-4 w-4 text-blue-600" />
+                        <span className="text-sm font-semibold text-gray-700">
+                          {t('sources')} ({msg.documentChunks.length})
+                        </span>
+                      </div>
+                      <div className="space-y-2">
+                        {msg.documentChunks.map((chunk: any, i: number) => (
+                          <button
+                            key={i}
+                            onClick={() =>
+                              window.open(
+                                `/api/documents/${chunk.documentId}/download`,
+                                '_blank'
+                              )
+                            }
+                            className="w-full text-left p-3 rounded-lg border border-gray-200 hover:border-blue-400 hover:bg-blue-50 transition-all group"
+                          >
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <FileText className="h-4 w-4 text-blue-600 flex-shrink-0" />
+                                  <span className="font-medium text-sm text-gray-900 truncate">
+                                    {chunk.documentName}
+                                  </span>
+                                </div>
+                                <p className="text-xs text-gray-500 line-clamp-2 pl-6">
+                                  {chunk.content.substring(0, 150)}...
+                                </p>
+                                <div className="flex items-center gap-3 mt-2 pl-6">
+                                  <span className="text-xs text-gray-400">
+                                    Score: {(chunk.score * 100).toFixed(1)}%
+                                  </span>
+                                </div>
                               </div>
-                              <p className="text-xs text-gray-500 line-clamp-2 pl-6">
-                                {chunk.content.substring(0, 150)}...
-                              </p>
-                              <div className="flex items-center gap-3 mt-2 pl-6">
-                                <span className="text-xs text-gray-400">
-                                  Score: {(chunk.score * 100).toFixed(1)}%
-                                </span>
-                              </div>
+                              <ExternalLink className="h-4 w-4 text-gray-400 group-hover:text-blue-600 flex-shrink-0 mt-1" />
                             </div>
-                            <ExternalLink className="h-4 w-4 text-gray-400 group-hover:text-blue-600 flex-shrink-0 mt-1" />
-                          </div>
-                        </button>
-                      ))}
+                          </button>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
               </CardContent>
             </Card>
           </div>

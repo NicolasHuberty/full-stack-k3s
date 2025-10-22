@@ -1,5 +1,9 @@
 import { prisma } from '@/lib/prisma'
-import { CollectionPermissionLevel, CollectionVisibility, OrganizationRole } from '@prisma/client'
+import {
+  CollectionPermissionLevel,
+  CollectionVisibility,
+  OrganizationRole,
+} from '@prisma/client'
 
 export type Permission = 'read' | 'write' | 'delete' | 'manage'
 
@@ -49,21 +53,27 @@ export async function hasCollectionAccess(
       collection.organizationId &&
       requiredPermission === 'read'
     ) {
-      const isMember = collection.organization?.members.some((m) => m.userId === userId)
+      const isMember = collection.organization?.members.some(
+        (m) => m.userId === userId
+      )
       if (isMember && collection.allowPublicRead) {
         return true
       }
     }
 
     // Check explicit permissions
-    const userPermission = collection.permissions.find((p) => p.userId === userId)
+    const userPermission = collection.permissions.find(
+      (p) => p.userId === userId
+    )
     if (userPermission) {
       return hasPermissionLevel(userPermission.permission, requiredPermission)
     }
 
     // Organization admins/owners have full access to org collections
     if (collection.organizationId) {
-      const member = collection.organization?.members.find((m) => m.userId === userId)
+      const member = collection.organization?.members.find(
+        (m) => m.userId === userId
+      )
       if (member && (member.role === 'OWNER' || member.role === 'ADMIN')) {
         return true
       }
@@ -103,7 +113,11 @@ export async function grantCollectionPermission(
 ): Promise<void> {
   try {
     // Check if granter has manage permission
-    const canManage = await hasCollectionAccess(grantedById, collectionId, 'manage')
+    const canManage = await hasCollectionAccess(
+      grantedById,
+      collectionId,
+      'manage'
+    )
     if (!canManage) {
       throw new Error('You do not have permission to manage this collection')
     }
@@ -143,7 +157,11 @@ export async function revokeCollectionPermission(
 ): Promise<void> {
   try {
     // Check if revoker has manage permission
-    const canManage = await hasCollectionAccess(revokedById, collectionId, 'manage')
+    const canManage = await hasCollectionAccess(
+      revokedById,
+      collectionId,
+      'manage'
+    )
     if (!canManage) {
       throw new Error('You do not have permission to manage this collection')
     }

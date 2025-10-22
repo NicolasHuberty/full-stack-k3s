@@ -33,9 +33,14 @@ export async function createCollection(input: CreateCollectionInput) {
   try {
     // If organizationId is provided, check permission
     if (input.organizationId) {
-      const canCreate = await canCreateOrgCollection(input.ownerId, input.organizationId)
+      const canCreate = await canCreateOrgCollection(
+        input.ownerId,
+        input.organizationId
+      )
       if (!canCreate) {
-        throw new Error('You do not have permission to create collections in this organization')
+        throw new Error(
+          'You do not have permission to create collections in this organization'
+        )
       }
     }
 
@@ -266,9 +271,12 @@ export async function getCollectionStats(collectionId: string, userId: string) {
     )
 
     const documentsByStatus = {
-      pending: collection.documents.filter((d) => d.status === 'PENDING').length,
-      processing: collection.documents.filter((d) => d.status === 'PROCESSING').length,
-      completed: collection.documents.filter((d) => d.status === 'COMPLETED').length,
+      pending: collection.documents.filter((d) => d.status === 'PENDING')
+        .length,
+      processing: collection.documents.filter((d) => d.status === 'PROCESSING')
+        .length,
+      completed: collection.documents.filter((d) => d.status === 'COMPLETED')
+        .length,
       failed: collection.documents.filter((d) => d.status === 'FAILED').length,
     }
 
@@ -299,7 +307,9 @@ export async function addCollectionTag(
   try {
     const hasAccess = await hasCollectionAccess(userId, collectionId, 'write')
     if (!hasAccess) {
-      throw new Error('You do not have permission to add tags to this collection')
+      throw new Error(
+        'You do not have permission to add tags to this collection'
+      )
     }
 
     const tag = await prisma.collectionTag.create({
@@ -320,10 +330,7 @@ export async function addCollectionTag(
 /**
  * Delete a tag from a collection
  */
-export async function deleteCollectionTag(
-  tagId: string,
-  userId: string
-) {
+export async function deleteCollectionTag(tagId: string, userId: string) {
   try {
     const tag = await prisma.collectionTag.findUnique({
       where: { id: tagId },
@@ -336,7 +343,11 @@ export async function deleteCollectionTag(
       throw new Error('Tag not found')
     }
 
-    const hasAccess = await hasCollectionAccess(userId, tag.collectionId, 'write')
+    const hasAccess = await hasCollectionAccess(
+      userId,
+      tag.collectionId,
+      'write'
+    )
     if (!hasAccess) {
       throw new Error('You do not have permission to delete this tag')
     }

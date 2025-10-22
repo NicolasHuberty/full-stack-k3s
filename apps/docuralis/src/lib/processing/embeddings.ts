@@ -1,6 +1,9 @@
 import OpenAI from 'openai'
 
-export type EmbeddingModel = 'text-embedding-3-small' | 'text-embedding-3-large' | 'text-embedding-ada-002'
+export type EmbeddingModel =
+  | 'text-embedding-3-small'
+  | 'text-embedding-3-large'
+  | 'text-embedding-ada-002'
 
 export interface EmbeddingResult {
   embedding: number[]
@@ -60,7 +63,9 @@ export class EmbeddingService {
       }
     } catch (error) {
       console.error('Failed to generate embedding:', error)
-      throw new Error(`Embedding generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      throw new Error(
+        `Embedding generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+      )
     }
   }
 
@@ -119,7 +124,9 @@ export class EmbeddingService {
       }
     } catch (error) {
       console.error('Failed to generate batch embeddings:', error)
-      throw new Error(`Batch embedding generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      throw new Error(
+        `Batch embedding generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+      )
     }
   }
 

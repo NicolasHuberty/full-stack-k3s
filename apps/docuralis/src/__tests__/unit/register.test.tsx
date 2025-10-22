@@ -29,7 +29,7 @@ describe('RegisterPage Component', () => {
   })
 
   it('should handle successful registration', async () => {
-    (global.fetch as jest.Mock).mockResolvedValueOnce({
+    ;(global.fetch as jest.Mock).mockResolvedValueOnce({
       ok: true,
       json: async () => ({ success: true }),
     })
@@ -47,13 +47,16 @@ describe('RegisterPage Component', () => {
     fireEvent.click(submitButton)
 
     await waitFor(() => {
-      expect(global.fetch).toHaveBeenCalledWith('/api/auth/register', expect.any(Object))
+      expect(global.fetch).toHaveBeenCalledWith(
+        '/api/auth/register',
+        expect.any(Object)
+      )
       expect(mockPush).toHaveBeenCalledWith('/login')
     })
   })
 
   it('should display error message on failed registration', async () => {
-    (global.fetch as jest.Mock).mockResolvedValueOnce({
+    ;(global.fetch as jest.Mock).mockResolvedValueOnce({
       ok: false,
       json: async () => ({ error: 'Email already exists' }),
     })
@@ -76,8 +79,14 @@ describe('RegisterPage Component', () => {
   })
 
   it('should show loading state during registration', async () => {
-    (global.fetch as jest.Mock).mockImplementation(
-      () => new Promise((resolve) => setTimeout(() => resolve({ ok: true, json: async () => ({ success: true }) }), 100))
+    ;(global.fetch as jest.Mock).mockImplementation(
+      () =>
+        new Promise((resolve) =>
+          setTimeout(
+            () => resolve({ ok: true, json: async () => ({ success: true }) }),
+            100
+          )
+        )
     )
 
     render(<RegisterPage />)

@@ -27,7 +27,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           }),
         ]
       : []),
-    ...(process.env.AZURE_AD_CLIENT_ID && process.env.AZURE_AD_CLIENT_SECRET && process.env.AZURE_AD_TENANT_ID
+    ...(process.env.AZURE_AD_CLIENT_ID &&
+    process.env.AZURE_AD_CLIENT_SECRET &&
+    process.env.AZURE_AD_TENANT_ID
       ? [
           AzureAD({
             clientId: process.env.AZURE_AD_CLIENT_ID,
@@ -95,7 +97,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
           // Check if this OAuth account is already linked
           const accountExists = existingUser.accounts.find(
-            (acc) => acc.provider === account.provider && acc.providerAccountId === account.providerAccountId
+            (acc) =>
+              acc.provider === account.provider &&
+              acc.providerAccountId === account.providerAccountId
           )
 
           if (!accountExists) {
@@ -112,7 +116,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                 token_type: account.token_type,
                 scope: account.scope,
                 id_token: account.id_token,
-                session_state: typeof account.session_state === 'string' ? account.session_state : null,
+                session_state:
+                  typeof account.session_state === 'string'
+                    ? account.session_state
+                    : null,
               },
             })
           }

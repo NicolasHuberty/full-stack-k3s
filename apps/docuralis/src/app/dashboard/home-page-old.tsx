@@ -27,11 +27,24 @@ import {
   Send,
   FolderOpen,
   Star,
-  Plus
+  Plus,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { formatDistanceToNow, format, startOfWeek, endOfWeek, eachDayOfInterval, isToday } from 'date-fns'
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from '@/components/ui/card'
+import {
+  formatDistanceToNow,
+  format,
+  startOfWeek,
+  endOfWeek,
+  eachDayOfInterval,
+  isToday,
+} from 'date-fns'
 
 export function DashboardHomePage() {
   const { data: session } = useSession()
@@ -46,7 +59,7 @@ export function DashboardHomePage() {
     totalCollections: 0,
     totalDocuments: 0,
     storageUsed: 0,
-    storageLimit: 0
+    storageLimit: 0,
   })
 
   useEffect(() => {
@@ -60,7 +73,10 @@ export function DashboardHomePage() {
       if (chatsRes.ok) {
         const chatsData = await chatsRes.json()
         setRecentChats(chatsData.sessions?.slice(0, 5) || [])
-        setStats(prev => ({ ...prev, totalChats: chatsData.sessions?.length || 0 }))
+        setStats((prev) => ({
+          ...prev,
+          totalChats: chatsData.sessions?.length || 0,
+        }))
       }
 
       // Fetch collections
@@ -68,11 +84,19 @@ export function DashboardHomePage() {
       if (collectionsRes.ok) {
         const collectionsData = await collectionsRes.json()
         setCollections(collectionsData.collections || [])
-        setStats(prev => ({
+        setStats((prev) => ({
           ...prev,
           totalCollections: collectionsData.collections?.length || 0,
-          totalDocuments: collectionsData.collections?.reduce((sum: number, c: any) => sum + (c.documentCount || 0), 0) || 0,
-          storageUsed: collectionsData.collections?.reduce((sum: number, c: any) => sum + parseInt(c.storageUsed || 0), 0) || 0
+          totalDocuments:
+            collectionsData.collections?.reduce(
+              (sum: number, c: any) => sum + (c.documentCount || 0),
+              0
+            ) || 0,
+          storageUsed:
+            collectionsData.collections?.reduce(
+              (sum: number, c: any) => sum + parseInt(c.storageUsed || 0),
+              0
+            ) || 0,
         }))
       }
 
@@ -94,9 +118,9 @@ export function DashboardHomePage() {
 
       // Set storage limit from user session
       if (session?.user?.storageLimit) {
-        setStats(prev => ({
+        setStats((prev) => ({
           ...prev,
-          storageLimit: parseInt(session.user.storageLimit)
+          storageLimit: parseInt(session.user.storageLimit),
         }))
       }
     } catch (error) {
@@ -108,9 +132,8 @@ export function DashboardHomePage() {
     router.push('/dashboard/chat')
   }
 
-  const storagePercentage = stats.storageLimit > 0
-    ? (stats.storageUsed / stats.storageLimit) * 100
-    : 0
+  const storagePercentage =
+    stats.storageLimit > 0 ? (stats.storageUsed / stats.storageLimit) * 100 : 0
 
   return (
     <div className="p-6 md:p-8 max-w-7xl mx-auto space-y-6">
@@ -118,7 +141,8 @@ export function DashboardHomePage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl md:text-4xl font-bold mb-2">
-            {t('welcomeBack')}, {session?.user?.name?.split(' ')[0] || 'there'} 👋
+            {t('welcomeBack')}, {session?.user?.name?.split(' ')[0] || 'there'}{' '}
+            👋
           </h1>
           <p className="text-muted-foreground">{t('dashboardSubtitle')}</p>
         </div>
@@ -134,9 +158,13 @@ export function DashboardHomePage() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">{t('conversations')}</p>
+                <p className="text-sm font-medium text-muted-foreground">
+                  {t('conversations')}
+                </p>
                 <p className="text-3xl font-bold mt-2">{stats.totalChats}</p>
-                <p className="text-xs text-muted-foreground mt-1">{t('totalChats')}</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {t('totalChats')}
+                </p>
               </div>
               <div className="h-12 w-12 rounded-lg bg-blue-500/10 flex items-center justify-center">
                 <MessageSquare className="h-6 w-6 text-blue-500" />
@@ -149,9 +177,15 @@ export function DashboardHomePage() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">{t('collections')}</p>
-                <p className="text-3xl font-bold mt-2">{stats.totalCollections}</p>
-                <p className="text-xs text-muted-foreground mt-1">{t('knowledgeBases')}</p>
+                <p className="text-sm font-medium text-muted-foreground">
+                  {t('collections')}
+                </p>
+                <p className="text-3xl font-bold mt-2">
+                  {stats.totalCollections}
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {t('knowledgeBases')}
+                </p>
               </div>
               <div className="h-12 w-12 rounded-lg bg-purple-500/10 flex items-center justify-center">
                 <Database className="h-6 w-6 text-purple-500" />
@@ -164,9 +198,15 @@ export function DashboardHomePage() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">{t('documents')}</p>
-                <p className="text-3xl font-bold mt-2">{stats.totalDocuments}</p>
-                <p className="text-xs text-muted-foreground mt-1">{t('filesUploaded')}</p>
+                <p className="text-sm font-medium text-muted-foreground">
+                  {t('documents')}
+                </p>
+                <p className="text-3xl font-bold mt-2">
+                  {stats.totalDocuments}
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {t('filesUploaded')}
+                </p>
               </div>
               <div className="h-12 w-12 rounded-lg bg-green-500/10 flex items-center justify-center">
                 <FileText className="h-6 w-6 text-green-500" />
@@ -179,10 +219,15 @@ export function DashboardHomePage() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">{t('storage')}</p>
-                <p className="text-3xl font-bold mt-2">{(stats.storageUsed / 1024 / 1024 / 1024).toFixed(1)}</p>
+                <p className="text-sm font-medium text-muted-foreground">
+                  {t('storage')}
+                </p>
+                <p className="text-3xl font-bold mt-2">
+                  {(stats.storageUsed / 1024 / 1024 / 1024).toFixed(1)}
+                </p>
                 <p className="text-xs text-muted-foreground mt-1">
-                  {t('of')} {(stats.storageLimit / 1024 / 1024 / 1024).toFixed(0)} GB
+                  {t('of')}{' '}
+                  {(stats.storageLimit / 1024 / 1024 / 1024).toFixed(0)} GB
                 </p>
               </div>
               <div className="h-12 w-12 rounded-lg bg-orange-500/10 flex items-center justify-center">
@@ -193,9 +238,11 @@ export function DashboardHomePage() {
               <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
                 <div
                   className={`h-full transition-all ${
-                    storagePercentage > 90 ? 'bg-red-500' :
-                    storagePercentage > 70 ? 'bg-orange-500' :
-                    'bg-green-500'
+                    storagePercentage > 90
+                      ? 'bg-red-500'
+                      : storagePercentage > 70
+                        ? 'bg-orange-500'
+                        : 'bg-green-500'
                   }`}
                   style={{ width: `${Math.min(storagePercentage, 100)}%` }}
                 />
@@ -226,7 +273,9 @@ export function DashboardHomePage() {
               {recentChats.length === 0 ? (
                 <div className="text-center py-12">
                   <MessageSquare className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
-                  <p className="text-muted-foreground mb-4">{t('noRecentChats')}</p>
+                  <p className="text-muted-foreground mb-4">
+                    {t('noRecentChats')}
+                  </p>
                   <Button onClick={handleCreateChat} variant="outline">
                     <Sparkles className="h-4 w-4 mr-2" />
                     {t('startFirstChat')}
@@ -245,9 +294,14 @@ export function DashboardHomePage() {
                           <MessageSquare className="h-5 w-5 text-primary" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="font-medium truncate">{chat.title || t('untitledChat')}</p>
+                          <p className="font-medium truncate">
+                            {chat.title || t('untitledChat')}
+                          </p>
                           <p className="text-sm text-muted-foreground">
-                            {chat._count?.messages || 0} {t('messages')} • {formatDistanceToNow(new Date(chat.updatedAt), { addSuffix: true })}
+                            {chat._count?.messages || 0} {t('messages')} •{' '}
+                            {formatDistanceToNow(new Date(chat.updatedAt), {
+                              addSuffix: true,
+                            })}
                           </p>
                         </div>
                       </div>
@@ -283,7 +337,9 @@ export function DashboardHomePage() {
                     className="w-full h-auto py-4 flex-col gap-2"
                   >
                     <Database className="h-6 w-6 text-purple-500" />
-                    <span className="text-sm font-medium">{t('manageCollections')}</span>
+                    <span className="text-sm font-medium">
+                      {t('manageCollections')}
+                    </span>
                   </Button>
                 </Link>
                 <Link href="/dashboard/teams">
@@ -292,7 +348,9 @@ export function DashboardHomePage() {
                     className="w-full h-auto py-4 flex-col gap-2"
                   >
                     <Users className="h-6 w-6 text-blue-500" />
-                    <span className="text-sm font-medium">{t('inviteTeam')}</span>
+                    <span className="text-sm font-medium">
+                      {t('inviteTeam')}
+                    </span>
                   </Button>
                 </Link>
               </div>
@@ -321,7 +379,9 @@ export function DashboardHomePage() {
               {teamMembers.length === 0 ? (
                 <div className="text-center py-6">
                   <Users className="h-10 w-10 mx-auto text-muted-foreground mb-2" />
-                  <p className="text-sm text-muted-foreground mb-3">{t('noTeamMembers')}</p>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    {t('noTeamMembers')}
+                  </p>
                   <Link href="/dashboard/teams">
                     <Button variant="outline" size="sm">
                       {t('inviteTeam')}
@@ -343,13 +403,18 @@ export function DashboardHomePage() {
                       ) : (
                         <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center">
                           <span className="text-xs font-medium">
-                            {member.user?.name?.[0]?.toUpperCase() || member.user?.email[0].toUpperCase()}
+                            {member.user?.name?.[0]?.toUpperCase() ||
+                              member.user?.email[0].toUpperCase()}
                           </span>
                         </div>
                       )}
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium truncate">{member.user?.name || 'Unnamed'}</p>
-                        <p className="text-xs text-muted-foreground">{member.role}</p>
+                        <p className="text-sm font-medium truncate">
+                          {member.user?.name || 'Unnamed'}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {member.role}
+                        </p>
                       </div>
                     </div>
                   ))}
@@ -377,7 +442,9 @@ export function DashboardHomePage() {
               {collections.length === 0 ? (
                 <div className="text-center py-6">
                   <Database className="h-10 w-10 mx-auto text-muted-foreground mb-2" />
-                  <p className="text-sm text-muted-foreground mb-3">{t('noCollections')}</p>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    {t('noCollections')}
+                  </p>
                   <Link href="/dashboard/collections">
                     <Button variant="outline" size="sm">
                       {t('createCollection')}
@@ -387,14 +454,20 @@ export function DashboardHomePage() {
               ) : (
                 <div className="space-y-3">
                   {collections.slice(0, 4).map((collection: any) => (
-                    <div key={collection.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50 transition-colors">
+                    <div
+                      key={collection.id}
+                      className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50 transition-colors"
+                    >
                       <div className="h-8 w-8 rounded-lg bg-purple-500/10 flex items-center justify-center flex-shrink-0">
                         <Database className="h-4 w-4 text-purple-500" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium truncate">{collection.name}</p>
+                        <p className="text-sm font-medium truncate">
+                          {collection.name}
+                        </p>
                         <p className="text-xs text-muted-foreground">
-                          {collection.documentCount || 0} {t('documents').toLowerCase()}
+                          {collection.documentCount || 0}{' '}
+                          {t('documents').toLowerCase()}
                         </p>
                       </div>
                     </div>

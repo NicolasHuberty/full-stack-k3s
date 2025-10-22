@@ -1,6 +1,9 @@
 import { prisma } from '@/lib/prisma'
 import { sendEmail } from './email'
-import { getOrganizationInvitationEmail, getMemberAddedEmail } from './email-templates'
+import {
+  getOrganizationInvitationEmail,
+  getMemberAddedEmail,
+} from './email-templates'
 import crypto from 'crypto'
 
 export async function createOrganization(data: {
@@ -188,7 +191,10 @@ export async function acceptInvitation(token: string, userId: string) {
   ])
 
   // Send welcome email
-  const welcomeEmail = getMemberAddedEmail(user.name || user.email, invitation.organization.name)
+  const welcomeEmail = getMemberAddedEmail(
+    user.name || user.email,
+    invitation.organization.name
+  )
   await sendEmail({
     to: user.email,
     subject: welcomeEmail.subject,
@@ -198,7 +204,10 @@ export async function acceptInvitation(token: string, userId: string) {
   return result[0]
 }
 
-export async function removeMemberFromOrganization(organizationId: string, memberId: string) {
+export async function removeMemberFromOrganization(
+  organizationId: string,
+  memberId: string
+) {
   const member = await prisma.organizationMember.findUnique({
     where: { id: memberId },
     include: { organization: true },
@@ -230,7 +239,10 @@ export async function removeMemberFromOrganization(organizationId: string, membe
   return { success: true }
 }
 
-export async function updateMemberRole(memberId: string, newRole: 'ADMIN' | 'MEMBER' | 'VIEWER') {
+export async function updateMemberRole(
+  memberId: string,
+  newRole: 'ADMIN' | 'MEMBER' | 'VIEWER'
+) {
   const member = await prisma.organizationMember.findUnique({
     where: { id: memberId },
   })

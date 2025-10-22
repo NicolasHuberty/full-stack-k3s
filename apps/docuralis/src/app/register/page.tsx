@@ -33,7 +33,9 @@ export default function RegisterPage() {
     }
   }
 
-  async function handleOAuthSignIn(provider: 'google' | 'github' | 'microsoft') {
+  async function handleOAuthSignIn(
+    provider: 'google' | 'github' | 'microsoft'
+  ) {
     setLoading(true)
     await signIn(provider, { callbackUrl: '/dashboard' })
   }

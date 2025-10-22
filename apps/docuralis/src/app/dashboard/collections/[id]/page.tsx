@@ -130,9 +130,14 @@ export default function CollectionDetailPage() {
   const [uploading, setUploading] = useState(false)
   const [dragActive, setDragActive] = useState(false)
   const [deleteDocId, setDeleteDocId] = useState<string | null>(null)
-  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+  const [message, setMessage] = useState<{
+    type: 'success' | 'error'
+    text: string
+  } | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
-  const [statusFilter, setStatusFilter] = useState<'all' | DocumentStatus>('all')
+  const [statusFilter, setStatusFilter] = useState<'all' | DocumentStatus>(
+    'all'
+  )
   const [sortBy, setSortBy] = useState<'name' | 'date' | 'size'>('date')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
   const [displayedCount, setDisplayedCount] = useState(20)
@@ -143,7 +148,9 @@ export default function CollectionDetailPage() {
   const [showAccessDialog, setShowAccessDialog] = useState(false)
   const [editingAccess, setEditingAccess] = useState<AccessUser | null>(null)
   const [newUserEmail, setNewUserEmail] = useState('')
-  const [newUserRole, setNewUserRole] = useState<'VIEWER' | 'EDITOR' | 'ADMIN'>('VIEWER')
+  const [newUserRole, setNewUserRole] = useState<'VIEWER' | 'EDITOR' | 'ADMIN'>(
+    'VIEWER'
+  )
   const [accessLoading, setAccessLoading] = useState(false)
 
   // Batch selection state
@@ -162,14 +169,15 @@ export default function CollectionDetailPage() {
     let filtered = collection.documents
 
     if (searchQuery) {
-      filtered = filtered.filter(doc =>
-        doc.originalName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        doc.uploadedBy.name?.toLowerCase().includes(searchQuery.toLowerCase())
+      filtered = filtered.filter(
+        (doc) =>
+          doc.originalName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          doc.uploadedBy.name?.toLowerCase().includes(searchQuery.toLowerCase())
       )
     }
 
     if (statusFilter !== 'all') {
-      filtered = filtered.filter(doc => doc.status === statusFilter)
+      filtered = filtered.filter((doc) => doc.status === statusFilter)
     }
 
     const sorted = [...filtered].sort((a, b) => {
@@ -180,7 +188,8 @@ export default function CollectionDetailPage() {
           comparison = a.originalName.localeCompare(b.originalName)
           break
         case 'date':
-          comparison = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+          comparison =
+            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
           break
         case 'size':
           comparison = Number(a.fileSize) - Number(b.fileSize)
@@ -193,7 +202,10 @@ export default function CollectionDetailPage() {
     return sorted
   }, [collection, searchQuery, statusFilter, sortBy, sortOrder])
 
-  const filteredAndSortedDocuments = allFilteredAndSorted.slice(0, displayedCount)
+  const filteredAndSortedDocuments = allFilteredAndSorted.slice(
+    0,
+    displayedCount
+  )
   const hasMore = allFilteredAndSorted.length > displayedCount
 
   useEffect(() => {
@@ -234,7 +246,12 @@ export default function CollectionDetailPage() {
 
     const currentTarget = observerTarget.current
     if (currentTarget && hasMore) {
-      console.log('Observer attached, hasMore:', hasMore, 'displayed:', displayedCount)
+      console.log(
+        'Observer attached, hasMore:',
+        hasMore,
+        'displayed:',
+        displayedCount
+      )
       observer.observe(currentTarget)
     }
 
@@ -370,10 +387,13 @@ export default function CollectionDetailPage() {
           const formData = new FormData()
           formData.append('file', file)
 
-          const res = await fetch(`/api/collections/${collectionId}/documents`, {
-            method: 'POST',
-            body: formData,
-          })
+          const res = await fetch(
+            `/api/collections/${collectionId}/documents`,
+            {
+              method: 'POST',
+              body: formData,
+            }
+          )
 
           if (res.ok) {
             successCount++
@@ -391,14 +411,15 @@ export default function CollectionDetailPage() {
       if (errorCount === 0) {
         setMessage({
           type: 'success',
-          text: files.length === 1
-            ? t('uploadSuccess')
-            : `${successCount} ${t('uploadSuccess')}`
+          text:
+            files.length === 1
+              ? t('uploadSuccess')
+              : `${successCount} ${t('uploadSuccess')}`,
         })
       } else if (successCount > 0) {
         setMessage({
           type: 'error',
-          text: `${successCount} uploaded, ${errorCount} failed`
+          text: `${successCount} uploaded, ${errorCount} failed`,
         })
       } else {
         setMessage({ type: 'error', text: t('uploadError') })
@@ -459,7 +480,10 @@ export default function CollectionDetailPage() {
         await fetchCollection(true)
       } else {
         const error = await res.json()
-        setMessage({ type: 'error', text: error.error || 'Failed to grant access' })
+        setMessage({
+          type: 'error',
+          text: error.error || 'Failed to grant access',
+        })
       }
     } catch (error) {
       console.error('Failed to add access:', error)
@@ -469,14 +493,20 @@ export default function CollectionDetailPage() {
     }
   }
 
-  const handleUpdateAccess = async (userId: string, permission: 'VIEWER' | 'EDITOR' | 'ADMIN') => {
+  const handleUpdateAccess = async (
+    userId: string,
+    permission: 'VIEWER' | 'EDITOR' | 'ADMIN'
+  ) => {
     setAccessLoading(true)
     try {
-      const res = await fetch(`/api/collections/${collectionId}/permissions/${userId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ permission }),
-      })
+      const res = await fetch(
+        `/api/collections/${collectionId}/permissions/${userId}`,
+        {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ permission }),
+        }
+      )
 
       if (res.ok) {
         setMessage({ type: 'success', text: 'Access updated successfully' })
@@ -484,7 +514,10 @@ export default function CollectionDetailPage() {
         await fetchCollection(true)
       } else {
         const error = await res.json()
-        setMessage({ type: 'error', text: error.error || 'Failed to update access' })
+        setMessage({
+          type: 'error',
+          text: error.error || 'Failed to update access',
+        })
       }
     } catch (error) {
       console.error('Failed to update access:', error)
@@ -497,16 +530,22 @@ export default function CollectionDetailPage() {
   const handleRemoveAccess = async (userId: string) => {
     setAccessLoading(true)
     try {
-      const res = await fetch(`/api/collections/${collectionId}/permissions/${userId}`, {
-        method: 'DELETE',
-      })
+      const res = await fetch(
+        `/api/collections/${collectionId}/permissions/${userId}`,
+        {
+          method: 'DELETE',
+        }
+      )
 
       if (res.ok) {
         setMessage({ type: 'success', text: 'Access removed successfully' })
         await fetchCollection(true)
       } else {
         const error = await res.json()
-        setMessage({ type: 'error', text: error.error || 'Failed to remove access' })
+        setMessage({
+          type: 'error',
+          text: error.error || 'Failed to remove access',
+        })
       }
     } catch (error) {
       console.error('Failed to remove access:', error)
@@ -518,7 +557,7 @@ export default function CollectionDetailPage() {
 
   // Batch selection handlers
   const toggleDocumentSelection = (docId: string) => {
-    setSelectedDocIds(prev => {
+    setSelectedDocIds((prev) => {
       const newSet = new Set(prev)
       if (newSet.has(docId)) {
         newSet.delete(docId)
@@ -533,7 +572,7 @@ export default function CollectionDetailPage() {
     if (selectedDocIds.size === docs.length && docs.length > 0) {
       setSelectedDocIds(new Set())
     } else {
-      setSelectedDocIds(new Set(docs.map(doc => doc.id)))
+      setSelectedDocIds(new Set(docs.map((doc) => doc.id)))
     }
   }
 
@@ -564,12 +603,12 @@ export default function CollectionDetailPage() {
       if (errorCount === 0) {
         setMessage({
           type: 'success',
-          text: `Successfully deleted ${successCount} document${successCount > 1 ? 's' : ''}`
+          text: `Successfully deleted ${successCount} document${successCount > 1 ? 's' : ''}`,
         })
       } else if (successCount > 0) {
         setMessage({
           type: 'error',
-          text: `${successCount} deleted, ${errorCount} failed`
+          text: `${successCount} deleted, ${errorCount} failed`,
         })
       } else {
         setMessage({ type: 'error', text: 'Failed to delete documents' })
@@ -592,7 +631,7 @@ export default function CollectionDetailPage() {
         const error = await response.json()
         setMessage({
           type: 'error',
-          text: error.error || 'Failed to download document'
+          text: error.error || 'Failed to download document',
         })
         return
       }
@@ -603,7 +642,7 @@ export default function CollectionDetailPage() {
       console.error('Failed to view document:', error)
       setMessage({
         type: 'error',
-        text: 'Failed to download document. The file may not exist in storage.'
+        text: 'Failed to download document. The file may not exist in storage.',
       })
     }
   }
@@ -621,7 +660,8 @@ export default function CollectionDetailPage() {
     }
     // Word documents
     else if (
-      mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+      mimeType ===
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
       mimeType === 'application/msword' ||
       extension === 'doc' ||
       extension === 'docx'
@@ -631,7 +671,8 @@ export default function CollectionDetailPage() {
     }
     // Excel
     else if (
-      mimeType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
+      mimeType ===
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
       mimeType === 'application/vnd.ms-excel' ||
       extension === 'xls' ||
       extension === 'xlsx'
@@ -641,7 +682,8 @@ export default function CollectionDetailPage() {
     }
     // PowerPoint
     else if (
-      mimeType === 'application/vnd.openxmlformats-officedocument.presentationml.presentation' ||
+      mimeType ===
+        'application/vnd.openxmlformats-officedocument.presentationml.presentation' ||
       mimeType === 'application/vnd.ms-powerpoint' ||
       extension === 'ppt' ||
       extension === 'pptx'
@@ -671,7 +713,9 @@ export default function CollectionDetailPage() {
     }
 
     return (
-      <div className={`h-10 w-10 rounded ${bgColor} flex items-center justify-center flex-shrink-0 p-1.5`}>
+      <div
+        className={`h-10 w-10 rounded ${bgColor} flex items-center justify-center flex-shrink-0 p-1.5`}
+      >
         <img
           src={iconUrl}
           alt={extension || 'file'}
@@ -683,14 +727,28 @@ export default function CollectionDetailPage() {
 
   const getStatusBadge = (status: DocumentStatus) => {
     const badges = {
-      COMPLETED: { label: 'Terminé', class: 'bg-green-50 text-green-700 border-green-200' },
-      PROCESSING: { label: 'En traitement', class: 'bg-blue-50 text-blue-700 border-blue-200' },
-      FAILED: { label: 'Échoué', class: 'bg-red-50 text-red-700 border-red-200' },
-      PENDING: { label: 'En attente', class: 'bg-yellow-50 text-yellow-700 border-yellow-200' },
+      COMPLETED: {
+        label: 'Terminé',
+        class: 'bg-green-50 text-green-700 border-green-200',
+      },
+      PROCESSING: {
+        label: 'En traitement',
+        class: 'bg-blue-50 text-blue-700 border-blue-200',
+      },
+      FAILED: {
+        label: 'Échoué',
+        class: 'bg-red-50 text-red-700 border-red-200',
+      },
+      PENDING: {
+        label: 'En attente',
+        class: 'bg-yellow-50 text-yellow-700 border-yellow-200',
+      },
     }
     const badge = badges[status]
     return (
-      <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border ${badge.class}`}>
+      <span
+        className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border ${badge.class}`}
+      >
         {badge.label}
       </span>
     )
@@ -720,7 +778,10 @@ export default function CollectionDetailPage() {
       <DashboardLayout>
         <div className="p-8 text-center">
           <p className="text-muted-foreground">{t('notFound')}</p>
-          <Button onClick={() => router.push('/dashboard/collections')} className="mt-4">
+          <Button
+            onClick={() => router.push('/dashboard/collections')}
+            className="mt-4"
+          >
             {t('backToCollections')}
           </Button>
         </div>
@@ -746,9 +807,13 @@ export default function CollectionDetailPage() {
               </Button>
               <div className="h-6 w-px bg-border" />
               <div>
-                <h1 className="text-xl font-semibold text-foreground">{collection.name}</h1>
+                <h1 className="text-xl font-semibold text-foreground">
+                  {collection.name}
+                </h1>
                 {collection.description && (
-                  <p className="text-sm text-muted-foreground">{collection.description}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {collection.description}
+                  </p>
                 )}
               </div>
             </div>
@@ -761,16 +826,22 @@ export default function CollectionDetailPage() {
               </div>
               <div className="flex items-center gap-2">
                 <Database className="h-4 w-4 text-muted-foreground" />
-                <span className="font-medium">{formatBytes(collection.storageUsed)}</span>
+                <span className="font-medium">
+                  {formatBytes(collection.storageUsed)}
+                </span>
               </div>
               <div className="flex items-center gap-2">
                 <MessageSquare className="h-4 w-4 text-muted-foreground" />
-                <span className="font-medium">{collection.totalChatMessages}</span>
+                <span className="font-medium">
+                  {collection.totalChatMessages}
+                </span>
                 <span className="text-muted-foreground">messages</span>
               </div>
               <div className="flex items-center gap-2">
                 <Users className="h-4 w-4 text-muted-foreground" />
-                <span className="font-medium">{collection.accessUsers.length}</span>
+                <span className="font-medium">
+                  {collection.accessUsers.length}
+                </span>
                 <span className="text-muted-foreground">users</span>
               </div>
             </div>
@@ -778,7 +849,9 @@ export default function CollectionDetailPage() {
         </div>
 
         {message && (
-          <div className={`mx-6 mt-4 p-3 rounded border text-sm ${message.type === 'success' ? 'bg-green-50 text-green-800 border-green-200' : 'bg-red-50 text-red-800 border-red-200'}`}>
+          <div
+            className={`mx-6 mt-4 p-3 rounded border text-sm ${message.type === 'success' ? 'bg-green-50 text-green-800 border-green-200' : 'bg-red-50 text-red-800 border-red-200'}`}
+          >
             {message.text}
           </div>
         )}
@@ -789,25 +862,42 @@ export default function CollectionDetailPage() {
             {/* Activity Summary */}
             <div className="mb-6 grid grid-cols-3 gap-6 text-sm">
               <div className="border rounded p-4 bg-card">
-                <div className="text-muted-foreground mb-1">Dernière mise à jour</div>
+                <div className="text-muted-foreground mb-1">
+                  Dernière mise à jour
+                </div>
                 <div className="font-medium">
                   {collection.lastDocumentUpdate
-                    ? formatDistanceToNow(new Date(collection.lastDocumentUpdate), { addSuffix: true, locale: fr })
+                    ? formatDistanceToNow(
+                        new Date(collection.lastDocumentUpdate),
+                        { addSuffix: true, locale: fr }
+                      )
                     : 'Jamais'}
                 </div>
               </div>
               <div className="border rounded p-4 bg-card">
-                <div className="text-muted-foreground mb-1">Dernière activité chat</div>
+                <div className="text-muted-foreground mb-1">
+                  Dernière activité chat
+                </div>
                 <div className="font-medium">
                   {collection.lastChatActivity
-                    ? formatDistanceToNow(new Date(collection.lastChatActivity), { addSuffix: true, locale: fr })
+                    ? formatDistanceToNow(
+                        new Date(collection.lastChatActivity),
+                        { addSuffix: true, locale: fr }
+                      )
                     : 'Aucune activité'}
                 </div>
               </div>
               <div className="border rounded p-4 bg-card">
                 <div className="text-muted-foreground mb-1">Visibilité</div>
                 <div className="font-medium">
-                  <VisibilityBadge visibility={collection.visibility as 'PRIVATE' | 'ORGANIZATION' | 'PUBLIC'} />
+                  <VisibilityBadge
+                    visibility={
+                      collection.visibility as
+                        | 'PRIVATE'
+                        | 'ORGANIZATION'
+                        | 'PUBLIC'
+                    }
+                  />
                 </div>
               </div>
             </div>
@@ -815,8 +905,13 @@ export default function CollectionDetailPage() {
             {/* Access Users */}
             <div className="mb-6">
               <div className="flex items-center justify-between mb-3">
-                <h2 className="text-sm font-semibold text-foreground">Accès équipe ({collection.accessUsers.length})</h2>
-                <Dialog open={showAccessDialog} onOpenChange={setShowAccessDialog}>
+                <h2 className="text-sm font-semibold text-foreground">
+                  Accès équipe ({collection.accessUsers.length})
+                </h2>
+                <Dialog
+                  open={showAccessDialog}
+                  onOpenChange={setShowAccessDialog}
+                >
                   <DialogTrigger asChild>
                     <Button size="sm" variant="outline">
                       <UserPlus className="h-4 w-4 mr-2" />
@@ -843,23 +938,39 @@ export default function CollectionDetailPage() {
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="role">Rôle</Label>
-                        <Select value={newUserRole} onValueChange={(value: any) => setNewUserRole(value)}>
+                        <Select
+                          value={newUserRole}
+                          onValueChange={(value: any) => setNewUserRole(value)}
+                        >
                           <SelectTrigger id="role">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="VIEWER">Lecteur (Lecture seule)</SelectItem>
-                            <SelectItem value="EDITOR">Éditeur (Peut modifier)</SelectItem>
-                            <SelectItem value="ADMIN">Administrateur (Accès complet)</SelectItem>
+                            <SelectItem value="VIEWER">
+                              Lecteur (Lecture seule)
+                            </SelectItem>
+                            <SelectItem value="EDITOR">
+                              Éditeur (Peut modifier)
+                            </SelectItem>
+                            <SelectItem value="ADMIN">
+                              Administrateur (Accès complet)
+                            </SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
                     </div>
                     <DialogFooter>
-                      <Button variant="outline" onClick={() => setShowAccessDialog(false)} disabled={accessLoading}>
+                      <Button
+                        variant="outline"
+                        onClick={() => setShowAccessDialog(false)}
+                        disabled={accessLoading}
+                      >
                         Annuler
                       </Button>
-                      <Button onClick={handleAddAccess} disabled={accessLoading || !newUserEmail.trim()}>
+                      <Button
+                        onClick={handleAddAccess}
+                        disabled={accessLoading || !newUserEmail.trim()}
+                      >
                         {accessLoading ? 'Ajout...' : 'Ajouter'}
                       </Button>
                     </DialogFooter>
@@ -887,14 +998,23 @@ export default function CollectionDetailPage() {
                         <TableRow key={user.id}>
                           <TableCell>
                             <Avatar className="h-8 w-8">
-                              <AvatarImage src={user.image || undefined} alt={user.name || user.email} />
+                              <AvatarImage
+                                src={user.image || undefined}
+                                alt={user.name || user.email}
+                              />
                               <AvatarFallback className="bg-primary/10 text-primary font-semibold text-sm">
-                                {(user.name || user.email).charAt(0).toUpperCase()}
+                                {(user.name || user.email)
+                                  .charAt(0)
+                                  .toUpperCase()}
                               </AvatarFallback>
                             </Avatar>
                           </TableCell>
-                          <TableCell className="font-medium">{user.name || 'Unknown'}</TableCell>
-                          <TableCell className="text-muted-foreground">{user.email}</TableCell>
+                          <TableCell className="font-medium">
+                            {user.name || 'Unknown'}
+                          </TableCell>
+                          <TableCell className="text-muted-foreground">
+                            {user.email}
+                          </TableCell>
                           <TableCell>
                             {editingAccess?.id === user.id ? (
                               <Select
@@ -908,9 +1028,15 @@ export default function CollectionDetailPage() {
                                   <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
-                                  <SelectItem value="VIEWER">Lecteur</SelectItem>
-                                  <SelectItem value="EDITOR">Éditeur</SelectItem>
-                                  <SelectItem value="ADMIN">Administrateur</SelectItem>
+                                  <SelectItem value="VIEWER">
+                                    Lecteur
+                                  </SelectItem>
+                                  <SelectItem value="EDITOR">
+                                    Éditeur
+                                  </SelectItem>
+                                  <SelectItem value="ADMIN">
+                                    Administrateur
+                                  </SelectItem>
                                 </SelectContent>
                               </Select>
                             ) : (
@@ -960,14 +1086,18 @@ export default function CollectionDetailPage() {
                 <div className="absolute inset-0 z-50 bg-primary/10 border-2 border-dashed border-primary rounded flex items-center justify-center">
                   <div className="text-center">
                     <Upload className="h-12 w-12 mx-auto text-primary mb-2" />
-                    <p className="text-lg font-semibold text-primary">Drop files here to upload</p>
+                    <p className="text-lg font-semibold text-primary">
+                      Drop files here to upload
+                    </p>
                   </div>
                 </div>
               )}
               {/* Header with Search and Upload */}
               <div className="border-b p-4">
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-base font-semibold">Documents ({allFilteredAndSorted.length})</h2>
+                  <h2 className="text-base font-semibold">
+                    Documents ({allFilteredAndSorted.length})
+                  </h2>
                   <div>
                     <input
                       type="file"
@@ -1012,7 +1142,9 @@ export default function CollectionDetailPage() {
                   <div className="mb-4 p-3 bg-primary/5 border border-primary/20 rounded-lg flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-medium">
-                        {selectedDocIds.size} document{selectedDocIds.size > 1 ? 's' : ''} sélectionné{selectedDocIds.size > 1 ? 's' : ''}
+                        {selectedDocIds.size} document
+                        {selectedDocIds.size > 1 ? 's' : ''} sélectionné
+                        {selectedDocIds.size > 1 ? 's' : ''}
                       </span>
                       <Button
                         variant="ghost"
@@ -1048,7 +1180,10 @@ export default function CollectionDetailPage() {
                       className="pl-9"
                     />
                   </div>
-                  <Select value={statusFilter} onValueChange={(value: any) => setStatusFilter(value)}>
+                  <Select
+                    value={statusFilter}
+                    onValueChange={(value: any) => setStatusFilter(value)}
+                  >
                     <SelectTrigger className="w-[150px]">
                       <SelectValue placeholder="Statut" />
                     </SelectTrigger>
@@ -1069,11 +1204,14 @@ export default function CollectionDetailPage() {
                   <div className="text-center py-12">
                     <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
                     <p className="text-muted-foreground">
-                      {searchQuery || statusFilter !== 'all' ? 'Aucun document ne correspond à vos filtres' : 'Aucun document pour le moment'}
+                      {searchQuery || statusFilter !== 'all'
+                        ? 'Aucun document ne correspond à vos filtres'
+                        : 'Aucun document pour le moment'}
                     </p>
                     {!searchQuery && statusFilter === 'all' && (
                       <p className="text-sm text-muted-foreground mt-2">
-                        Glissez-déposez des fichiers ici ou utilisez le bouton de téléversement
+                        Glissez-déposez des fichiers ici ou utilisez le bouton
+                        de téléversement
                       </p>
                     )}
                   </div>
@@ -1083,8 +1221,14 @@ export default function CollectionDetailPage() {
                       <TableRow>
                         <TableHead className="w-[40px]">
                           <Checkbox
-                            checked={selectedDocIds.size === filteredAndSortedDocuments.length && filteredAndSortedDocuments.length > 0}
-                            onCheckedChange={() => toggleSelectAll(filteredAndSortedDocuments)}
+                            checked={
+                              selectedDocIds.size ===
+                                filteredAndSortedDocuments.length &&
+                              filteredAndSortedDocuments.length > 0
+                            }
+                            onCheckedChange={() =>
+                              toggleSelectAll(filteredAndSortedDocuments)
+                            }
                           />
                         </TableHead>
                         <TableHead className="w-[40px]">Statut</TableHead>
@@ -1097,9 +1241,12 @@ export default function CollectionDetailPage() {
                             onClick={() => handleSort('name')}
                           >
                             Nom
-                            {sortBy === 'name' && (
-                              sortOrder === 'asc' ? <ChevronUp className="ml-1 h-3 w-3" /> : <ChevronDown className="ml-1 h-3 w-3" />
-                            )}
+                            {sortBy === 'name' &&
+                              (sortOrder === 'asc' ? (
+                                <ChevronUp className="ml-1 h-3 w-3" />
+                              ) : (
+                                <ChevronDown className="ml-1 h-3 w-3" />
+                              ))}
                           </Button>
                         </TableHead>
                         <TableHead>
@@ -1110,9 +1257,12 @@ export default function CollectionDetailPage() {
                             onClick={() => handleSort('size')}
                           >
                             Taille
-                            {sortBy === 'size' && (
-                              sortOrder === 'asc' ? <ChevronUp className="ml-1 h-3 w-3" /> : <ChevronDown className="ml-1 h-3 w-3" />
-                            )}
+                            {sortBy === 'size' &&
+                              (sortOrder === 'asc' ? (
+                                <ChevronUp className="ml-1 h-3 w-3" />
+                              ) : (
+                                <ChevronDown className="ml-1 h-3 w-3" />
+                              ))}
                           </Button>
                         </TableHead>
                         <TableHead>Téléversé par</TableHead>
@@ -1124,9 +1274,12 @@ export default function CollectionDetailPage() {
                             onClick={() => handleSort('date')}
                           >
                             Date
-                            {sortBy === 'date' && (
-                              sortOrder === 'asc' ? <ChevronUp className="ml-1 h-3 w-3" /> : <ChevronDown className="ml-1 h-3 w-3" />
-                            )}
+                            {sortBy === 'date' &&
+                              (sortOrder === 'asc' ? (
+                                <ChevronUp className="ml-1 h-3 w-3" />
+                              ) : (
+                                <ChevronDown className="ml-1 h-3 w-3" />
+                              ))}
                           </Button>
                         </TableHead>
                         <TableHead className="text-right">Fragments</TableHead>
@@ -1143,7 +1296,9 @@ export default function CollectionDetailPage() {
                           <TableCell onClick={(e) => e.stopPropagation()}>
                             <Checkbox
                               checked={selectedDocIds.has(doc.id)}
-                              onCheckedChange={() => toggleDocumentSelection(doc.id)}
+                              onCheckedChange={() =>
+                                toggleDocumentSelection(doc.id)
+                              }
                             />
                           </TableCell>
                           <TableCell onClick={(e) => e.stopPropagation()}>
@@ -1154,12 +1309,21 @@ export default function CollectionDetailPage() {
                           </TableCell>
                           <TableCell>
                             <div className="max-w-[400px]">
-                              <p className="font-medium truncate" title={doc.originalName}>
+                              <p
+                                className="font-medium truncate"
+                                title={doc.originalName}
+                              >
                                 {doc.originalName}
                               </p>
                               {doc.status === 'FAILED' && (
-                                <p className="text-xs text-red-600 mt-1 line-clamp-1" title={doc.processingError || 'Processing failed'}>
-                                  ⚠ {doc.processingError || 'Processing failed'}
+                                <p
+                                  className="text-xs text-red-600 mt-1 line-clamp-1"
+                                  title={
+                                    doc.processingError || 'Processing failed'
+                                  }
+                                >
+                                  ⚠{' '}
+                                  {doc.processingError || 'Processing failed'}
                                 </p>
                               )}
                             </div>
@@ -1170,19 +1334,33 @@ export default function CollectionDetailPage() {
                           <TableCell>
                             <div className="flex items-center gap-3">
                               <Avatar className="h-8 w-8">
-                                <AvatarImage src={doc.uploadedBy.image || undefined} alt={doc.uploadedBy.name || doc.uploadedBy.email} />
+                                <AvatarImage
+                                  src={doc.uploadedBy.image || undefined}
+                                  alt={
+                                    doc.uploadedBy.name || doc.uploadedBy.email
+                                  }
+                                />
                                 <AvatarFallback className="bg-primary/10 text-primary font-semibold text-sm">
-                                  {(doc.uploadedBy.name || doc.uploadedBy.email).charAt(0).toUpperCase()}
+                                  {(doc.uploadedBy.name || doc.uploadedBy.email)
+                                    .charAt(0)
+                                    .toUpperCase()}
                                 </AvatarFallback>
                               </Avatar>
                               <div>
-                                <p className="font-medium text-sm">{doc.uploadedBy.name || 'Unknown'}</p>
-                                <p className="text-xs text-muted-foreground">{doc.uploadedBy.email}</p>
+                                <p className="font-medium text-sm">
+                                  {doc.uploadedBy.name || 'Unknown'}
+                                </p>
+                                <p className="text-xs text-muted-foreground">
+                                  {doc.uploadedBy.email}
+                                </p>
                               </div>
                             </div>
                           </TableCell>
                           <TableCell className="text-muted-foreground text-sm">
-                            {formatDistanceToNow(new Date(doc.createdAt), { addSuffix: true, locale: fr })}
+                            {formatDistanceToNow(new Date(doc.createdAt), {
+                              addSuffix: true,
+                              locale: fr,
+                            })}
                           </TableCell>
                           <TableCell className="text-right font-medium">
                             {doc.totalChunks || 0}
@@ -1220,21 +1398,30 @@ export default function CollectionDetailPage() {
                       {hasMore && (
                         <TableRow>
                           <TableCell colSpan={9} className="h-24">
-                            <div ref={observerTarget} className="flex flex-col items-center justify-center py-4 gap-3">
+                            <div
+                              ref={observerTarget}
+                              className="flex flex-col items-center justify-center py-4 gap-3"
+                            >
                               {isLoadingMore ? (
                                 <div className="flex items-center gap-2 text-muted-foreground">
                                   <Loader2 className="h-4 w-4 animate-spin" />
-                                  <span className="text-sm">Loading more...</span>
+                                  <span className="text-sm">
+                                    Loading more...
+                                  </span>
                                 </div>
                               ) : (
                                 <>
                                   <div className="text-sm text-muted-foreground">
-                                    {allFilteredAndSorted.length - displayedCount} more documents
+                                    {allFilteredAndSorted.length -
+                                      displayedCount}{' '}
+                                    more documents
                                   </div>
                                   <Button
                                     size="sm"
                                     variant="outline"
-                                    onClick={() => setDisplayedCount(prev => prev + 20)}
+                                    onClick={() =>
+                                      setDisplayedCount((prev) => prev + 20)
+                                    }
                                     className="gap-2"
                                   >
                                     <ChevronDown className="h-4 w-4" />
@@ -1255,17 +1442,24 @@ export default function CollectionDetailPage() {
         </div>
 
         {/* Delete Dialog */}
-        <AlertDialog open={!!deleteDocId} onOpenChange={() => setDeleteDocId(null)}>
+        <AlertDialog
+          open={!!deleteDocId}
+          onOpenChange={() => setDeleteDocId(null)}
+        >
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle>Delete Document</AlertDialogTitle>
               <AlertDialogDescription>
-                Are you sure you want to delete this document? This action cannot be undone.
+                Are you sure you want to delete this document? This action
+                cannot be undone.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={handleDeleteDocument} className="bg-red-600 hover:bg-red-700">
+              <AlertDialogAction
+                onClick={handleDeleteDocument}
+                className="bg-red-600 hover:bg-red-700"
+              >
                 Delete
               </AlertDialogAction>
             </AlertDialogFooter>
@@ -1278,13 +1472,20 @@ export default function CollectionDetailPage() {
             <AlertDialogHeader>
               <AlertDialogTitle>Delete Multiple Documents</AlertDialogTitle>
               <AlertDialogDescription>
-                Are you sure you want to delete {selectedDocIds.size} document{selectedDocIds.size > 1 ? 's' : ''}? This action cannot be undone and will remove the documents from both storage and the vector database.
+                Are you sure you want to delete {selectedDocIds.size} document
+                {selectedDocIds.size > 1 ? 's' : ''}? This action cannot be
+                undone and will remove the documents from both storage and the
+                vector database.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={handleBatchDelete} className="bg-red-600 hover:bg-red-700">
-                Delete {selectedDocIds.size} Document{selectedDocIds.size > 1 ? 's' : ''}
+              <AlertDialogAction
+                onClick={handleBatchDelete}
+                className="bg-red-600 hover:bg-red-700"
+              >
+                Delete {selectedDocIds.size} Document
+                {selectedDocIds.size > 1 ? 's' : ''}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
@@ -1300,21 +1501,31 @@ export default function CollectionDetailPage() {
               </DialogDescription>
             </DialogHeader>
             <div className="grid grid-cols-2 gap-4 py-4">
-              <label htmlFor="file-upload" onClick={() => setShowUploadModal(false)}>
+              <label
+                htmlFor="file-upload"
+                onClick={() => setShowUploadModal(false)}
+              >
                 <div className="cursor-pointer group">
                   <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-primary hover:bg-primary/5 transition-all">
                     <FileText className="h-12 w-12 mx-auto text-gray-400 group-hover:text-primary mb-3" />
                     <h3 className="font-semibold text-sm mb-1">Fichiers</h3>
-                    <p className="text-xs text-muted-foreground">Sélectionner des fichiers</p>
+                    <p className="text-xs text-muted-foreground">
+                      Sélectionner des fichiers
+                    </p>
                   </div>
                 </div>
               </label>
-              <label htmlFor="folder-upload" onClick={() => setShowUploadModal(false)}>
+              <label
+                htmlFor="folder-upload"
+                onClick={() => setShowUploadModal(false)}
+              >
                 <div className="cursor-pointer group">
                   <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-primary hover:bg-primary/5 transition-all">
                     <FolderUp className="h-12 w-12 mx-auto text-gray-400 group-hover:text-primary mb-3" />
                     <h3 className="font-semibold text-sm mb-1">Dossier</h3>
-                    <p className="text-xs text-muted-foreground">Sélectionner un dossier entier</p>
+                    <p className="text-xs text-muted-foreground">
+                      Sélectionner un dossier entier
+                    </p>
                   </div>
                 </div>
               </label>

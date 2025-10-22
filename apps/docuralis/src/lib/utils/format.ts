@@ -1,7 +1,10 @@
 /**
  * Format bytes to human-readable string with appropriate unit
  */
-export function formatBytes(bytes: number | bigint | string, decimals: number = 1): string {
+export function formatBytes(
+  bytes: number | bigint | string,
+  decimals: number = 1
+): string {
   const size = Math.abs(Number(bytes))
 
   if (size === 0) return '0 B'

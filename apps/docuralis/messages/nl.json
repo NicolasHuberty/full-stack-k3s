@@ -123,7 +123,12 @@
       "name": "Gratis",
       "price": "€0",
       "description": "Perfect voor individuen die beginnen",
-      "features": ["5 GB opslag", "Basis RAG-zoekopdracht", "Toegang tot publieke databases", "Communityondersteuning"],
+      "features": [
+        "5 GB opslag",
+        "Basis RAG-zoekopdracht",
+        "Toegang tot publieke databases",
+        "Communityondersteuning"
+      ],
       "cta": "Start Gratis"
     },
     "pro": {
@@ -131,7 +136,13 @@
       "price": "€29",
       "period": "/maand",
       "description": "Voor professionals en kleine teams",
-      "features": ["50 GB opslag", "Geavanceerde AI-agenten", "Prioriteitsondersteuning", "Aangepaste databases", "API-toegang"],
+      "features": [
+        "50 GB opslag",
+        "Geavanceerde AI-agenten",
+        "Prioriteitsondersteuning",
+        "Aangepaste databases",
+        "API-toegang"
+      ],
       "badge": "Populair",
       "cta": "Start Proefperiode"
     },
@@ -139,7 +150,13 @@
       "name": "Enterprise",
       "price": "Op maat",
       "description": "Voor grote organisaties",
-      "features": ["Onbeperkte opslag", "On-premise implementatie", "Toegewijde ondersteuning", "Aangepaste integraties", "SLA-garantie"],
+      "features": [
+        "Onbeperkte opslag",
+        "On-premise implementatie",
+        "Toegewijde ondersteuning",
+        "Aangepaste integraties",
+        "SLA-garantie"
+      ],
       "cta": "Contacteer Verkoop"
     }
   },

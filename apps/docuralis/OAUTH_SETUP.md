@@ -10,11 +10,13 @@ This guide will help you set up OAuth authentication with Google, GitHub, and Mi
 ## Callback URLs
 
 All OAuth providers will redirect back to:
+
 ```
 http://localhost:3001/api/auth/callback/{provider}
 ```
 
 **For production, use:**
+
 ```
 https://yourdomain.com/api/auth/callback/{provider}
 ```
@@ -81,11 +83,14 @@ https://yourdomain.com/api/auth/callback/{provider}
    AZURE_AD_CLIENT_SECRET="your-client-secret-value"
    ```
 10. In **Overview**, copy the **Directory (tenant) ID**:
-   ```env
-   AZURE_AD_TENANT_ID="common"  # or your specific tenant ID
-   ```
-   - Use `"common"` for multi-tenant (personal + work accounts)
-   - Use your tenant ID for single-tenant
+
+```env
+AZURE_AD_TENANT_ID="common"  # or your specific tenant ID
+```
+
+- Use `"common"` for multi-tenant (personal + work accounts)
+- Use your tenant ID for single-tenant
+
 11. Go to **API permissions**:
     - Add permission → **Microsoft Graph** → **Delegated permissions**
     - Add: `email`, `openid`, `profile`
@@ -96,6 +101,7 @@ https://yourdomain.com/api/auth/callback/{provider}
 ## Testing
 
 1. Restart your dev server:
+
    ```bash
    bun run dev
    ```
@@ -113,6 +119,7 @@ https://yourdomain.com/api/auth/callback/{provider}
 When deploying to production:
 
 1. Update OAuth callback URLs in each provider:
+
    ```
    https://yourdomain.com/api/auth/callback/{provider}
    ```
@@ -129,16 +136,19 @@ When deploying to production:
 ## Troubleshooting
 
 ### "redirect_uri_mismatch" error
+
 - Verify callback URLs match exactly in provider settings
 - Check for trailing slashes
 - Ensure protocol matches (http vs https)
 
 ### "invalid_client" error
+
 - Double-check client ID and secret
 - Ensure no extra spaces in .env.local
 - Restart dev server after changing .env.local
 
 ### User not created in database
+
 - Check database connection
 - Verify Prisma migrations are up to date: `bunx prisma migrate dev`
 - Check server logs for errors
@@ -151,10 +161,14 @@ To make OAuth providers optional (for development), update `auth.ts`:
 
 ```typescript
 providers: [
-  ...(process.env.GOOGLE_CLIENT_ID ? [Google({
-    clientId: process.env.GOOGLE_CLIENT_ID,
-    clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-  })] : []),
+  ...(process.env.GOOGLE_CLIENT_ID
+    ? [
+        Google({
+          clientId: process.env.GOOGLE_CLIENT_ID,
+          clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+        }),
+      ]
+    : []),
   // Repeat for other providers
 ]
 ```

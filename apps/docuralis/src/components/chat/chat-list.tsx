@@ -120,7 +120,9 @@ export function ChatList({
       if (res.ok) {
         const { session } = await res.json()
         setSessions(
-          sessions.map((s) => (s.id === sessionId ? { ...s, title: session.title } : s))
+          sessions.map((s) =>
+            s.id === sessionId ? { ...s, title: session.title } : s
+          )
         )
         cancelEdit()
       }
@@ -160,7 +162,10 @@ export function ChatList({
             onClick={() => onSelectSession(session.id)}
           >
             {editingId === session.id ? (
-              <div className="flex items-center gap-2 w-full" onClick={(e) => e.stopPropagation()}>
+              <div
+                className="flex items-center gap-2 w-full"
+                onClick={(e) => e.stopPropagation()}
+              >
                 <Input
                   value={editTitle}
                   onChange={(e) => setEditTitle(e.target.value)}
@@ -192,18 +197,28 @@ export function ChatList({
               <div className="w-full">
                 <div className="flex items-start gap-2 w-full">
                   <div className="flex-1 min-w-0">
-                    <div className="text-sm font-semibold truncate" title={session.title || t('untitled')}>
+                    <div
+                      className="text-sm font-semibold truncate"
+                      title={session.title || t('untitled')}
+                    >
                       {session.title || t('untitled')}
                     </div>
                     <div className="text-xs text-gray-500 mt-1 truncate">
                       {session.collection && (
-                        <span className="text-blue-600">{session.collection.name} • </span>
+                        <span className="text-blue-600">
+                          {session.collection.name} •{' '}
+                        </span>
                       )}
                       {session._count.messages} {t('messages')} •{' '}
-                      {formatDistanceToNow(new Date(session.updatedAt), { addSuffix: true })}
+                      {formatDistanceToNow(new Date(session.updatedAt), {
+                        addSuffix: true,
+                      })}
                     </div>
                   </div>
-                  <div className="flex gap-1 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+                  <div
+                    className="flex gap-1 flex-shrink-0"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     <Button
                       size="sm"
                       variant="ghost"

@@ -25,11 +25,16 @@ export default function CollectionsPage() {
   const [collections, setCollections] = useState<any[]>([])
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [loading, setLoading] = useState(false)
-  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+  const [message, setMessage] = useState<{
+    type: 'success' | 'error'
+    text: string
+  } | null>(null)
 
   const [collectionName, setCollectionName] = useState('')
   const [collectionDescription, setCollectionDescription] = useState('')
-  const [collectionVisibility, setCollectionVisibility] = useState<'PRIVATE' | 'ORGANIZATION' | 'PUBLIC'>('PRIVATE')
+  const [collectionVisibility, setCollectionVisibility] = useState<
+    'PRIVATE' | 'ORGANIZATION' | 'PUBLIC'
+  >('PRIVATE')
 
   useEffect(() => {
     fetchCollections()
@@ -96,7 +101,9 @@ export default function CollectionsPage() {
         </div>
 
         {message && (
-          <div className={`mb-6 p-4 rounded-lg ${message.type === 'success' ? 'bg-green-500/10 text-green-600' : 'bg-red-500/10 text-red-600'}`}>
+          <div
+            className={`mb-6 p-4 rounded-lg ${message.type === 'success' ? 'bg-green-500/10 text-green-600' : 'bg-red-500/10 text-red-600'}`}
+          >
             {message.text}
           </div>
         )}
@@ -107,7 +114,9 @@ export default function CollectionsPage() {
               <Database className="h-8 w-8 text-muted-foreground" />
             </div>
             <h2 className="text-xl font-semibold mb-2">{t('noCollections')}</h2>
-            <p className="text-muted-foreground mb-6">{t('noCollectionsDesc')}</p>
+            <p className="text-muted-foreground mb-6">
+              {t('noCollectionsDesc')}
+            </p>
             <Button onClick={() => setShowCreateModal(true)}>
               <Plus className="h-4 w-4 mr-2" />
               {t('createFirst')}
@@ -119,7 +128,9 @@ export default function CollectionsPage() {
               <div
                 key={collection.id}
                 className="rounded-xl border border-border bg-card p-6 hover:shadow-md transition cursor-pointer"
-                onClick={() => router.push(`/dashboard/collections/${collection.id}`)}
+                onClick={() =>
+                  router.push(`/dashboard/collections/${collection.id}`)
+                }
               >
                 <div className="flex items-start justify-between mb-4">
                   <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
@@ -129,14 +140,18 @@ export default function CollectionsPage() {
                     {collection.visibility}
                   </span>
                 </div>
-                <h3 className="font-semibold text-lg mb-2">{collection.name}</h3>
+                <h3 className="font-semibold text-lg mb-2">
+                  {collection.name}
+                </h3>
                 {collection.description && (
                   <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
                     {collection.description}
                   </p>
                 )}
                 <div className="flex items-center justify-between text-sm text-muted-foreground">
-                  <span>{collection.documentCount || 0} {t('documents')}</span>
+                  <span>
+                    {collection.documentCount || 0} {t('documents')}
+                  </span>
                   <span>{formatBytes(collection.storageUsed)}</span>
                 </div>
               </div>
@@ -172,7 +187,9 @@ export default function CollectionsPage() {
                   </div>
 
                   <div>
-                    <Label htmlFor="collectionDescription">{t('descriptionOptional')}</Label>
+                    <Label htmlFor="collectionDescription">
+                      {t('descriptionOptional')}
+                    </Label>
                     <Textarea
                       id="collectionDescription"
                       value={collectionDescription}
@@ -183,27 +200,41 @@ export default function CollectionsPage() {
                   </div>
 
                   <div>
-                    <Label htmlFor="collectionVisibility">{t('visibility')}</Label>
+                    <Label htmlFor="collectionVisibility">
+                      {t('visibility')}
+                    </Label>
                     <Select
                       value={collectionVisibility}
-                      onValueChange={(value: any) => setCollectionVisibility(value)}
+                      onValueChange={(value: any) =>
+                        setCollectionVisibility(value)
+                      }
                     >
                       <SelectTrigger id="collectionVisibility">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="PRIVATE">{t('visibilityPrivate')}</SelectItem>
-                        <SelectItem value="ORGANIZATION">{t('visibilityOrganization')}</SelectItem>
-                        <SelectItem value="PUBLIC">{t('visibilityPublic')}</SelectItem>
+                        <SelectItem value="PRIVATE">
+                          {t('visibilityPrivate')}
+                        </SelectItem>
+                        <SelectItem value="ORGANIZATION">
+                          {t('visibilityOrganization')}
+                        </SelectItem>
+                        <SelectItem value="PUBLIC">
+                          {t('visibilityPublic')}
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                 </div>
 
                 {message && (
-                  <div className={`mt-4 p-3 rounded-lg text-sm ${
-                    message.type === 'success' ? 'bg-green-500/10 text-green-600' : 'bg-red-500/10 text-red-600'
-                  }`}>
+                  <div
+                    className={`mt-4 p-3 rounded-lg text-sm ${
+                      message.type === 'success'
+                        ? 'bg-green-500/10 text-green-600'
+                        : 'bg-red-500/10 text-red-600'
+                    }`}
+                  >
                     {message.text}
                   </div>
                 )}

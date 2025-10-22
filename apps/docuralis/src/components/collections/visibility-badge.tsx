@@ -1,7 +1,12 @@
 'use client'
 
 import { HelpCircle, Lock, Users, Globe } from 'lucide-react'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 
 type Visibility = 'PRIVATE' | 'ORGANIZATION' | 'PUBLIC'
 
@@ -15,7 +20,8 @@ const visibilityConfig = {
   PRIVATE: {
     fr: {
       label: 'Privé',
-      description: 'Accessible uniquement par vous et les personnes que vous invitez',
+      description:
+        'Accessible uniquement par vous et les personnes que vous invitez',
       icon: Lock,
       color: 'text-gray-600 bg-gray-100',
     },
@@ -56,12 +62,18 @@ const visibilityConfig = {
   },
 }
 
-export function VisibilityBadge({ visibility, locale = 'fr', showTooltip = true }: VisibilityBadgeProps) {
+export function VisibilityBadge({
+  visibility,
+  locale = 'fr',
+  showTooltip = true,
+}: VisibilityBadgeProps) {
   const config = visibilityConfig[visibility][locale]
   const Icon = config.icon
 
   const badge = (
-    <span className={`inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full font-medium ${config.color}`}>
+    <span
+      className={`inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full font-medium ${config.color}`}
+    >
       <Icon className="h-3.5 w-3.5" />
       {config.label}
       {showTooltip && <HelpCircle className="h-3 w-3 opacity-70" />}
@@ -75,9 +87,7 @@ export function VisibilityBadge({ visibility, locale = 'fr', showTooltip = true 
   return (
     <TooltipProvider>
       <Tooltip>
-        <TooltipTrigger asChild>
-          {badge}
-        </TooltipTrigger>
+        <TooltipTrigger asChild>{badge}</TooltipTrigger>
         <TooltipContent>
           <p className="max-w-xs">{config.description}</p>
         </TooltipContent>

@@ -82,7 +82,11 @@ export class ChunkingService {
   /**
    * Find the nearest sentence boundary before the target position
    */
-  private findSentenceBoundary(text: string, start: number, target: number): number {
+  private findSentenceBoundary(
+    text: string,
+    start: number,
+    target: number
+  ): number {
     // Look for sentence-ending punctuation followed by whitespace
     const sentenceEnders = ['. ', '! ', '? ', '.\n', '!\n', '?\n']
 
@@ -121,7 +125,10 @@ export class ChunkingService {
   /**
    * Count tokens in text using tiktoken (with fallback)
    */
-  async countTokens(text: string, model: string = 'gpt-3.5-turbo'): Promise<number> {
+  async countTokens(
+    text: string,
+    model: string = 'gpt-3.5-turbo'
+  ): Promise<number> {
     try {
       if (!encoding_for_model) {
         // Tiktoken not available, use fallback
@@ -144,7 +151,10 @@ export class ChunkingService {
   /**
    * Add token counts to chunks
    */
-  async addTokenCounts(chunks: TextChunk[], model: string = 'gpt-3.5-turbo'): Promise<TextChunk[]> {
+  async addTokenCounts(
+    chunks: TextChunk[],
+    model: string = 'gpt-3.5-turbo'
+  ): Promise<TextChunk[]> {
     const chunksWithTokens = await Promise.all(
       chunks.map(async (chunk) => ({
         ...chunk,
@@ -166,7 +176,10 @@ export class ChunkingService {
 
     for (const section of sections) {
       // If adding this section would exceed maxChunkSize and we have content
-      if (currentChunk.length > 0 && currentChunk.length + section.length > maxChunkSize) {
+      if (
+        currentChunk.length > 0 &&
+        currentChunk.length + section.length > maxChunkSize
+      ) {
         // Save current chunk
         chunks.push({
           content: currentChunk.trim(),

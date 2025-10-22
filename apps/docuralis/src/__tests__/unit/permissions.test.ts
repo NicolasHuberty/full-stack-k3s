@@ -167,8 +167,16 @@ describe('Permission System', () => {
 
       const canRead = await hasCollectionAccess(userId, collectionId, 'read')
       const canWrite = await hasCollectionAccess(userId, collectionId, 'write')
-      const canDelete = await hasCollectionAccess(userId, collectionId, 'delete')
-      const canManage = await hasCollectionAccess(userId, collectionId, 'manage')
+      const canDelete = await hasCollectionAccess(
+        userId,
+        collectionId,
+        'delete'
+      )
+      const canManage = await hasCollectionAccess(
+        userId,
+        collectionId,
+        'manage'
+      )
 
       expect(canRead).toBe(true)
       expect(canWrite).toBe(true)

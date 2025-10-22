@@ -63,7 +63,10 @@ export async function POST(request: NextRequest) {
       storageUsed: collection.storageUsed.toString(),
     }
 
-    return NextResponse.json({ collection: serializedCollection }, { status: 201 })
+    return NextResponse.json(
+      { collection: serializedCollection },
+      { status: 201 }
+    )
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(

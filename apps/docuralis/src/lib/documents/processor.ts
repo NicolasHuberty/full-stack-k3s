@@ -53,7 +53,11 @@ export class DocumentProcessor {
 
       // Upload to MinIO
       const minio = getMinIOClient()
-      const fileUrl = await minio.uploadFile(uniqueFilename, input.file, input.mimeType)
+      const fileUrl = await minio.uploadFile(
+        uniqueFilename,
+        input.file,
+        input.mimeType
+      )
 
       // Create document record and update collection stats immediately
       const document = await prisma.document.create({
@@ -149,19 +153,28 @@ export class DocumentProcessor {
 
       // Step 2: Extract text
       const extractor = getTextExtractor()
-      const { text, metadata } = await extractor.extractText(fileBuffer, document.mimeType)
+      const { text, metadata } = await extractor.extractText(
+        fileBuffer,
+        document.mimeType
+      )
       const cleanedText = extractor.cleanText(text)
 
-      console.log(`Extracted text length: ${text.length}, cleaned: ${cleanedText.length}`)
+      console.log(
+        `Extracted text length: ${text.length}, cleaned: ${cleanedText.length}`
+      )
 
       // Check if text extraction failed
       if (!cleanedText || cleanedText.trim().length === 0) {
-        throw new Error('Failed to extract text from document. The document may be empty, image-based (scanned), corrupted, or in an unsupported format. For scanned PDFs, please ensure the document has a text layer or use OCR.')
+        throw new Error(
+          'Failed to extract text from document. The document may be empty, image-based (scanned), corrupted, or in an unsupported format. For scanned PDFs, please ensure the document has a text layer or use OCR.'
+        )
       }
 
       // Warn if very little text extracted
       if (cleanedText.length < 100) {
-        console.warn(`Very little text extracted (${cleanedText.length} chars). Document may be image-based or have extraction issues.`)
+        console.warn(
+          `Very little text extracted (${cleanedText.length} chars). Document may be image-based or have extraction issues.`
+        )
       }
 
       // Update document with extracted text
@@ -274,7 +287,8 @@ export class DocumentProcessor {
         where: { id: documentId },
         data: {
           status: 'FAILED',
-          processingError: error instanceof Error ? error.message : 'Unknown error',
+          processingError:
+            error instanceof Error ? error.message : 'Unknown error',
         },
       })
 

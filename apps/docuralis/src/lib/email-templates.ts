@@ -27,7 +27,11 @@ export function getWelcomeEmail(name: string) {
   }
 }
 
-export function getLoginNotificationEmail(name: string, ipAddress?: string, location?: string) {
+export function getLoginNotificationEmail(
+  name: string,
+  ipAddress?: string,
+  location?: string
+) {
   const content = `
     <h2 style="color: #0A2540; margin-bottom: 20px;">New Login Detected 🔐</h2>
     <p>Hi ${name},</p>
@@ -94,7 +98,10 @@ export function getOrganizationInvitationEmail(
   }
 }
 
-export function getMemberAddedEmail(userName: string, organizationName: string) {
+export function getMemberAddedEmail(
+  userName: string,
+  organizationName: string
+) {
   const content = `
     <h2 style="color: #0A2540; margin-bottom: 20px;">Welcome to ${organizationName}! 🎉</h2>
     <p>Hi ${userName},</p>
@@ -152,7 +159,12 @@ export function getPasswordResetEmail(name: string, resetToken: string) {
   }
 }
 
-export function getSeatLimitEmail(adminName: string, organizationName: string, seatsUsed: number, seatsTotal: number) {
+export function getSeatLimitEmail(
+  adminName: string,
+  organizationName: string,
+  seatsUsed: number,
+  seatsTotal: number
+) {
   const content = `
     <h2 style="color: #0A2540; margin-bottom: 20px;">Seat Limit Reached ⚠️</h2>
     <p>Hi ${adminName},</p>
@@ -181,7 +193,11 @@ export function getSeatLimitEmail(adminName: string, organizationName: string, s
   }
 }
 
-export function getTrialEndingEmail(adminName: string, organizationName: string, daysLeft: number) {
+export function getTrialEndingEmail(
+  adminName: string,
+  organizationName: string,
+  daysLeft: number
+) {
   const content = `
     <h2 style="color: #0A2540; margin-bottom: 20px;">Your Trial is Ending Soon ⏰</h2>
     <p>Hi ${adminName},</p>

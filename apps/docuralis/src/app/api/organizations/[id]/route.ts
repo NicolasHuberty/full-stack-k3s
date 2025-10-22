@@ -11,10 +11,7 @@ export async function GET(
     const session = await auth()
 
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const { id: organizationId } = await params
@@ -96,15 +93,19 @@ export async function GET(
       ...organization,
       storageUsed: organization.storageUsed.toString(),
       storageLimit: organization.storageLimit.toString(),
-      members: organization.members.map(member => ({
+      members: organization.members.map((member) => ({
         ...member,
         user: {
           ...member.user,
-          storageUsed: member.user.storageUsed ? member.user.storageUsed.toString() : '0',
-          storageLimit: member.user.storageLimit ? member.user.storageLimit.toString() : '0',
+          storageUsed: member.user.storageUsed
+            ? member.user.storageUsed.toString()
+            : '0',
+          storageLimit: member.user.storageLimit
+            ? member.user.storageLimit.toString()
+            : '0',
         },
       })),
-      collections: organization.collections.map(collection => ({
+      collections: organization.collections.map((collection) => ({
         ...collection,
         storageUsed: collection.storageUsed.toString(),
       })),

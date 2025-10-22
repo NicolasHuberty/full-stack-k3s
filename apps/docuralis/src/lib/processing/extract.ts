@@ -52,7 +52,9 @@ export class TextExtractor {
             })
 
             if (decodingErrors > 0) {
-              console.warn(`PDF extraction had ${decodingErrors} URI decoding errors, used raw text`)
+              console.warn(
+                `PDF extraction had ${decodingErrors} URI decoding errors, used raw text`
+              )
             }
 
             const trimmedText = fullText.trim()
@@ -62,7 +64,9 @@ export class TextExtractor {
               console.warn('PDF extraction resulted in empty text')
             }
 
-            console.log(`Extracted ${trimmedText.length} characters from ${pages.length} pages`)
+            console.log(
+              `Extracted ${trimmedText.length} characters from ${pages.length} pages`
+            )
 
             // Get metadata
             const meta = pdfData.Meta || {}
@@ -85,7 +89,9 @@ export class TextExtractor {
       })
     } catch (error) {
       console.error('Failed to extract text from PDF:', error)
-      throw new Error(`PDF extraction failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      throw new Error(
+        `PDF extraction failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+      )
     }
   }
 
@@ -104,7 +110,9 @@ export class TextExtractor {
       }
     } catch (error) {
       console.error('Failed to extract text from DOCX:', error)
-      throw new Error(`DOCX extraction failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      throw new Error(
+        `DOCX extraction failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+      )
     }
   }
 
@@ -123,7 +131,9 @@ export class TextExtractor {
       }
     } catch (error) {
       console.error('Failed to extract text from TXT:', error)
-      throw new Error(`Text extraction failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      throw new Error(
+        `Text extraction failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+      )
     }
   }
 
@@ -142,14 +152,19 @@ export class TextExtractor {
       }
     } catch (error) {
       console.error('Failed to extract text from Markdown:', error)
-      throw new Error(`Markdown extraction failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      throw new Error(
+        `Markdown extraction failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+      )
     }
   }
 
   /**
    * Main extraction method that routes to the appropriate extractor
    */
-  async extractText(buffer: Buffer, mimeType: string): Promise<ExtractionResult> {
+  async extractText(
+    buffer: Buffer,
+    mimeType: string
+  ): Promise<ExtractionResult> {
     try {
       switch (mimeType) {
         case 'application/pdf':

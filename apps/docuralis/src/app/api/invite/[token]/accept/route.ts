@@ -32,10 +32,7 @@ export async function POST(
 
     if (error instanceof Error) {
       // Return specific error messages from the service
-      return NextResponse.json(
-        { error: error.message },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: error.message }, { status: 400 })
     }
 
     return NextResponse.json(

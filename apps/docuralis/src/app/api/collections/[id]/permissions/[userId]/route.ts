@@ -33,7 +33,10 @@ export async function PUT(
     })
 
     if (!collection) {
-      return NextResponse.json({ error: 'Collection not found' }, { status: 404 })
+      return NextResponse.json(
+        { error: 'Collection not found' },
+        { status: 404 }
+      )
     }
 
     const isOwner = collection.ownerId === session.user.id
@@ -102,7 +105,10 @@ export async function DELETE(
     })
 
     if (!collection) {
-      return NextResponse.json({ error: 'Collection not found' }, { status: 404 })
+      return NextResponse.json(
+        { error: 'Collection not found' },
+        { status: 404 }
+      )
     }
 
     const isOwner = collection.ownerId === session.user.id

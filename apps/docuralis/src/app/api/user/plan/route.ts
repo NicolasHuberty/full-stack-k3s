@@ -40,10 +40,7 @@ export async function PATCH(request: NextRequest) {
   } catch (error) {
     console.error('Failed to update plan:', error)
     if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { error: 'Invalid plan type' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'Invalid plan type' }, { status: 400 })
     }
     return NextResponse.json(
       { error: 'Failed to update plan' },

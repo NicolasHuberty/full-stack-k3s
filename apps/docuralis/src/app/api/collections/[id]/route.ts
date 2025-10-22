@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/auth'
-import { getCollection, updateCollection, deleteCollection } from '@/lib/collections/service'
+import {
+  getCollection,
+  updateCollection,
+  deleteCollection,
+} from '@/lib/collections/service'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
 
@@ -106,7 +110,7 @@ export async function GET(
     }
 
     // Add users with explicit permissions (exclude owner to avoid duplicates)
-    accessStats.forEach(p => {
+    accessStats.forEach((p) => {
       if (p.user.id !== collection.ownerId) {
         accessUsers.push({
           ...p.user,
@@ -120,7 +124,7 @@ export async function GET(
       ...collection,
       storageUsed: collection.storageUsed.toString(),
       documentCount: collection._count?.documents || 0,
-      documents: documents.map(doc => ({
+      documents: documents.map((doc) => ({
         ...doc,
         fileSize: doc.fileSize.toString(),
       })),
@@ -164,7 +168,11 @@ export async function PUT(
     const body = await request.json()
     const validatedData = updateCollectionSchema.parse(body)
 
-    const collection = await updateCollection(id, session.user.id, validatedData)
+    const collection = await updateCollection(
+      id,
+      session.user.id,
+      validatedData
+    )
 
     // Convert BigInt to string
     const serializedCollection = {

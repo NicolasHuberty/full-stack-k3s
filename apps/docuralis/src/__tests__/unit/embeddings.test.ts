@@ -8,7 +8,9 @@ jest.mock('openai', () => {
       embeddings: {
         create: jest.fn().mockImplementation((params) => {
           // Handle both single and batch operations
-          const inputArray = Array.isArray(params.input) ? params.input : [params.input]
+          const inputArray = Array.isArray(params.input)
+            ? params.input
+            : [params.input]
           return Promise.resolve({
             data: inputArray.map(() => ({
               embedding: Array(1536).fill(0.1),
@@ -44,7 +46,9 @@ describe('EmbeddingService', () => {
     })
 
     it('should throw error for empty text', async () => {
-      await expect(service.generateEmbedding('')).rejects.toThrow('Text cannot be empty')
+      await expect(service.generateEmbedding('')).rejects.toThrow(
+        'Text cannot be empty'
+      )
     })
 
     it('should throw error for whitespace-only text', async () => {
@@ -79,9 +83,9 @@ describe('EmbeddingService', () => {
     })
 
     it('should throw error when all texts are invalid', async () => {
-      await expect(service.generateBatchEmbeddings(['', '  ', '\n'])).rejects.toThrow(
-        'No valid texts to embed'
-      )
+      await expect(
+        service.generateBatchEmbeddings(['', '  ', '\n'])
+      ).rejects.toThrow('No valid texts to embed')
     })
   })
 

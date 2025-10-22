@@ -83,10 +83,14 @@ class QdrantService {
         },
       })
 
-      console.log(`Collection ${collectionName} created with vector size ${vectorSize}`)
+      console.log(
+        `Collection ${collectionName} created with vector size ${vectorSize}`
+      )
     } catch (error) {
       console.error('Failed to create collection:', error)
-      throw new Error(`Failed to create collection: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      throw new Error(
+        `Failed to create collection: ${error instanceof Error ? error.message : 'Unknown error'}`
+      )
     }
   }
 
@@ -112,7 +116,9 @@ class QdrantService {
       console.log(`Collection ${collectionName} deleted`)
     } catch (error) {
       console.error('Failed to delete collection:', error)
-      throw new Error(`Failed to delete collection: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      throw new Error(
+        `Failed to delete collection: ${error instanceof Error ? error.message : 'Unknown error'}`
+      )
     }
   }
 
@@ -138,9 +144,12 @@ class QdrantService {
       }
 
       // Validate chunks before upserting
-      const validChunks = chunks.filter(chunk => {
+      const validChunks = chunks.filter((chunk) => {
         if (!chunk.id || !chunk.vector || chunk.vector.length === 0) {
-          console.warn('Invalid chunk detected:', { id: chunk.id, vectorLength: chunk.vector?.length })
+          console.warn('Invalid chunk detected:', {
+            id: chunk.id,
+            vectorLength: chunk.vector?.length,
+          })
           return false
         }
         return true
@@ -161,19 +170,28 @@ class QdrantService {
         },
       }))
 
-      console.log(`Upserting ${points.length} chunks to collection ${collectionName}`)
-      console.log('Sample point:', points[0] ? {
-        id: points[0].id,
-        vectorLength: points[0].vector.length,
-        payloadKeys: Object.keys(points[0].payload)
-      } : 'no points')
+      console.log(
+        `Upserting ${points.length} chunks to collection ${collectionName}`
+      )
+      console.log(
+        'Sample point:',
+        points[0]
+          ? {
+              id: points[0].id,
+              vectorLength: points[0].vector.length,
+              payloadKeys: Object.keys(points[0].payload),
+            }
+          : 'no points'
+      )
 
       await this.client.upsert(collectionName, {
         wait: true,
         points,
       })
 
-      console.log(`Successfully upserted ${points.length} chunks to collection ${collectionName}`)
+      console.log(
+        `Successfully upserted ${points.length} chunks to collection ${collectionName}`
+      )
     } catch (error) {
       console.error('Failed to upsert chunks:', error)
 
@@ -191,7 +209,9 @@ class QdrantService {
         }
       }
 
-      throw new Error(`Failed to upsert chunks: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      throw new Error(
+        `Failed to upsert chunks: ${error instanceof Error ? error.message : 'Unknown error'}`
+      )
     }
   }
 
@@ -217,10 +237,14 @@ class QdrantService {
         },
       })
 
-      console.log(`Deleted chunks for document ${documentId} from collection ${collectionName}`)
+      console.log(
+        `Deleted chunks for document ${documentId} from collection ${collectionName}`
+      )
     } catch (error) {
       console.error('Failed to delete document chunks:', error)
-      throw new Error(`Failed to delete chunks: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      throw new Error(
+        `Failed to delete chunks: ${error instanceof Error ? error.message : 'Unknown error'}`
+      )
     }
   }
 
@@ -271,7 +295,9 @@ class QdrantService {
       }))
     } catch (error) {
       console.error('Failed to search similar chunks:', error)
-      throw new Error(`Failed to search: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      throw new Error(
+        `Failed to search: ${error instanceof Error ? error.message : 'Unknown error'}`
+      )
     }
   }
 
@@ -283,7 +309,9 @@ class QdrantService {
       return await this.client.getCollection(collectionName)
     } catch (error) {
       console.error('Failed to get collection info:', error)
-      throw new Error(`Failed to get collection info: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      throw new Error(
+        `Failed to get collection info: ${error instanceof Error ? error.message : 'Unknown error'}`
+      )
     }
   }
 

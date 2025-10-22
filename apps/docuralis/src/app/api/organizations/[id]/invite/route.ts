@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/auth'
-import { inviteMemberToOrganization, checkUserPermission } from '@/lib/organization'
+import {
+  inviteMemberToOrganization,
+  checkUserPermission,
+} from '@/lib/organization'
 import { z } from 'zod'
 
 const inviteSchema = z.object({
@@ -18,10 +21,7 @@ export async function POST(
     const session = await auth()
 
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const { id: organizationId } = await params
@@ -35,7 +35,10 @@ export async function POST(
 
     if (!hasPermission) {
       return NextResponse.json(
-        { error: 'You do not have permission to invite members to this organization' },
+        {
+          error:
+            'You do not have permission to invite members to this organization',
+        },
         { status: 403 }
       )
     }
@@ -58,14 +61,19 @@ export async function POST(
         storageUsed: invitation.organization.storageUsed.toString(),
         storageLimit: invitation.organization.storageLimit.toString(),
       },
-      invitedBy: invitation.invitedBy ? {
-        ...invitation.invitedBy,
-        storageUsed: invitation.invitedBy.storageUsed.toString(),
-        storageLimit: invitation.invitedBy.storageLimit.toString(),
-      } : null,
+      invitedBy: invitation.invitedBy
+        ? {
+            ...invitation.invitedBy,
+            storageUsed: invitation.invitedBy.storageUsed.toString(),
+            storageLimit: invitation.invitedBy.storageLimit.toString(),
+          }
+        : null,
     }
 
-    return NextResponse.json({ invitation: serializedInvitation }, { status: 201 })
+    return NextResponse.json(
+      { invitation: serializedInvitation },
+      { status: 201 }
+    )
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -77,10 +85,7 @@ export async function POST(
     console.error('Failed to invite member:', error)
 
     if (error instanceof Error) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: error.message }, { status: 400 })
     }
 
     return NextResponse.json(

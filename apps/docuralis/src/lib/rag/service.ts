@@ -63,7 +63,11 @@ export class RAGService {
   async search(params: SearchQuery, userId: string): Promise<SearchResult> {
     try {
       // Check access permission
-      const hasAccess = await hasCollectionAccess(userId, params.collectionId, 'read')
+      const hasAccess = await hasCollectionAccess(
+        userId,
+        params.collectionId,
+        'read'
+      )
       if (!hasAccess) {
         throw new Error('You do not have access to this collection')
       }
@@ -174,7 +178,11 @@ export class RAGService {
         console.log(`Searching for documents in collection: ${collectionId}`)
 
         // Check access
-        const hasAccess = await hasCollectionAccess(params.userId, collectionId, 'read')
+        const hasAccess = await hasCollectionAccess(
+          params.userId,
+          collectionId,
+          'read'
+        )
         if (!hasAccess) {
           throw new Error('You do not have access to this collection')
         }
@@ -195,7 +203,10 @@ export class RAGService {
         // Build context from chunks
         if (relevantChunks.length > 0) {
           context = relevantChunks
-            .map((chunk, i) => `[${i + 1}] From "${chunk.documentName}":\n${chunk.content}`)
+            .map(
+              (chunk, i) =>
+                `[${i + 1}] From "${chunk.documentName}":\n${chunk.content}`
+            )
             .join('\n\n')
 
           console.log(`Built context with ${context.length} characters`)
@@ -251,7 +262,10 @@ ${context}`,
         choices: completion.choices.length,
         finishReason: completion.choices[0]?.finish_reason,
         hasContent: !!completion.choices[0]?.message?.content,
-        contentPreview: completion.choices[0]?.message?.content?.substring(0, 100),
+        contentPreview: completion.choices[0]?.message?.content?.substring(
+          0,
+          100
+        ),
         contentLength: completion.choices[0]?.message?.content?.length,
         usage: completion.usage,
       })
@@ -259,7 +273,10 @@ ${context}`,
       const assistantMessage = completion.choices[0]?.message?.content || ''
 
       if (!assistantMessage) {
-        console.error('No content in OpenAI response!', JSON.stringify(completion, null, 2))
+        console.error(
+          'No content in OpenAI response!',
+          JSON.stringify(completion, null, 2)
+        )
         throw new Error('OpenAI returned empty response')
       }
 
@@ -278,7 +295,10 @@ ${context}`,
           sessionId: session.id,
           role: 'ASSISTANT',
           content: assistantMessage || '',
-          documentChunks: relevantChunks.length > 0 ? JSON.parse(JSON.stringify(relevantChunks)) : undefined,
+          documentChunks:
+            relevantChunks.length > 0
+              ? JSON.parse(JSON.stringify(relevantChunks))
+              : undefined,
           promptTokens: completion.usage?.prompt_tokens || 0,
           completionTokens: completion.usage?.completion_tokens || 0,
         },

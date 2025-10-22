@@ -61,7 +61,10 @@ export async function GET(
       const exists = await minioClient.fileExists(filename)
       if (!exists) {
         return NextResponse.json(
-          { error: 'File not found in storage. The document may have failed to upload.' },
+          {
+            error:
+              'File not found in storage. The document may have failed to upload.',
+          },
           { status: 404 }
         )
       }
@@ -87,7 +90,10 @@ export async function GET(
     } catch (fileError) {
       console.error('Failed to retrieve file from MinIO:', fileError)
       return NextResponse.json(
-        { error: 'File not found in storage. The document may have failed to upload.' },
+        {
+          error:
+            'File not found in storage. The document may have failed to upload.',
+        },
         { status: 404 }
       )
     }

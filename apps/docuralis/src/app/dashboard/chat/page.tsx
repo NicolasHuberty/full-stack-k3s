@@ -69,71 +69,77 @@ export default function ChatPage() {
   return (
     <DashboardLayout>
       <div className="flex h-full bg-gray-50">
-      {/* Sidebar - Chat List */}
-      <div className="w-80 bg-white border-r flex flex-col">
-        <div className="p-4 border-b space-y-3">
-          <h1 className="text-xl font-bold flex items-center gap-2">
-            <MessageSquare className="h-6 w-6" />
-            {t('title')}
-          </h1>
+        {/* Sidebar - Chat List */}
+        <div className="w-80 bg-white border-r flex flex-col">
+          <div className="p-4 border-b space-y-3">
+            <h1 className="text-xl font-bold flex items-center gap-2">
+              <MessageSquare className="h-6 w-6" />
+              {t('title')}
+            </h1>
 
-          {/* Collection Selector */}
-          <div className="space-y-2">
-            <label className="text-xs font-medium text-muted-foreground flex items-center gap-1">
-              <FolderOpen className="h-3 w-3" />
-              Collection
-            </label>
-            <Select value={selectedCollectionId} onValueChange={setSelectedCollectionId}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select a collection" />
-              </SelectTrigger>
-              <SelectContent>
-                {collections.map((col) => (
-                  <SelectItem key={col.id} value={col.id}>
-                    {col.name} ({col.documentCount} docs)
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <Button onClick={handleNewChat} className="w-full" size="sm" disabled={!selectedCollectionId}>
-            <Plus className="h-4 w-4 mr-2" />
-            {t('newChat')}
-          </Button>
-        </div>
-        <div className="flex-1 overflow-y-auto">
-          <ChatList
-            onSelectSession={handleSelectSession}
-            selectedSessionId={selectedSessionId}
-          />
-        </div>
-      </div>
-
-      {/* Main Chat Area */}
-      <div className="flex-1 flex flex-col">
-        {showNewChat || selectedSessionId ? (
-          <ChatInterface
-            sessionId={selectedSessionId || undefined}
-            collectionId={selectedCollectionId}
-            onNewSession={handleNewSession}
-          />
-        ) : (
-          <div className="flex-1 flex items-center justify-center text-gray-500">
-            <div className="text-center">
-              <MessageSquare className="h-24 w-24 mx-auto mb-4 text-gray-300" />
-              <h2 className="text-2xl font-semibold mb-2">{t('welcome')}</h2>
-              <p className="text-gray-600 mb-6">
-                {t('selectOrStart')}
-              </p>
-              <Button onClick={handleNewChat}>
-                <Plus className="h-4 w-4 mr-2" />
-                {t('startNewChat')}
-              </Button>
+            {/* Collection Selector */}
+            <div className="space-y-2">
+              <label className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+                <FolderOpen className="h-3 w-3" />
+                Collection
+              </label>
+              <Select
+                value={selectedCollectionId}
+                onValueChange={setSelectedCollectionId}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select a collection" />
+                </SelectTrigger>
+                <SelectContent>
+                  {collections.map((col) => (
+                    <SelectItem key={col.id} value={col.id}>
+                      {col.name} ({col.documentCount} docs)
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
+
+            <Button
+              onClick={handleNewChat}
+              className="w-full"
+              size="sm"
+              disabled={!selectedCollectionId}
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              {t('newChat')}
+            </Button>
           </div>
-        )}
-      </div>
+          <div className="flex-1 overflow-y-auto">
+            <ChatList
+              onSelectSession={handleSelectSession}
+              selectedSessionId={selectedSessionId}
+            />
+          </div>
+        </div>
+
+        {/* Main Chat Area */}
+        <div className="flex-1 flex flex-col">
+          {showNewChat || selectedSessionId ? (
+            <ChatInterface
+              sessionId={selectedSessionId || undefined}
+              collectionId={selectedCollectionId}
+              onNewSession={handleNewSession}
+            />
+          ) : (
+            <div className="flex-1 flex items-center justify-center text-gray-500">
+              <div className="text-center">
+                <MessageSquare className="h-24 w-24 mx-auto mb-4 text-gray-300" />
+                <h2 className="text-2xl font-semibold mb-2">{t('welcome')}</h2>
+                <p className="text-gray-600 mb-6">{t('selectOrStart')}</p>
+                <Button onClick={handleNewChat}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  {t('startNewChat')}
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </DashboardLayout>
   )

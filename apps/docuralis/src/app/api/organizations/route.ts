@@ -1,11 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/auth'
-import { createOrganization, getOrganizationsByUserId } from '@/lib/organization'
+import {
+  createOrganization,
+  getOrganizationsByUserId,
+} from '@/lib/organization'
 import { z } from 'zod'
 
 const createOrgSchema = z.object({
   name: z.string().min(1, 'Organization name is required'),
-  slug: z.string().min(1, 'Organization slug is required').regex(/^[a-z0-9-]+$/, 'Slug must contain only lowercase letters, numbers, and hyphens'),
+  slug: z
+    .string()
+    .min(1, 'Organization slug is required')
+    .regex(
+      /^[a-z0-9-]+$/,
+      'Slug must contain only lowercase letters, numbers, and hyphens'
+    ),
   domain: z.string().optional(),
 })
 
@@ -14,16 +23,13 @@ export async function GET(request: NextRequest) {
     const session = await auth()
 
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const organizations = await getOrganizationsByUserId(session.user.id)
 
     // Convert BigInt to string for JSON serialization
-    const serializedOrgs = organizations.map(org => ({
+    const serializedOrgs = organizations.map((org) => ({
       ...org,
       storageUsed: org.storageUsed.toString(),
       storageLimit: org.storageLimit.toString(),
@@ -44,10 +50,7 @@ export async function POST(request: NextRequest) {
     const session = await auth()
 
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const body = await request.json()
@@ -65,7 +68,7 @@ export async function POST(request: NextRequest) {
       ...organization,
       storageUsed: organization.storageUsed.toString(),
       storageLimit: organization.storageLimit.toString(),
-      members: organization.members.map(member => ({
+      members: organization.members.map((member) => ({
         ...member,
         user: {
           ...member.user,
@@ -87,10 +90,7 @@ export async function POST(request: NextRequest) {
     console.error('Failed to create organization:', error)
 
     if (error instanceof Error) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: error.message }, { status: 400 })
     }
 
     return NextResponse.json(

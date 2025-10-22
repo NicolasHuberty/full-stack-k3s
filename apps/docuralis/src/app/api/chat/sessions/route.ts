@@ -14,7 +14,10 @@ export async function GET(request: NextRequest) {
     const collectionId = searchParams.get('collectionId') || undefined
 
     const ragService = getRAGService()
-    const sessions = await ragService.getUserSessions(session.user.id, collectionId)
+    const sessions = await ragService.getUserSessions(
+      session.user.id,
+      collectionId
+    )
 
     return NextResponse.json({ sessions })
   } catch (error) {

@@ -34,7 +34,10 @@ export async function POST(
     })
 
     if (!collection) {
-      return NextResponse.json({ error: 'Collection not found' }, { status: 404 })
+      return NextResponse.json(
+        { error: 'Collection not found' },
+        { status: 404 }
+      )
     }
 
     const isOwner = collection.ownerId === session.user.id

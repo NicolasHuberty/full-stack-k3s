@@ -56,7 +56,9 @@ class MinIOClient {
       return url
     } catch (error) {
       console.error('Failed to upload file to MinIO:', error)
-      throw new Error(`Failed to upload file: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      throw new Error(
+        `Failed to upload file: ${error instanceof Error ? error.message : 'Unknown error'}`
+      )
     }
   }
 
@@ -85,7 +87,9 @@ class MinIOClient {
       return url
     } catch (error) {
       console.error('Failed to upload stream to MinIO:', error)
-      throw new Error(`Failed to upload stream: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      throw new Error(
+        `Failed to upload stream: ${error instanceof Error ? error.message : 'Unknown error'}`
+      )
     }
   }
 
@@ -101,7 +105,9 @@ class MinIOClient {
       })
     } catch (error) {
       console.error('Failed to download file from MinIO:', error)
-      throw new Error(`Failed to download file: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      throw new Error(
+        `Failed to download file: ${error instanceof Error ? error.message : 'Unknown error'}`
+      )
     }
   }
 
@@ -110,7 +116,9 @@ class MinIOClient {
       return await this.client.getObject(bucketName, filename)
     } catch (error) {
       console.error('Failed to get object from MinIO:', error)
-      throw new Error(`Failed to get object: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      throw new Error(
+        `Failed to get object: ${error instanceof Error ? error.message : 'Unknown error'}`
+      )
     }
   }
 
@@ -119,7 +127,9 @@ class MinIOClient {
       await this.client.removeObject(this.bucketName, filename)
     } catch (error) {
       console.error('Failed to delete file from MinIO:', error)
-      throw new Error(`Failed to delete file: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      throw new Error(
+        `Failed to delete file: ${error instanceof Error ? error.message : 'Unknown error'}`
+      )
     }
   }
 
@@ -128,11 +138,16 @@ class MinIOClient {
       await this.client.removeObjects(this.bucketName, filenames)
     } catch (error) {
       console.error('Failed to delete files from MinIO:', error)
-      throw new Error(`Failed to delete files: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      throw new Error(
+        `Failed to delete files: ${error instanceof Error ? error.message : 'Unknown error'}`
+      )
     }
   }
 
-  async getFileUrl(filename: string, expirySeconds: number = 3600): Promise<string> {
+  async getFileUrl(
+    filename: string,
+    expirySeconds: number = 3600
+  ): Promise<string> {
     try {
       const url = await this.client.presignedGetObject(
         this.bucketName,
@@ -142,7 +157,9 @@ class MinIOClient {
       return url
     } catch (error) {
       console.error('Failed to generate presigned URL:', error)
-      throw new Error(`Failed to generate URL: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      throw new Error(
+        `Failed to generate URL: ${error instanceof Error ? error.message : 'Unknown error'}`
+      )
     }
   }
 

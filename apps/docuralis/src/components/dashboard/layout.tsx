@@ -26,7 +26,10 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setDropdownOpen(false)
       }
     }
@@ -36,10 +39,25 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
 
   const navItems = [
     { id: 'home', label: t('home'), icon: Home, href: '/dashboard' },
-    { id: 'chat', label: t('chat'), icon: MessageSquare, href: '/dashboard/chat' },
-    { id: 'collections', label: t('collections'), icon: Database, href: '/dashboard/collections' },
+    {
+      id: 'chat',
+      label: t('chat'),
+      icon: MessageSquare,
+      href: '/dashboard/chat',
+    },
+    {
+      id: 'collections',
+      label: t('collections'),
+      icon: Database,
+      href: '/dashboard/collections',
+    },
     { id: 'teams', label: 'Teams', icon: Users, href: '/dashboard/teams' },
-    { id: 'settings', label: t('settings'), icon: Settings, href: '/dashboard/settings' },
+    {
+      id: 'settings',
+      label: t('settings'),
+      icon: Settings,
+      href: '/dashboard/settings',
+    },
   ]
 
   return (
@@ -49,7 +67,13 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
         {/* Logo */}
         <div className="p-6 border-b border-border">
           <Link href="/" className="flex items-center gap-3">
-            <Image src="/docuralis.png" alt="Docuralis" width={50} height={50} className="h-16 w-auto" />
+            <Image
+              src="/docuralis.png"
+              alt="Docuralis"
+              width={50}
+              height={50}
+              className="h-16 w-auto"
+            />
           </Link>
         </div>
 
@@ -91,14 +115,21 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
               />
             ) : (
               <div className="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center text-primary text-sm font-semibold">
-                {session?.user?.name?.[0]?.toUpperCase() || session?.user?.email?.[0]?.toUpperCase()}
+                {session?.user?.name?.[0]?.toUpperCase() ||
+                  session?.user?.email?.[0]?.toUpperCase()}
               </div>
             )}
             <div className="flex-1 min-w-0 text-left">
-              <p className="text-sm font-medium text-foreground truncate">{session?.user?.name || 'User'}</p>
-              <p className="text-xs text-muted-foreground truncate">{session?.user?.email}</p>
+              <p className="text-sm font-medium text-foreground truncate">
+                {session?.user?.name || 'User'}
+              </p>
+              <p className="text-xs text-muted-foreground truncate">
+                {session?.user?.email}
+              </p>
             </div>
-            <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} />
+            <ChevronDown
+              className={`h-4 w-4 text-muted-foreground transition-transform ${dropdownOpen ? 'rotate-180' : ''}`}
+            />
           </button>
 
           {/* Dropdown Menu */}
@@ -125,9 +156,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-auto">
-        {children}
-      </main>
+      <main className="flex-1 overflow-auto">{children}</main>
     </div>
   )
 }

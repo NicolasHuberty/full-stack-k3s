@@ -41,6 +41,9 @@ spec:
             - name: NEXTAUTH_URL
               value: "https://app.docuralis.com"
 
+            - name: AUTH_TRUST_HOST
+              value: "true"
+
             # OAuth Providers
             - name: GOOGLE_CLIENT_ID
               valueFrom:

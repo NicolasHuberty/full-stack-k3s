@@ -1,0 +1,26 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: postgresql-access
+  namespace: database
+spec:
+  podSelector:
+    matchLabels:
+      app: postgresql
+  policyTypes:
+    - Ingress
+  ingress:
+    # Allow from bastion
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: default
+          podSelector:
+            matchLabels:
+              app: bastion
+    # Allow from docuralis in all environments
+    - from:
+        - namespaceSelector: {}
+          podSelector:
+            matchLabels:
+              app: docuralis

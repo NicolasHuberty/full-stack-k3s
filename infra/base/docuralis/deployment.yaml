@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: docuralis
-          image: ghcr.io/nicolashuberty/k3s-app/docuralis:latest
+          image: ghcr.io/nicolashuberty/full-stack-k3s/docuralis:latest
           imagePullPolicy: Always
           ports:
             - name: http

@@ -17,7 +17,7 @@ commonLabels:
   managed-by: argocd
 
 images:
-  - name: ghcr.io/nicolashuberty/k3s-app/docuralis
+  - name: ghcr.io/nicolashuberty/full-stack-k3s/docuralis
     newTag: dev
 
 configMapGenerator:

@@ -8,7 +8,7 @@ spec:
     spec:
       containers:
         - name: docuralis
-          image: ghcr.io/nicolashuberty/k3s-app/docuralis:dev
+          image: ghcr.io/nicolashuberty/full-stack-k3s/docuralis:dev
           env:
             - name: NEXTAUTH_URL
               value: "https://dev.docuralis.com"

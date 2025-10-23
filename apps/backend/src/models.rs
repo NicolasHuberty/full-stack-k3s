@@ -27,8 +27,16 @@ pub struct LoginRequest {
 
 #[derive(Debug, Serialize, ToSchema)]
 pub struct AuthResponse {
-    pub token: String,
+    pub access_token: String,
+    pub refresh_token: String,
+    pub token_type: String,
+    pub expires_in: i64,
     pub user: UserResponse,
+}
+
+#[derive(Debug, Deserialize, ToSchema)]
+pub struct RefreshRequest {
+    pub refresh_token: String,
 }
 
 #[derive(Debug, Serialize, ToSchema)]
@@ -107,4 +115,72 @@ pub struct ChatMessage {
 #[derive(Debug, Serialize, ToSchema)]
 pub struct ErrorResponse {
     pub error: String,
+}
+
+// Memos models
+#[derive(Debug, Serialize, Deserialize, FromRow, ToSchema)]
+pub struct Memo {
+    pub id: Uuid,
+    pub user_id: Uuid,
+    pub title: String,
+    pub description: Option<String>,
+    pub created_at: chrono::NaiveDateTime,
+    pub updated_at: chrono::NaiveDateTime,
+}
+
+#[derive(Debug, Serialize, ToSchema)]
+pub struct MemoResponse {
+    pub id: Uuid,
+    pub title: String,
+    pub description: Option<String>,
+    pub message_count: i64,
+    pub created_at: chrono::NaiveDateTime,
+    pub updated_at: chrono::NaiveDateTime,
+}
+
+#[derive(Debug, Deserialize, ToSchema)]
+pub struct CreateMemoRequest {
+    pub title: String,
+    pub description: Option<String>,
+}
+
+#[derive(Debug, Serialize, Deserialize, FromRow, ToSchema)]
+pub struct MemoMessage {
+    pub id: Uuid,
+    pub memo_id: Uuid,
+    pub user_id: Uuid,
+    pub content: String,
+    pub role: String, // "user" or "assistant"
+    pub created_at: chrono::NaiveDateTime,
+}
+
+#[derive(Debug, Serialize, ToSchema)]
+pub struct MemoMessageResponse {
+    pub id: Uuid,
+    pub content: String,
+    pub role: String,
+    pub attachments: Vec<MemoAttachmentResponse>,
+    pub created_at: chrono::NaiveDateTime,
+}
+
+#[derive(Debug, Deserialize, ToSchema)]
+pub struct CreateMemoMessageRequest {
+    pub content: String,
+}
+
+#[derive(Debug, Serialize, Deserialize, FromRow, ToSchema)]
+pub struct MemoAttachment {
+    pub id: Uuid,
+    pub message_id: Uuid,
+    pub file_id: Uuid,
+    pub created_at: chrono::NaiveDateTime,
+}
+
+#[derive(Debug, Serialize, ToSchema)]
+pub struct MemoAttachmentResponse {
+    pub id: Uuid,
+    pub filename: String,
+    pub mime_type: Option<String>,
+    pub file_size: i64,
+    pub created_at: chrono::NaiveDateTime,
 }

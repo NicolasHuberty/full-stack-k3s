@@ -1,0 +1,372 @@
+{
+  "nav": {
+    "features": "Fonctionnalités",
+    "agents": "Agents IA",
+    "pricing": "Tarifs",
+    "login": "Connexion",
+    "signup": "S'inscrire"
+  },
+  "hero": {
+    "title": "Vos Documents, Propulsés par l'IA",
+    "subtitle": "Transformez vos documents en bases de connaissances intelligentes avec RAG enterprise et agents IA spécialisés",
+    "cta": "Commencer Gratuitement"
+  },
+  "demo": {
+    "title": "Voir Docuralis en Action",
+    "categories": {
+      "legal": "Juridique",
+      "hr": "RH",
+      "tech": "IT"
+    },
+    "aiAnswer": "Réponse IA",
+    "sources": "Sources",
+    "searching": "Recherche dans les documents..."
+  },
+  "compliance": {
+    "title": "Sécurité et Conformité de Niveau Entreprise",
+    "subtitle": "Conçu pour les industries réglementées avec souveraineté des données européennes et conformité au cœur",
+    "badges": {
+      "gdpr": "Conforme RGPD",
+      "aiAct": "Prêt pour l'AI Act UE",
+      "servers": "Serveurs UE Uniquement",
+      "multilingual": "Support Multilingue"
+    }
+  },
+  "features": {
+    "title": "Tout Ce Dont Vous Avez Besoin",
+    "rag": {
+      "title": "RAG Avancé",
+      "description": "Génération augmentée par récupération de pointe pour des réponses précises et contextuelles"
+    },
+    "gdpr": {
+      "title": "Conforme RGPD",
+      "description": "Vos données restent en Europe avec des garanties complètes de confidentialité et de sécurité"
+    },
+    "agents": {
+      "title": "Agents IA Spécialisés",
+      "description": "Agents préconfigurés pour le juridique, RH, documentation technique et plus de domaines professionnels"
+    },
+    "sources": {
+      "title": "Citations de Sources",
+      "description": "Chaque réponse inclut des citations précises vers les documents originaux pour vérification"
+    },
+    "data": {
+      "title": "Vos Données, Votre Contrôle",
+      "description": "Propriété et contrôle complets sur vos documents et bases de connaissances"
+    },
+    "multilingual": {
+      "title": "Multilingue",
+      "description": "Support pour plusieurs langues européennes incluant le français, le néerlandais et plus"
+    }
+  },
+  "aiAgents": {
+    "title": "Agents IA Spécialisés",
+    "subtitle": "Choisissez l'expert approprié pour chaque question. Chaque agent est optimisé pour des domaines professionnels spécifiques.",
+    "catalog": {
+      "title": "Votre Équipe d'Experts IA",
+      "subtitle": "Sélectionnez un agent pour le voir en action"
+    },
+    "superpowers": {
+      "understanding": {
+        "title": "Compréhension Profonde",
+        "description": "Les agents analysent le contexte, croisent les documents et comprennent la terminologie spécifique au domaine"
+      },
+      "cited": {
+        "title": "Toujours Cité",
+        "description": "Chaque réponse inclut des références de page exactes et des extraits des documents sources"
+      },
+      "expertise": {
+        "title": "Expertise de Domaine",
+        "description": "Chaque agent est optimisé pour des domaines spécifiques comme le juridique, RH, finance ou documentation technique"
+      }
+    }
+  },
+  "teamManagement": {
+    "title": "Conçu pour les Équipes",
+    "subtitle": "Collaborez de manière transparente avec une gestion d'équipe puissante et des bases de connaissances partagées",
+    "teams": {
+      "title": "Espace de Travail d'Équipe",
+      "description": "Créez des espaces de travail, invitez des membres, attribuez des rôles et collaborez sur des documents partagés"
+    },
+    "rags": {
+      "title": "Bases de Connaissances Partagées",
+      "description": "Créez des collections RAG à l'échelle de l'organisation accessibles à toute votre équipe avec contrôle des permissions"
+    },
+    "access": {
+      "title": "Contrôle d'Accès Granulaire",
+      "description": "Définissez qui peut consulter, modifier ou gérer chaque base de connaissances avec des permissions basées sur les rôles"
+    }
+  },
+  "mobileApp": {
+    "title": "Obtenez des Réponses Encore Plus Rapidement",
+    "subtitle": "Téléchargez notre application mobile pour un accès instantané à vos agents IA partout, à tout moment",
+    "cta": "Télécharger l'App",
+    "platforms": "Disponible sur iOS et Android"
+  },
+  "cta": {
+    "title": "Prêt à Transformer Vos Documents ?",
+    "button": "Démarrer l'Essai Gratuit"
+  },
+  "footer": {
+    "copyright": "© 2025 Docuralis. Tous droits réservés.",
+    "privacy": "Politique de Confidentialité",
+    "terms": "Conditions d'Utilisation",
+    "contact": "Contact"
+  },
+  "chat": {
+    "title": "Historique des conversations",
+    "newChat": "Nouvelle conversation",
+    "startNewChat": "Démarrer une nouvelle conversation",
+    "welcome": "Bienvenue dans le Chat",
+    "selectOrStart": "Sélectionnez une conversation dans la barre latérale ou démarrez une nouvelle conversation",
+    "untitled": "Conversation sans titre",
+    "messages": "messages",
+    "deleteConfirm": "Supprimer la session de chat",
+    "deleteDescription": "Êtes-vous sûr de vouloir supprimer cette session de chat ? Cette action ne peut pas être annulée.",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "sources": "Sources",
+    "typePlaceholder": "Tapez votre message... (Shift+Entrée pour une nouvelle ligne)",
+    "noChats": "Aucune session de chat pour le moment. Commencez une nouvelle conversation !",
+    "loading": "Chargement des conversations..."
+  },
+  "settings": {
+    "title": "Paramètres",
+    "language": {
+      "title": "Préférences linguistiques",
+      "description": "Choisissez votre langue préférée pour l'interface du tableau de bord",
+      "label": "Langue de l'interface",
+      "select": "Sélectionner une langue",
+      "save": "Enregistrer la langue",
+      "saving": "Enregistrement...",
+      "saved": "Langue enregistrée avec succès"
+    },
+    "account": {
+      "title": "Informations du compte",
+      "description": "Détails de votre compte",
+      "name": "Nom",
+      "email": "E-mail",
+      "plan": "Plan",
+      "notSet": "Non défini"
+    },
+    "plan": {
+      "title": "Plan d'abonnement",
+      "description": "Gérez votre abonnement et votre facturation",
+      "current": "Plan actuel",
+      "status": "Statut",
+      "selectPlan": "Sélectionner un plan",
+      "free": "Gratuit",
+      "starter": "Starter",
+      "pro": "Pro",
+      "enterprise": "Entreprise",
+      "freeDesc": "Fonctionnalités de base pour un usage personnel",
+      "starterDesc": "Fonctionnalités essentielles pour les petites équipes",
+      "proDesc": "Fonctionnalités avancées pour les équipes en croissance",
+      "enterpriseDesc": "Solutions personnalisées pour les grandes organisations",
+      "freePrice": "Gratuit",
+      "starterPrice": "10$/mois",
+      "proPrice": "25$/mois",
+      "enterprisePrice": "Contactez-nous",
+      "changePlan": "Changer de plan",
+      "currentPlan": "Plan actuel",
+      "upgrade": "Améliorer",
+      "downgrade": "Rétrograder",
+      "confirmChange": "Confirmer le changement de plan",
+      "confirmChangeDesc": "Êtes-vous sûr de vouloir changer votre plan pour",
+      "cancel": "Annuler",
+      "confirm": "Confirmer",
+      "changing": "Changement...",
+      "changeSuccess": "Plan changé avec succès !",
+      "changeError": "Échec du changement de plan"
+    }
+  },
+  "dashboard": {
+    "welcome": "Bienvenue",
+    "welcomeBack": "Bon retour",
+    "goodMorning": "Bonjour",
+    "goodAfternoon": "Bon après-midi",
+    "goodEvening": "Bonsoir",
+    "dashboardSubtitle": "Voici ce qui se passe dans votre espace de travail aujourd'hui",
+    "home": "Accueil",
+    "collections": "Collections",
+    "documents": "Documents",
+    "chat": "Chat",
+    "settings": "Paramètres",
+    "conversations": "Conversations",
+    "totalChats": "conversations totales",
+    "knowledgeBases": "bases de connaissances",
+    "filesUploaded": "fichiers téléversés",
+    "storage": "Stockage",
+    "of": "sur",
+    "recentActivity": "Activité récente",
+    "viewAll": "Voir tout",
+    "noRecentChats": "Aucune conversation récente",
+    "startFirstChat": "Démarrer votre première conversation",
+    "untitledChat": "Conversation sans titre",
+    "messages": "messages",
+    "quickActions": "Actions rapides",
+    "newChat": "Nouvelle conversation",
+    "manageCollections": "Gérer les collections",
+    "inviteTeam": "Inviter l'équipe",
+    "teamMembers": "Membres de l'équipe",
+    "noTeamMembers": "Aucun membre d'équipe pour le moment",
+    "topCollections": "Collections principales",
+    "noCollections": "Aucune collection pour le moment",
+    "createCollection": "Créer une collection"
+  },
+  "collections": {
+    "title": "Collections",
+    "description": "Organisez vos documents en bases de connaissances",
+    "createNew": "Nouvelle Collection",
+    "noCollections": "Aucune collection pour le moment",
+    "noCollectionsDesc": "Créez votre première collection pour commencer à organiser des documents",
+    "createFirst": "Créer votre première collection",
+    "name": "Nom de la collection",
+    "namePlaceholder": "Ma base de connaissances",
+    "descriptionOptional": "Description (Optionnel)",
+    "descriptionPlaceholder": "Décrivez à quoi sert cette collection...",
+    "visibility": "Visibilité",
+    "visibilityPrivate": "Privé - Vous seulement",
+    "visibilityOrganization": "Organisation - Membres de l'équipe",
+    "visibilityPublic": "Public - Tout le monde",
+    "documents": "documents",
+    "cancel": "Annuler",
+    "create": "Créer la collection",
+    "creating": "Création...",
+    "createSuccess": "Collection créée avec succès !",
+    "createError": "Échec de la création de la collection"
+  },
+  "collectionDetail": {
+    "back": "Retour",
+    "backToCollections": "Retour aux collections",
+    "notFound": "Collection introuvable",
+    "fetchError": "Échec du chargement de la collection",
+    "totalDocuments": "Total de documents",
+    "storage": "Stockage utilisé",
+    "visibility": "Visibilité",
+    "uploadDocuments": "Téléverser des documents",
+    "uploadDescription": "Ajoutez des documents à cette collection pour le traitement et la récupération",
+    "dragAndDrop": "Glissez et déposez les fichiers ici",
+    "or": "ou",
+    "browseFiles": "Parcourir les fichiers",
+    "supportedFormats": "Formats supportés : PDF, TXT, DOC, DOCX",
+    "uploading": "Téléversement...",
+    "uploadSuccess": "Fichiers téléversés avec succès !",
+    "uploadError": "Échec du téléversement des fichiers",
+    "documents": "Documents",
+    "noDocuments": "Aucun document pour le moment. Téléversez votre premier document !",
+    "status": "Statut",
+    "fileName": "Nom du fichier",
+    "size": "Taille",
+    "uploadedBy": "Téléversé par",
+    "uploadedAt": "Téléversé le",
+    "chunks": "Fragments",
+    "actions": "Actions",
+    "view": "Voir",
+    "delete": "Supprimer",
+    "deleteConfirm": "Supprimer le document",
+    "deleteDescription": "Êtes-vous sûr de vouloir supprimer ce document ? Cette action ne peut pas être annulée.",
+    "cancel": "Annuler",
+    "deleteSuccess": "Document supprimé avec succès !",
+    "deleteError": "Échec de la suppression du document"
+  },
+  "pricing": {
+    "title": "Tarification simple et transparente",
+    "subtitle": "Choisissez le plan qui correspond à vos besoins",
+    "free": {
+      "name": "Gratuit",
+      "price": "0$/mois",
+      "description": "Parfait pour commencer",
+      "features": [
+        "Stockage 5GB",
+        "Fonctionnalités de chat de base",
+        "Jusqu'à 3 collections",
+        "Support communautaire"
+      ],
+      "cta": "Commencer"
+    },
+    "starter": {
+      "name": "Starter",
+      "price": "10$/mois",
+      "description": "Pour les petites équipes",
+      "features": [
+        "Stockage 50GB",
+        "Fonctionnalités de chat avancées",
+        "Collections illimitées",
+        "Support par e-mail",
+        "Collaboration d'équipe"
+      ],
+      "cta": "Essai gratuit"
+    },
+    "pro": {
+      "name": "Pro",
+      "price": "25$",
+      "period": "/mois",
+      "badge": "Le Plus Populaire",
+      "description": "Pour les équipes en croissance",
+      "features": [
+        "Stockage 250GB",
+        "Support prioritaire",
+        "Analyses avancées",
+        "Intégrations personnalisées",
+        "Accès API"
+      ],
+      "cta": "Essai gratuit"
+    },
+    "enterprise": {
+      "name": "Entreprise",
+      "price": "Contactez-nous",
+      "description": "Pour les grandes organisations",
+      "features": [
+        "Stockage 1TB",
+        "Support dédié",
+        "Garantie SLA",
+        "Intégrations personnalisées",
+        "Sécurité avancée"
+      ],
+      "cta": "Contacter les ventes"
+    }
+  },
+  "teams": {
+    "title": "Équipes",
+    "description": "Gérez votre organisation et les membres de l'équipe",
+    "createOrganization": "Créer une organisation",
+    "inviteMembers": "Inviter des membres",
+    "noOrganization": "Aucune organisation pour le moment",
+    "noOrganizationDesc": "Créez une organisation pour inviter des membres d'équipe et collaborer",
+    "createFirst": "Créer votre première organisation",
+    "organizationDetails": "Détails de l'organisation",
+    "name": "Nom",
+    "plan": "Plan",
+    "seatsUsed": "Sièges utilisés",
+    "members": "Membres",
+    "teamMembers": "Membres de l'équipe",
+    "pendingInvitations": "Invitations en attente",
+    "invitedBy": "Invité par",
+    "organizationName": "Nom de l'organisation",
+    "organizationNamePlaceholder": "Acme Inc",
+    "organizationSlug": "Slug de l'organisation",
+    "organizationSlugPlaceholder": "acme-inc",
+    "slugHelp": "Utilisé dans les URLs. Uniquement des lettres minuscules, des chiffres et des tirets.",
+    "domainOptional": "Domaine (Optionnel)",
+    "domainPlaceholder": "acme.com",
+    "domainHelp": "Les utilisateurs avec ce domaine email peuvent rejoindre automatiquement.",
+    "inviteTeamMember": "Inviter un membre de l'équipe",
+    "emailAddress": "Adresse e-mail",
+    "emailPlaceholder": "collegue@exemple.com",
+    "emailHelp": "Un e-mail d'invitation sera envoyé à cette adresse.",
+    "role": "Rôle",
+    "roleMember": "Membre - Peut voir et modifier le contenu",
+    "roleAdmin": "Admin - Peut gérer les membres et les paramètres",
+    "roleViewer": "Visualiseur - Peut seulement voir le contenu",
+    "cancel": "Annuler",
+    "create": "Créer l'organisation",
+    "creating": "Création...",
+    "sendInvitation": "Envoyer l'invitation",
+    "sending": "Envoi...",
+    "createSuccess": "Organisation créée avec succès !",
+    "createError": "Échec de la création de l'organisation",
+    "inviteSuccess": "Invitation envoyée avec succès !",
+    "inviteError": "Échec de l'envoi de l'invitation"
+  }
+}

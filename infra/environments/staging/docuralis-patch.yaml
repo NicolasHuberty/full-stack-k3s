@@ -1,0 +1,14 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: docuralis
+spec:
+  replicas: 2
+  template:
+    spec:
+      containers:
+        - name: docuralis
+          image: ghcr.io/nicolashuberty/full-stack-k3s/docuralis:staging
+          env:
+            - name: NEXTAUTH_URL
+              value: "https://staging.docuralis.com"

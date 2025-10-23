@@ -1,0 +1,372 @@
+{
+  "nav": {
+    "features": "Features",
+    "agents": "AI Agents",
+    "pricing": "Pricing",
+    "login": "Login",
+    "signup": "Sign Up"
+  },
+  "hero": {
+    "title": "Your Documents, AI-Powered",
+    "subtitle": "Transform your documents into intelligent knowledge bases with enterprise-grade RAG and specialized AI agents",
+    "cta": "Get Started Free"
+  },
+  "demo": {
+    "title": "See Docuralis in Action",
+    "categories": {
+      "legal": "Legal",
+      "hr": "HR",
+      "tech": "IT"
+    },
+    "aiAnswer": "AI Answer",
+    "sources": "Sources",
+    "searching": "Searching documents..."
+  },
+  "compliance": {
+    "title": "Enterprise-Grade Security & Compliance",
+    "subtitle": "Built for regulated industries with European data sovereignty and compliance at its core",
+    "badges": {
+      "gdpr": "GDPR Compliant",
+      "aiAct": "EU AI Act Ready",
+      "servers": "EU Servers Only",
+      "multilingual": "Multilingual Support"
+    }
+  },
+  "features": {
+    "title": "Everything You Need",
+    "rag": {
+      "title": "Advanced RAG",
+      "description": "State-of-the-art retrieval augmented generation for accurate, context-aware responses"
+    },
+    "gdpr": {
+      "title": "GDPR Compliant",
+      "description": "Your data stays in Europe with complete privacy and security guarantees"
+    },
+    "agents": {
+      "title": "Specialized AI Agents",
+      "description": "Pre-configured agents for legal, HR, tech docs, and more professional domains"
+    },
+    "sources": {
+      "title": "Source Citations",
+      "description": "Every answer includes precise citations to original documents for verification"
+    },
+    "data": {
+      "title": "Your Data, Your Control",
+      "description": "Complete ownership and control over your documents and knowledge bases"
+    },
+    "multilingual": {
+      "title": "Multilingual",
+      "description": "Support for multiple European languages including French, Dutch, and more"
+    }
+  },
+  "aiAgents": {
+    "title": "Specialized AI Agents",
+    "subtitle": "Choose the right expert for every question. Each agent is fine-tuned for specific professional domains.",
+    "catalog": {
+      "title": "Your AI Expert Team",
+      "subtitle": "Select an agent to see it in action"
+    },
+    "superpowers": {
+      "understanding": {
+        "title": "Deep Understanding",
+        "description": "Agents analyze context, cross-reference documents, and understand domain-specific terminology"
+      },
+      "cited": {
+        "title": "Always Cited",
+        "description": "Every answer includes exact page references and excerpts from source documents"
+      },
+      "expertise": {
+        "title": "Domain Expertise",
+        "description": "Each agent is optimized for specific fields like legal, HR, finance, or technical documentation"
+      }
+    }
+  },
+  "teamManagement": {
+    "title": "Built for Teams",
+    "subtitle": "Collaborate seamlessly with powerful team management and shared knowledge bases",
+    "teams": {
+      "title": "Team Workspace",
+      "description": "Create workspaces, invite members, assign roles, and collaborate on shared documents"
+    },
+    "rags": {
+      "title": "Shared Knowledge Bases",
+      "description": "Build organization-wide RAG collections accessible to your entire team with permission controls"
+    },
+    "access": {
+      "title": "Granular Access Control",
+      "description": "Define who can view, edit, or manage each knowledge base with role-based permissions"
+    }
+  },
+  "mobileApp": {
+    "title": "Get Answers Even Faster",
+    "subtitle": "Download our mobile app for instant access to your AI agents anywhere, anytime",
+    "cta": "Download App",
+    "platforms": "Available on iOS and Android"
+  },
+  "cta": {
+    "title": "Ready to Transform Your Documents?",
+    "button": "Start Free Trial"
+  },
+  "footer": {
+    "copyright": "© 2025 Docuralis. All rights reserved.",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "contact": "Contact"
+  },
+  "chat": {
+    "title": "Chat History",
+    "newChat": "New Chat",
+    "startNewChat": "Start New Chat",
+    "welcome": "Welcome to Chat",
+    "selectOrStart": "Select a chat from the sidebar or start a new conversation",
+    "untitled": "Untitled Chat",
+    "messages": "messages",
+    "deleteConfirm": "Delete Chat Session",
+    "deleteDescription": "Are you sure you want to delete this chat session? This action cannot be undone.",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "sources": "Sources",
+    "typePlaceholder": "Type your message... (Shift+Enter for new line)",
+    "noChats": "No chat sessions yet. Start a new conversation!",
+    "loading": "Loading chats..."
+  },
+  "settings": {
+    "title": "Settings",
+    "language": {
+      "title": "Language Preferences",
+      "description": "Choose your preferred language for the dashboard interface",
+      "label": "Interface Language",
+      "select": "Select a language",
+      "save": "Save Language",
+      "saving": "Saving...",
+      "saved": "Language saved successfully"
+    },
+    "account": {
+      "title": "Account Information",
+      "description": "Your account details",
+      "name": "Name",
+      "email": "Email",
+      "plan": "Plan",
+      "notSet": "Not set"
+    },
+    "plan": {
+      "title": "Subscription Plan",
+      "description": "Manage your subscription and billing",
+      "current": "Current Plan",
+      "status": "Status",
+      "selectPlan": "Select a plan",
+      "free": "Free",
+      "starter": "Starter",
+      "pro": "Pro",
+      "enterprise": "Enterprise",
+      "freeDesc": "Basic features for personal use",
+      "starterDesc": "Essential features for small teams",
+      "proDesc": "Advanced features for growing teams",
+      "enterpriseDesc": "Custom solutions for large organizations",
+      "freePrice": "Free",
+      "starterPrice": "$10/month",
+      "proPrice": "$25/month",
+      "enterprisePrice": "Contact us",
+      "changePlan": "Change Plan",
+      "currentPlan": "Current Plan",
+      "upgrade": "Upgrade",
+      "downgrade": "Downgrade",
+      "confirmChange": "Confirm Plan Change",
+      "confirmChangeDesc": "Are you sure you want to change your plan to",
+      "cancel": "Cancel",
+      "confirm": "Confirm",
+      "changing": "Changing...",
+      "changeSuccess": "Plan changed successfully!",
+      "changeError": "Failed to change plan"
+    }
+  },
+  "dashboard": {
+    "welcome": "Welcome",
+    "welcomeBack": "Welcome back",
+    "goodMorning": "Good morning",
+    "goodAfternoon": "Good afternoon",
+    "goodEvening": "Good evening",
+    "dashboardSubtitle": "Here's what's happening with your workspace today",
+    "home": "Home",
+    "collections": "Collections",
+    "documents": "Documents",
+    "chat": "Chat",
+    "settings": "Settings",
+    "conversations": "Conversations",
+    "totalChats": "total chats",
+    "knowledgeBases": "knowledge bases",
+    "filesUploaded": "files uploaded",
+    "storage": "Storage",
+    "of": "of",
+    "recentActivity": "Recent Activity",
+    "viewAll": "View all",
+    "noRecentChats": "No recent chats yet",
+    "startFirstChat": "Start your first chat",
+    "untitledChat": "Untitled Chat",
+    "messages": "messages",
+    "quickActions": "Quick Actions",
+    "newChat": "New Chat",
+    "manageCollections": "Manage Collections",
+    "inviteTeam": "Invite Team",
+    "teamMembers": "Team Members",
+    "noTeamMembers": "No team members yet",
+    "topCollections": "Top Collections",
+    "noCollections": "No collections yet",
+    "createCollection": "Create Collection"
+  },
+  "collections": {
+    "title": "Collections",
+    "description": "Organize your documents into knowledge bases",
+    "createNew": "New Collection",
+    "noCollections": "No collections yet",
+    "noCollectionsDesc": "Create your first collection to start organizing documents",
+    "createFirst": "Create Your First Collection",
+    "name": "Collection Name",
+    "namePlaceholder": "My Knowledge Base",
+    "descriptionOptional": "Description (Optional)",
+    "descriptionPlaceholder": "Describe what this collection is for...",
+    "visibility": "Visibility",
+    "visibilityPrivate": "Private - Only you",
+    "visibilityOrganization": "Organization - Team members",
+    "visibilityPublic": "Public - Everyone",
+    "documents": "documents",
+    "cancel": "Cancel",
+    "create": "Create Collection",
+    "creating": "Creating...",
+    "createSuccess": "Collection created successfully!",
+    "createError": "Failed to create collection"
+  },
+  "collectionDetail": {
+    "back": "Back",
+    "backToCollections": "Back to Collections",
+    "notFound": "Collection not found",
+    "fetchError": "Failed to load collection",
+    "totalDocuments": "Total Documents",
+    "storage": "Storage Used",
+    "visibility": "Visibility",
+    "uploadDocuments": "Upload Documents",
+    "uploadDescription": "Add documents to this collection for processing and retrieval",
+    "dragAndDrop": "Drag and drop files here",
+    "or": "or",
+    "browseFiles": "Browse Files",
+    "supportedFormats": "Supported: PDF, TXT, DOC, DOCX",
+    "uploading": "Uploading...",
+    "uploadSuccess": "Files uploaded successfully!",
+    "uploadError": "Failed to upload files",
+    "documents": "Documents",
+    "noDocuments": "No documents yet. Upload your first document!",
+    "status": "Status",
+    "fileName": "File Name",
+    "size": "Size",
+    "uploadedBy": "Uploaded By",
+    "uploadedAt": "Uploaded At",
+    "chunks": "Chunks",
+    "actions": "Actions",
+    "view": "View",
+    "delete": "Delete",
+    "deleteConfirm": "Delete Document",
+    "deleteDescription": "Are you sure you want to delete this document? This action cannot be undone.",
+    "cancel": "Cancel",
+    "deleteSuccess": "Document deleted successfully!",
+    "deleteError": "Failed to delete document"
+  },
+  "pricing": {
+    "title": "Simple, Transparent Pricing",
+    "subtitle": "Choose the plan that fits your needs",
+    "free": {
+      "name": "Free",
+      "price": "$0/month",
+      "description": "Perfect for getting started",
+      "features": [
+        "5GB Storage",
+        "Basic chat features",
+        "Up to 3 collections",
+        "Community support"
+      ],
+      "cta": "Get Started"
+    },
+    "starter": {
+      "name": "Starter",
+      "price": "$10/month",
+      "description": "For small teams",
+      "features": [
+        "50GB Storage",
+        "Advanced chat features",
+        "Unlimited collections",
+        "Email support",
+        "Team collaboration"
+      ],
+      "cta": "Start Free Trial"
+    },
+    "pro": {
+      "name": "Pro",
+      "price": "$25",
+      "period": "/month",
+      "badge": "Most Popular",
+      "description": "For growing teams",
+      "features": [
+        "250GB Storage",
+        "Priority support",
+        "Advanced analytics",
+        "Custom integrations",
+        "API access"
+      ],
+      "cta": "Start Free Trial"
+    },
+    "enterprise": {
+      "name": "Enterprise",
+      "price": "Contact us",
+      "description": "For large organizations",
+      "features": [
+        "1TB Storage",
+        "Dedicated support",
+        "SLA guarantee",
+        "Custom integrations",
+        "Advanced security"
+      ],
+      "cta": "Contact Sales"
+    }
+  },
+  "teams": {
+    "title": "Teams",
+    "description": "Manage your organization and team members",
+    "createOrganization": "Create Organization",
+    "inviteMembers": "Invite Members",
+    "noOrganization": "No organization yet",
+    "noOrganizationDesc": "Create an organization to invite team members and collaborate",
+    "createFirst": "Create Your First Organization",
+    "organizationDetails": "Organization Details",
+    "name": "Name",
+    "plan": "Plan",
+    "seatsUsed": "Seats Used",
+    "members": "Members",
+    "teamMembers": "Team Members",
+    "pendingInvitations": "Pending Invitations",
+    "invitedBy": "Invited by",
+    "organizationName": "Organization Name",
+    "organizationNamePlaceholder": "Acme Inc",
+    "organizationSlug": "Organization Slug",
+    "organizationSlugPlaceholder": "acme-inc",
+    "slugHelp": "Used in URLs. Only lowercase letters, numbers, and hyphens.",
+    "domainOptional": "Domain (Optional)",
+    "domainPlaceholder": "acme.com",
+    "domainHelp": "Users with this email domain can auto-join.",
+    "inviteTeamMember": "Invite Team Member",
+    "emailAddress": "Email Address",
+    "emailPlaceholder": "colleague@example.com",
+    "emailHelp": "An invitation email will be sent to this address.",
+    "role": "Role",
+    "roleMember": "Member - Can view and edit content",
+    "roleAdmin": "Admin - Can manage members and settings",
+    "roleViewer": "Viewer - Can only view content",
+    "cancel": "Cancel",
+    "create": "Create Organization",
+    "creating": "Creating...",
+    "sendInvitation": "Send Invitation",
+    "sending": "Sending...",
+    "createSuccess": "Organization created successfully!",
+    "createError": "Failed to create organization",
+    "inviteSuccess": "Invitation sent successfully!",
+    "inviteError": "Failed to send invitation"
+  }
+}

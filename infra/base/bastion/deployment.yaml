@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bastion
+  labels:
+    app: bastion
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bastion
+  template:
+    metadata:
+      labels:
+        app: bastion
+    spec:
+      containers:
+        - name: bastion
+          image: alpine:latest
+          command:
+            - /bin/sh
+            - -c
+            - |
+              apk add --no-cache \
+                curl \
+                wget \
+                postgresql-client \
+                bind-tools \
+                openssh-client \
+                jq \
+                vim \
+                bash
+              # Keep container running
+              tail -f /dev/null
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi

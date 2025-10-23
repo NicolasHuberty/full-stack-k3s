@@ -28,6 +28,7 @@ spec:
           - ingress
         domainFilters:
           - huberty.pro
+          - docuralis.com
         txtOwnerId: k3s-cluster
         logLevel: info
         interval: 1m

@@ -1,0 +1,219 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: docuralis
+  labels:
+    app: docuralis
+    managed-by: argocd
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: docuralis
+  template:
+    metadata:
+      labels:
+        app: docuralis
+    spec:
+      containers:
+        - name: docuralis
+          image: ghcr.io/nicolashuberty/full-stack-k3s/docuralis:latest
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 3000
+              protocol: TCP
+          env:
+            # Database
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: docuralis-secrets
+                  key: database-url
+
+            # NextAuth
+            - name: NEXTAUTH_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: docuralis-secrets
+                  key: nextauth-secret
+
+            - name: NEXTAUTH_URL
+              value: "https://app.docuralis.com"
+
+            - name: AUTH_TRUST_HOST
+              value: "true"
+
+            # OAuth Providers
+            - name: GOOGLE_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: docuralis-secrets
+                  key: google-client-id
+                  optional: true
+
+            - name: GOOGLE_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: docuralis-secrets
+                  key: google-client-secret
+                  optional: true
+
+            - name: GITHUB_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: docuralis-secrets
+                  key: github-client-id
+                  optional: true
+
+            - name: GITHUB_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: docuralis-secrets
+                  key: github-client-secret
+                  optional: true
+
+            - name: AZURE_AD_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: docuralis-secrets
+                  key: azure-ad-client-id
+                  optional: true
+
+            - name: AZURE_AD_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: docuralis-secrets
+                  key: azure-ad-client-secret
+                  optional: true
+
+            - name: AZURE_AD_TENANT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: docuralis-secrets
+                  key: azure-ad-tenant-id
+                  optional: true
+
+            # MinIO
+            - name: MINIO_ENDPOINT
+              valueFrom:
+                secretKeyRef:
+                  name: docuralis-secrets
+                  key: minio-endpoint
+
+            - name: MINIO_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: docuralis-secrets
+                  key: minio-port
+
+            - name: MINIO_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: docuralis-secrets
+                  key: minio-access-key
+
+            - name: MINIO_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: docuralis-secrets
+                  key: minio-secret-key
+
+            - name: MINIO_USE_SSL
+              value: "false"
+
+            - name: MINIO_BUCKET_NAME
+              value: "docuralis"
+
+            # Qdrant
+            - name: QDRANT_URL
+              valueFrom:
+                secretKeyRef:
+                  name: docuralis-secrets
+                  key: qdrant-url
+
+            - name: QDRANT_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: docuralis-secrets
+                  key: qdrant-api-key
+                  optional: true
+
+            # OpenAI
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: docuralis-secrets
+                  key: openai-api-key
+
+            # Email (optional)
+            - name: SMTP_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: docuralis-secrets
+                  key: smtp-host
+                  optional: true
+
+            - name: SMTP_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: docuralis-secrets
+                  key: smtp-port
+                  optional: true
+
+            - name: SMTP_USER
+              valueFrom:
+                secretKeyRef:
+                  name: docuralis-secrets
+                  key: smtp-user
+                  optional: true
+
+            - name: SMTP_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: docuralis-secrets
+                  key: smtp-password
+                  optional: true
+
+            - name: SMTP_FROM
+              valueFrom:
+                secretKeyRef:
+                  name: docuralis-secrets
+                  key: smtp-from
+                  optional: true
+
+            # App Configuration
+            - name: NODE_ENV
+              value: "production"
+
+            - name: NEXT_TELEMETRY_DISABLED
+              value: "1"
+
+          resources:
+            requests:
+              cpu: 200m
+              memory: 512Mi
+            limits:
+              cpu: 1000m
+              memory: 1Gi
+
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+
+      imagePullSecrets:
+        - name: ghcr-credentials

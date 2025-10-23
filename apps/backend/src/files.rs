@@ -314,11 +314,25 @@ fn guess_mime_type(filename: &str) -> &'static str {
         "svg" => "image/svg+xml",
         "webp" => "image/webp",
         "mp4" => "video/mp4",
+        "avi" => "video/x-msvideo",
+        "mov" => "video/quicktime",
+        // Audio formats
         "mp3" => "audio/mpeg",
         "wav" => "audio/wav",
+        "ogg" => "audio/ogg",
+        "m4a" => "audio/mp4",
+        "flac" => "audio/flac",
+        "aac" => "audio/aac",
+        "wma" => "audio/x-ms-wma",
+        "opus" => "audio/opus",
+        "webm" => "audio/webm", // WebM can be audio or video
+        // Archives
         "zip" => "application/zip",
         "tar" => "application/x-tar",
         "gz" => "application/gzip",
+        "rar" => "application/vnd.rar",
+        "7z" => "application/x-7z-compressed",
+        // Documents
         "csv" => "text/csv",
         "doc" => "application/msword",
         "docx" => "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
@@ -328,6 +342,11 @@ fn guess_mime_type(filename: &str) -> &'static str {
         "pptx" => "application/vnd.openxmlformats-officedocument.presentationml.presentation",
         _ => "application/octet-stream",
     }
+}
+
+/// Check if a file is an audio file based on mime type
+fn is_audio_file(mime_type: &str) -> bool {
+    mime_type.starts_with("audio/")
 }
 
 fn chunk_text(text: &str, chunk_size: usize) -> Vec<String> {
@@ -351,4 +370,95 @@ fn chunk_text(text: &str, chunk_size: usize) -> Vec<String> {
     }
 
     chunks
+}
+
+/// Transcribe an audio file to text
+///
+/// This endpoint accepts audio files and transcribes them to text using a speech-to-text service.
+/// Supported formats: mp3, wav, m4a, ogg, flac, opus, webm
+///
+/// Implementation TODO:
+/// - Integrate with Whisper API (OpenAI) or similar service
+/// - Handle large audio files (chunking if needed)
+/// - Store transcription in database linked to file
+/// - Return transcription text and confidence scores
+/// - Support multiple languages
+/// - Add speaker diarization support (optional)
+#[utoipa::path(
+    post,
+    path = "/api/files/{file_id}/transcribe",
+    responses(
+        (status = 200, description = "Audio transcribed successfully", body = serde_json::Value),
+        (status = 400, description = "Not an audio file"),
+        (status = 404, description = "File not found"),
+        (status = 401, description = "Unauthorized"),
+        (status = 501, description = "Not implemented yet")
+    ),
+    params(
+        ("file_id" = String, Path, description = "File ID to transcribe")
+    ),
+    security(
+        ("bearer" = [])
+    ),
+    tag = "files"
+)]
+pub async fn transcribe_audio(
+    pool: web::Data<Pool<Postgres>>,
+    _minio: web::Data<MinioClient>,
+    claims: web::ReqData<Claims>,
+    file_id: web::Path<Uuid>,
+) -> Result<HttpResponse, Error> {
+    let user_id = Uuid::parse_str(&claims.sub).map_err(|e| {
+        log::error!("UUID parse error: {}", e);
+        actix_web::error::ErrorBadRequest("Invalid user ID")
+    })?;
+
+    // Verify file exists and belongs to user
+    let file = match db::get_file_by_id(&pool, &file_id, &user_id).await {
+        Ok(Some(f)) => f,
+        Ok(None) => {
+            return Ok(HttpResponse::NotFound().json(serde_json::json!({
+                "error": "File not found"
+            })));
+        }
+        Err(e) => {
+            log::error!("Database error: {}", e);
+            return Ok(HttpResponse::InternalServerError().json(serde_json::json!({
+                "error": "Database error"
+            })));
+        }
+    };
+
+    // Check if file is audio
+    if let Some(ref mime_type) = file.mime_type {
+        if !is_audio_file(mime_type) {
+            return Ok(HttpResponse::BadRequest().json(serde_json::json!({
+                "error": "File is not an audio file"
+            })));
+        }
+    } else {
+        return Ok(HttpResponse::BadRequest().json(serde_json::json!({
+            "error": "Cannot determine file type"
+        })));
+    }
+
+    // TODO: Implement actual transcription
+    // 1. Download audio file from MinIO
+    // let audio_data = minio.download_file(&file.minio_path).await?;
+    //
+    // 2. Send to transcription service (e.g., OpenAI Whisper API)
+    // let transcription = transcribe_with_whisper(audio_data).await?;
+    //
+    // 3. Store transcription in database (add transcriptions table)
+    // db::store_transcription(&pool, &file_id, &transcription).await?;
+    //
+    // 4. Return transcription result
+
+    Ok(HttpResponse::NotImplemented().json(serde_json::json!({
+        "error": "Transcription not implemented yet",
+        "message": "This endpoint is prepared but transcription service integration is pending",
+        "file_id": file_id.to_string(),
+        "filename": file.filename,
+        "mime_type": file.mime_type
+    })))
 }

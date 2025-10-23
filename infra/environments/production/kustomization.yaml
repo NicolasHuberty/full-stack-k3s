@@ -4,9 +4,12 @@ kind: Kustomization
 namespace: production
 
 resources:
-  - ../../base/backend
-  - ../../base/frontend
-  - ingress.yaml
+  - ../../base/docuralis
+  - docuralis-ingress.yaml
+  - www-redirect-middleware.yaml
+
+patchesStrategicMerge:
+  - docuralis-patch.yaml
 
 namePrefix: prod-
 
@@ -15,26 +18,8 @@ commonLabels:
   managed-by: argocd
 
 images:
-  - name: ghcr.io/nicolashuberty/k3s-backend
+  - name: ghcr.io/nicolashuberty/full-stack-k3s/docuralis
     newTag: latest
-  - name: ghcr.io/nicolashuberty/k3s-frontend
-    newTag: latest
-
-patches:
-  - target:
-      kind: Deployment
-      name: backend
-    patch: |-
-      - op: replace
-        path: /spec/replicas
-        value: 3
-  - target:
-      kind: Deployment
-      name: frontend
-    patch: |-
-      - op: replace
-        path: /spec/replicas
-        value: 3
 
 configMapGenerator:
   - name: env-config

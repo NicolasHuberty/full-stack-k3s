@@ -5,6 +5,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { usePostHog } from 'posthog-js/react'
 import {
   Shield,
   Zap,
@@ -283,7 +284,13 @@ function DemoCard({
   )
 }
 
-function AIAgentsCatalog({ t }: { t: (key: string) => string }) {
+function AIAgentsCatalog({
+  t,
+  trackClick,
+}: {
+  t: (key: string) => string
+  trackClick: (eventName: string, properties?: Record<string, any>) => void
+}) {
   const [selectedAgent, setSelectedAgent] = useState<string | null>(null)
   const [agentStep, setAgentStep] = useState(0)
   const [agentQuery, setAgentQuery] = useState('')
@@ -504,11 +511,17 @@ function AIAgentsCatalog({ t }: { t: (key: string) => string }) {
               return (
                 <button
                   key={`${agent.id}-${index}`}
-                  onClick={() =>
-                    setSelectedAgent(
+                  onClick={() => {
+                    const newAgent =
                       agent.id === selectedAgent ? null : agent.id
-                    )
-                  }
+                    setSelectedAgent(newAgent)
+                    if (newAgent) {
+                      trackClick('agent_selected', {
+                        agent_type: agent.id,
+                        agent_name: agent.name,
+                      })
+                    }
+                  }}
                   className={`flex-shrink-0 w-80 rounded-2xl ${agent.bgColor} border-2 ${
                     isSelected
                       ? 'border-accent shadow-2xl scale-105'
@@ -785,6 +798,7 @@ function AIAgentsCatalog({ t }: { t: (key: string) => string }) {
 }
 
 export default function LandingPage() {
+  const posthog = usePostHog()
   const [locale, setLocale] = useState(() => {
     if (typeof window !== 'undefined') {
       const browserLang = navigator.language.split('-')[0]
@@ -793,6 +807,58 @@ export default function LandingPage() {
     return 'en'
   })
   const { t, messages } = useTranslations(locale)
+
+  // Track language changes
+  useEffect(() => {
+    if (posthog) {
+      posthog.capture('language_changed', {
+        locale,
+        page: 'landing',
+      })
+    }
+  }, [locale, posthog])
+
+  // Helper function to track clicks
+  const trackClick = (eventName: string, properties?: Record<string, any>) => {
+    if (posthog) {
+      posthog.capture(eventName, {
+        page: 'landing',
+        ...properties,
+      })
+    }
+  }
+
+  // Track scroll depth
+  useEffect(() => {
+    if (!posthog) return
+
+    let maxScrollDepth = 0
+    const handleScroll = () => {
+      const scrollPercentage = Math.round(
+        (window.scrollY /
+          (document.documentElement.scrollHeight - window.innerHeight)) *
+          100
+      )
+
+      if (scrollPercentage > maxScrollDepth) {
+        maxScrollDepth = scrollPercentage
+
+        // Track milestones
+        if (scrollPercentage >= 25 && maxScrollDepth < 50) {
+          posthog.capture('scroll_depth', { depth: '25%', page: 'landing' })
+        } else if (scrollPercentage >= 50 && maxScrollDepth < 75) {
+          posthog.capture('scroll_depth', { depth: '50%', page: 'landing' })
+        } else if (scrollPercentage >= 75 && maxScrollDepth < 100) {
+          posthog.capture('scroll_depth', { depth: '75%', page: 'landing' })
+        } else if (scrollPercentage >= 90) {
+          posthog.capture('scroll_depth', { depth: '100%', page: 'landing' })
+        }
+      }
+    }
+
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [posthog])
 
   if (!messages) return null
 
@@ -814,24 +880,30 @@ export default function LandingPage() {
             <div className="hidden md:flex items-center space-x-8">
               <a
                 href="#features"
+                onClick={() => trackClick('nav_click', { section: 'features' })}
                 className="text-muted-foreground hover:text-foreground transition"
               >
                 {t('nav.features')}
               </a>
               <a
                 href="#agents"
+                onClick={() => trackClick('nav_click', { section: 'agents' })}
                 className="text-muted-foreground hover:text-foreground transition"
               >
                 {t('nav.agents')}
               </a>
               <a
                 href="#pricing"
+                onClick={() => trackClick('nav_click', { section: 'pricing' })}
                 className="text-muted-foreground hover:text-foreground transition"
               >
                 {t('nav.pricing')}
               </a>
               <Link
                 href="/login"
+                onClick={() =>
+                  trackClick('nav_login_click', { location: 'navbar' })
+                }
                 className="text-muted-foreground hover:text-foreground transition"
               >
                 {t('nav.login')}
@@ -853,6 +925,12 @@ export default function LandingPage() {
 
               <Link
                 href="/register"
+                onClick={() =>
+                  trackClick('cta_click', {
+                    location: 'navbar',
+                    cta_type: 'signup',
+                  })
+                }
                 className="rounded-md bg-primary px-4 py-2 text-primary-foreground hover:opacity-90 transition"
               >
                 {t('nav.signup')}
@@ -878,6 +956,12 @@ export default function LandingPage() {
             <div className="mt-10 flex items-center justify-center gap-x-6">
               <Link
                 href="/register"
+                onClick={() =>
+                  trackClick('cta_click', {
+                    location: 'hero',
+                    cta_type: 'get_started',
+                  })
+                }
                 className="rounded-md bg-primary px-6 py-3 text-lg font-semibold text-primary-foreground hover:opacity-90 transition"
               >
                 {t('hero.cta')}
@@ -1022,7 +1106,7 @@ export default function LandingPage() {
             </p>
           </div>
 
-          <AIAgentsCatalog t={t} />
+          <AIAgentsCatalog t={t} trackClick={trackClick} />
 
           {/* Superpowers Grid */}
           <div className="mt-16 grid gap-6 md:grid-cols-3">
@@ -1316,7 +1400,14 @@ export default function LandingPage() {
                   'Download our mobile app for instant access to your AI agents anywhere, anytime.'}
               </p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center md:justify-start items-center">
-                <button className="inline-flex items-center gap-2 rounded-lg bg-foreground px-6 py-2.5 text-sm font-semibold text-background hover:opacity-90 transition-opacity">
+                <button
+                  onClick={() =>
+                    trackClick('mobile_app_click', {
+                      location: 'mobile_banner',
+                    })
+                  }
+                  className="inline-flex items-center gap-2 rounded-lg bg-foreground px-6 py-2.5 text-sm font-semibold text-background hover:opacity-90 transition-opacity"
+                >
                   <Smartphone className="h-4 w-4" />
                   {messages?.mobileApp?.cta || 'Download App'}
                 </button>
@@ -1484,6 +1575,12 @@ export default function LandingPage() {
               </ul>
               <Link
                 href="/register"
+                onClick={() =>
+                  trackClick('pricing_plan_click', {
+                    plan: 'free',
+                    location: 'pricing_section',
+                  })
+                }
                 className="mt-8 block w-full rounded-md border border-primary bg-background px-4 py-2 text-center font-semibold text-primary hover:bg-primary hover:text-primary-foreground transition"
               >
                 {t('pricing.free.cta')}
@@ -1519,6 +1616,12 @@ export default function LandingPage() {
               </ul>
               <Link
                 href="/register"
+                onClick={() =>
+                  trackClick('pricing_plan_click', {
+                    plan: 'pro',
+                    location: 'pricing_section',
+                  })
+                }
                 className="mt-8 block w-full rounded-md bg-accent px-4 py-2 text-center font-semibold text-accent-foreground hover:opacity-90 transition"
               >
                 {t('pricing.pro.cta')}
@@ -1548,6 +1651,12 @@ export default function LandingPage() {
               </ul>
               <a
                 href="mailto:contact@docuralis.com"
+                onClick={() =>
+                  trackClick('pricing_plan_click', {
+                    plan: 'enterprise',
+                    location: 'pricing_section',
+                  })
+                }
                 className="mt-8 block w-full rounded-md border border-primary bg-background px-4 py-2 text-center font-semibold text-primary hover:bg-primary hover:text-primary-foreground transition"
               >
                 {t('pricing.enterprise.cta')}
@@ -1566,6 +1675,12 @@ export default function LandingPage() {
           <div className="mt-10">
             <Link
               href="/register"
+              onClick={() =>
+                trackClick('cta_click', {
+                  location: 'final_cta',
+                  cta_type: 'get_started',
+                })
+              }
               className="rounded-md bg-secondary px-8 py-4 text-lg font-semibold text-secondary-foreground hover:opacity-90 transition inline-block"
             >
               {t('cta.button')}

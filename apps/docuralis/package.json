@@ -49,6 +49,7 @@
     "nodemailer": "^7.0.9",
     "openai": "^6.6.0",
     "pdf2json": "^4.0.0",
+    "posthog-js": "^1.280.0",
     "prisma": "^6.17.1",
     "react": "^19.0.0-rc.1",
     "react-day-picker": "^9.11.1",

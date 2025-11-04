@@ -1,17 +1,17 @@
 # Dockerfile for Next.js Memo App
-FROM node:20-alpine AS base
+# Using Debian-based image for better native binary support (Tailwind v4, Turbopack)
+FROM node:20-slim AS base
 
 # Install dependencies only when needed
 FROM base AS deps
-RUN apk add --no-cache libc6-compat
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 
 # Install dependencies using npm
 COPY package.json package-lock.json ./
 RUN npm ci
-
-# Install lightningcss musl binary explicitly
-RUN npm install --save-optional lightningcss-linux-x64-musl@1.27.0 || true
 
 # Rebuild the source code only when needed
 FROM base AS builder

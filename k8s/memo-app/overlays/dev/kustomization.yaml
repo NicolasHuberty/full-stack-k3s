@@ -6,12 +6,12 @@ namespace: memo-app-dev
 namePrefix: dev-
 nameSuffix: ""
 
-bases:
+resources:
   - ../../base
 
-patchesStrategicMerge:
-  - ingress-patch.yaml
-  - replica-patch.yaml
+patches:
+  - path: ingress-patch.yaml
+  - path: replica-patch.yaml
 
 images:
   - name: ghcr.io/nicolashuberty/memo-app
@@ -19,8 +19,9 @@ images:
   - name: ghcr.io/nicolashuberty/memo-worker
     newTag: dev
 
-commonLabels:
-  environment: dev
+labels:
+  - pairs:
+      environment: dev
 
 patches:
   - target:

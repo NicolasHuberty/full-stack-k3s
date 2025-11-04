@@ -13,6 +13,7 @@ resources:
   - worker.yaml
   - ingress.yaml
 
-commonLabels:
-  app.kubernetes.io/name: memo-app
-  app.kubernetes.io/part-of: memo-app
+labels:
+  - pairs:
+      app.kubernetes.io/name: memo-app
+      app.kubernetes.io/part-of: memo-app

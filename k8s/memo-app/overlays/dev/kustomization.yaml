@@ -14,9 +14,9 @@ patchesStrategicMerge:
   - replica-patch.yaml
 
 images:
-  - name: ghcr.io/nhuberty/memo-app
+  - name: ghcr.io/nicolashuberty/memo-app
     newTag: dev
-  - name: ghcr.io/nhuberty/memo-worker
+  - name: ghcr.io/nicolashuberty/memo-worker
     newTag: dev
 
 commonLabels:

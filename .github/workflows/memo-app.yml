@@ -19,8 +19,8 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  FRONTEND_IMAGE_NAME: nhuberty/memo-app
-  WORKER_IMAGE_NAME: nhuberty/memo-worker
+  FRONTEND_IMAGE_NAME: nicolashuberty/memo-app
+  WORKER_IMAGE_NAME: nicolashuberty/memo-worker
 
 jobs:
   build-and-push-frontend:

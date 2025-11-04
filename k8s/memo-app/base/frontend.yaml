@@ -31,7 +31,7 @@ spec:
     spec:
       initContainers:
       - name: migrate
-        image: ghcr.io/nhuberty/memo-app:latest
+        image: ghcr.io/nicolashuberty/memo-app:latest
         command:
         - /bin/sh
         - -c
@@ -47,7 +47,7 @@ spec:
               key: database-url
       containers:
       - name: frontend
-        image: ghcr.io/nhuberty/memo-app:latest
+        image: ghcr.io/nicolashuberty/memo-app:latest
         ports:
         - containerPort: 3000
           name: http

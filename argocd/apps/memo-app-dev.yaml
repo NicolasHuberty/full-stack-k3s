@@ -8,7 +8,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/nhuberty/k3s-app.git
+    repoURL: https://github.com/NicolasHuberty/full-stack-k3s.git
     targetRevision: dev
     path: k8s/memo-app/overlays/dev
   destination:

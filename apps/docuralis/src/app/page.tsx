@@ -189,12 +189,12 @@ function DemoCard({
         if (step === 0 && query.length < fullQuery.length) {
           setQuery(fullQuery.slice(0, query.length + 1))
         } else if (step === 0 && query.length === fullQuery.length) {
-          setTimeout(() => setStep(1), 500)
+          setTimeout(() => setStep(1), 400)
         } else if (step === 1) {
-          setTimeout(() => setStep(2), 1500)
+          setTimeout(() => setStep(2), 800)
         }
       },
-      step === 0 ? 40 : 0
+      step === 0 ? 25 : 0
     )
 
     return () => clearTimeout(timer)
@@ -203,83 +203,69 @@ function DemoCard({
   const ExampleIcon = example.icon
 
   return (
-    <div className="rounded-lg border border-border bg-card p-4 shadow-lg flex flex-col h-full">
-      {/* Category */}
-      <div className="mb-3 flex items-center gap-2">
+    <div className="bg-card border border-border rounded-xl overflow-hidden hover:shadow-lg transition-shadow">
+      {/* Header */}
+      <div className="bg-muted/30 px-4 py-2.5 border-b border-border flex items-center gap-2">
         <ExampleIcon className="h-4 w-4 text-accent" />
-        <span className="text-xs font-semibold text-accent">
-          {t(example.categoryKey)}
-        </span>
+        <span className="text-sm font-semibold">{t(example.categoryKey)}</span>
       </div>
 
-      {/* Query */}
-      <div className="mb-4">
-        <div className="rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground min-h-[60px]">
-          {query}
-          {step === 0 && <span className="animate-pulse">|</span>}
+      {/* Content */}
+      <div className="p-4 space-y-3">
+        {/* Question */}
+        <div className="bg-primary/10 border border-primary/20 rounded-lg px-3 py-2 min-h-[50px] flex items-center">
+          <p className="text-sm text-foreground">
+            {query}
+            {step === 0 && <span className="animate-pulse ml-0.5">|</span>}
+          </p>
         </div>
-      </div>
 
-      {/* Results */}
-      {step === 2 ? (
-        <div className="space-y-3 flex-1 animate-in fade-in duration-500">
-          {/* AI Answer */}
-          <div className="rounded-lg border border-accent/30 bg-accent/5 p-3">
-            <h3 className="mb-1 flex items-center gap-1 text-xs font-semibold text-accent">
-              <Zap className="h-3 w-3" />
-              {t('demo.aiAnswer')}
-            </h3>
-            <p
-              className="text-xs leading-relaxed text-foreground"
-              dangerouslySetInnerHTML={{ __html: example.answer }}
-            />
+        {/* Loading */}
+        {step === 1 && (
+          <div className="flex items-center gap-2 px-3 py-2">
+            <Search className="h-4 w-4 animate-spin text-accent" />
+            <span className="text-xs text-muted-foreground">{t('demo.searching')}</span>
           </div>
+        )}
 
-          {/* Sources */}
-          <div className="space-y-1">
-            <h3 className="text-xs font-semibold text-muted-foreground">
-              {t('demo.sources')}
-            </h3>
-            {example.sources.slice(0, 1).map((source, idx) => (
-              <div
-                key={idx}
-                className="rounded border border-border bg-background p-2"
-              >
-                <div className="mb-1 flex items-start justify-between">
-                  <div className="flex items-center gap-1">
-                    <FileText className="h-3 w-3 text-primary" />
-                    <span className="text-xs font-medium truncate">
-                      {source.file}
-                    </span>
-                  </div>
-                  <span className="text-xs text-muted-foreground">
-                    p.{source.page}
-                  </span>
-                </div>
-                <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
-                  {source.excerpt}{' '}
-                  <mark className="bg-accent/30 px-0.5">
-                    {source.highlight}
-                  </mark>
-                  {source.excerpt2}
-                </p>
+        {/* Answer */}
+        {step === 2 && (
+          <div className="space-y-2.5 animate-in fade-in duration-300">
+            <div className="bg-accent/5 border border-accent/20 rounded-lg p-3">
+              <div className="flex items-center gap-1.5 mb-2">
+                <Zap className="h-3.5 w-3.5 text-accent" />
+                <span className="text-xs font-semibold text-accent">{t('demo.aiAnswer')}</span>
               </div>
-            ))}
-            {example.sources.length > 1 && (
-              <p className="text-xs text-accent">
-                +{example.sources.length - 1} more sources
-              </p>
-            )}
+              <p
+                className="text-xs text-foreground leading-relaxed"
+                dangerouslySetInnerHTML={{ __html: example.answer }}
+              />
+            </div>
+
+            {/* Sources */}
+            <div className="space-y-1.5">
+              <p className="text-xs font-semibold text-muted-foreground">{t('demo.sources')}</p>
+              {example.sources.slice(0, 1).map((source: any, idx: number) => (
+                <div key={idx} className="bg-background border border-border rounded p-2">
+                  <div className="flex items-center justify-between mb-1">
+                    <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                      <FileText className="h-3 w-3 text-primary flex-shrink-0" />
+                      <span className="text-xs font-medium truncate">{source.file}</span>
+                    </div>
+                    <span className="text-xs text-accent ml-2">p.{source.page}</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground line-clamp-1">
+                    {source.excerpt} <span className="text-foreground bg-accent/20 px-0.5">{source.highlight}</span>
+                  </p>
+                </div>
+              ))}
+              {example.sources.length > 1 && (
+                <p className="text-xs text-accent">+{example.sources.length - 1} more</p>
+              )}
+            </div>
           </div>
-        </div>
-      ) : step === 1 ? (
-        <div className="flex-1 flex items-center justify-center">
-          <div className="flex items-center gap-2 text-secondary">
-            <Search className="h-4 w-4 animate-spin" />
-            <span className="text-sm font-medium">{t('demo.searching')}</span>
-          </div>
-        </div>
-      ) : null}
+        )}
+      </div>
     </div>
   )
 }
@@ -969,12 +955,22 @@ export default function LandingPage() {
             </div>
           </div>
 
-          {/* Three-Column Demo */}
+          {/* Compact Demo Section */}
           <div className="mx-auto mt-16 max-w-7xl">
-            <h2 className="text-center text-2xl font-bold mb-8 text-foreground">
-              {t('demo.title')}
-            </h2>
-            <div className="grid gap-6 md:grid-cols-3">
+            <div className="text-center mb-10">
+              <h2 className="text-3xl font-bold text-foreground mb-2">
+                {t('demo.title')}
+              </h2>
+              <p className="text-muted-foreground">
+                {locale === 'fr'
+                  ? "Exemples d'utilisation réels"
+                  : locale === 'nl'
+                    ? 'Echte gebruiksvoorbeelden'
+                    : 'Real-world examples'}
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-5">
               {getDemoExamples(locale).map((example: any) => (
                 <DemoCard key={example.id} example={example} t={t} />
               ))}

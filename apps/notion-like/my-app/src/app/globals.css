@@ -1,0 +1,87 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #37352f;
+  --border: #e9e9e7;
+  --gray-100: #f7f6f3;
+  --gray-200: #e9e9e7;
+  --gray-300: #d3d1cb;
+  --gray-400: #9b9a97;
+  --gray-500: #6f6e69;
+  --gray-600: #37352f;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, 'Apple Color Emoji', Arial, sans-serif, 'Segoe UI Emoji', 'Segoe UI Symbol';
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+/* Custom scrollbar for a cleaner look */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #d3d1cb;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #9b9a97;
+}
+
+/* Selection styling */
+::selection {
+  background-color: rgba(45, 170, 219, 0.3);
+}
+
+/* Focus states for better accessibility */
+*:focus-visible {
+  outline: 2px solid #2dabdb;
+  outline-offset: 2px;
+}
+
+/* Markdown content styling */
+.markdown-content {
+  line-height: 1.6;
+}
+
+.markdown-content p {
+  margin: 0;
+}
+
+.markdown-content a {
+  text-decoration: underline;
+  transition: color 0.2s;
+}
+
+.markdown-content code {
+  font-family: 'Geist Mono', 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+}
+
+.markdown-content strong {
+  font-weight: 600;
+}
+
+/* Auto-resize textarea */
+textarea {
+  field-sizing: content;
+  max-height: 500px;
+  overflow-y: auto;
+}

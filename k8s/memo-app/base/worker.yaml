@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: worker
-        image: ghcr.io/nhuberty/memo-worker:latest
+        image: ghcr.io/nicolashuberty/memo-worker:latest
         env:
         - name: NODE_ENV
           value: production

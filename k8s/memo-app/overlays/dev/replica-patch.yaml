@@ -1,0 +1,15 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: memo-frontend
+  namespace: memo-app-dev
+spec:
+  replicas: 1
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: memo-worker
+  namespace: memo-app-dev
+spec:
+  replicas: 1

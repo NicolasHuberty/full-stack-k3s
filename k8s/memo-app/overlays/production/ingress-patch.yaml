@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: memo-app-ingress
+  namespace: memo-app-production
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    external-dns.alpha.kubernetes.io/hostname: memo.docuralis.com
+spec:
+  tls:
+  - hosts:
+    - memo.docuralis.com
+    secretName: memo-app-production-tls
+  rules:
+  - host: memo.docuralis.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: prod-memo-frontend
+            port:
+              number: 3000

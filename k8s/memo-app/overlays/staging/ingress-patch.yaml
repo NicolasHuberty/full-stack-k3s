@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: memo-app-ingress
+  namespace: memo-app-staging
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    external-dns.alpha.kubernetes.io/hostname: staging.memo.docuralis.com
+spec:
+  tls:
+  - hosts:
+    - staging.memo.docuralis.com
+    secretName: memo-app-staging-tls
+  rules:
+  - host: staging.memo.docuralis.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: staging-memo-frontend
+            port:
+              number: 3000

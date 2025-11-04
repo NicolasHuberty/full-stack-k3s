@@ -36,7 +36,7 @@ export async function transcribeAudio(
         content: audioBuffer,
       },
       language: options?.language,
-      timestamp_granularities: options?.timestampGranularities
+      timestampGranularities: options?.timestampGranularities
         ? [options.timestampGranularities]
         : undefined,
     });
@@ -79,7 +79,7 @@ export async function transcribeAudioFromUrl(
         content: audioUrl, // Can be URL or Buffer
       },
       language: options?.language,
-      timestamp_granularities: options?.timestampGranularities
+      timestampGranularities: options?.timestampGranularities
         ? [options.timestampGranularities]
         : undefined,
     });

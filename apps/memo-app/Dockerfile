@@ -11,7 +11,7 @@ WORKDIR /app
 
 # Install dependencies using npm
 COPY package.json package-lock.json ./
-RUN npm ci
+RUN npm ci --include=optional
 
 # Rebuild the source code only when needed
 FROM base AS builder

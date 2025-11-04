@@ -10,6 +10,9 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
 
+# Install lightningcss musl binary explicitly
+RUN npm install --save-optional lightningcss-linux-x64-musl@1.27.0 || true
+
 # Rebuild the source code only when needed
 FROM base AS builder
 WORKDIR /app

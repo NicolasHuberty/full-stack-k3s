@@ -6,15 +6,9 @@ FROM base AS deps
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
-# Install dependencies
-COPY package.json bun.lock* package-lock.json* pnpm-lock.yaml* yarn.lock* ./
-RUN \
-  if [ -f bun.lock ]; then npm install -g bun && bun install --frozen-lockfile; \
-  elif [ -f yarn.lock ]; then yarn --frozen-lockfile; \
-  elif [ -f package-lock.json ]; then npm ci; \
-  elif [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm i --frozen-lockfile; \
-  else echo "Lockfile not found." && exit 1; \
-  fi
+# Install dependencies using npm
+COPY package.json package-lock.json ./
+RUN npm ci
 
 # Build the worker
 FROM base AS builder

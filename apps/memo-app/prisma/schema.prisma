@@ -1,0 +1,63 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id String @id @default(uuid())
+  email String @unique
+  name String
+  password String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  memos Memo[]
+  memoFiles MemoFile[]
+}
+
+model Memo {
+  id String @id @default(uuid())
+  userId String
+  user User @relation(fields: [userId], references: [id])
+  title String
+  content String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  status MemoStatus @default(DRAFT)
+  memoFiles MemoFile[]
+}
+
+enum MemoStatus {
+  DRAFT
+  PREPARING
+  RUNNING
+  DONE
+  CANCELLED
+  FAILED
+  ARCHIVED
+}
+
+model File {
+  id String @id @default(uuid())
+  filename String
+  mimeType String
+  size Int
+  s3Key String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  memoFiles MemoFile[]
+}
+
+model MemoFile {
+  id String @id @default(uuid())
+  memoId String
+  memo Memo @relation(fields: [memoId], references: [id])
+  userId String
+  user User @relation(fields: [userId], references: [id])
+  fileId String
+  file File @relation(fields: [fileId], references: [id])
+}

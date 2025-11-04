@@ -1,13 +1,13 @@
-import { NextRequest, NextResponse } from "next/server";
-import { fileService } from "@/services";
+import { type NextRequest, NextResponse } from "next/server";
 import { addFileProcessJob } from "@/lib/queue";
+import { fileService } from "@/services";
 
 export const runtime = "nodejs";
 
 // POST /api/files/[id]/transcribe - Trigger audio transcription
 export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const { id } = await params;
@@ -16,17 +16,14 @@ export async function POST(
     const file = await fileService.getFileById(id);
 
     if (!file) {
-      return NextResponse.json(
-        { error: "File not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "File not found" }, { status: 404 });
     }
 
     // Check if file is audio
     if (!file.mimeType.startsWith("audio/")) {
       return NextResponse.json(
         { error: "File is not an audio file" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -46,14 +43,11 @@ export async function POST(
   } catch (error) {
     console.error("Transcription queue error:", error);
     if (error instanceof Error) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: error.message }, { status: 400 });
     }
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

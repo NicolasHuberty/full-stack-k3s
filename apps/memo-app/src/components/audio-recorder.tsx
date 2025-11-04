@@ -1,16 +1,19 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { Mic, Square, Trash2, Upload } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Mic, Square, Upload, Trash2 } from "lucide-react";
 
 interface AudioRecorderProps {
   onUploadComplete?: (fileId: string, filename: string) => void;
   onError?: (error: string) => void;
 }
 
-export function AudioRecorder({ onUploadComplete, onError }: AudioRecorderProps) {
+export function AudioRecorder({
+  onUploadComplete,
+  onError,
+}: AudioRecorderProps) {
   const [isRecording, setIsRecording] = useState(false);
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
@@ -57,7 +60,7 @@ export function AudioRecorder({ onUploadComplete, onError }: AudioRecorderProps)
         setAudioUrl(url);
 
         // Stop all tracks
-        stream.getTracks().forEach(track => track.stop());
+        stream.getTracks().forEach((track) => track.stop());
       };
 
       mediaRecorder.start();
@@ -70,7 +73,9 @@ export function AudioRecorder({ onUploadComplete, onError }: AudioRecorderProps)
       }, 1000);
     } catch (err) {
       console.error("Error starting recording:", err);
-      onError?.("Failed to start recording. Please check microphone permissions.");
+      onError?.(
+        "Failed to start recording. Please check microphone permissions.",
+      );
     }
   };
 
@@ -141,9 +146,15 @@ export function AudioRecorder({ onUploadComplete, onError }: AudioRecorderProps)
       <CardContent className="pt-6 space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Mic className={`size-5 ${isRecording ? "text-red-500 animate-pulse" : "text-muted-foreground"}`} />
+            <Mic
+              className={`size-5 ${isRecording ? "text-red-500 animate-pulse" : "text-muted-foreground"}`}
+            />
             <span className="font-medium">
-              {isRecording ? "Recording..." : audioBlob ? "Recording Ready" : "Audio Recorder"}
+              {isRecording
+                ? "Recording..."
+                : audioBlob
+                  ? "Recording Ready"
+                  : "Audio Recorder"}
             </span>
           </div>
           {(isRecording || audioBlob) && (
@@ -153,9 +164,7 @@ export function AudioRecorder({ onUploadComplete, onError }: AudioRecorderProps)
           )}
         </div>
 
-        {audioUrl && (
-          <audio controls src={audioUrl} className="w-full" />
-        )}
+        {audioUrl && <audio controls src={audioUrl} className="w-full" />}
 
         <div className="flex gap-2">
           {!isRecording && !audioBlob && (
@@ -166,7 +175,11 @@ export function AudioRecorder({ onUploadComplete, onError }: AudioRecorderProps)
           )}
 
           {isRecording && (
-            <Button onClick={stopRecording} variant="destructive" className="flex-1">
+            <Button
+              onClick={stopRecording}
+              variant="destructive"
+              className="flex-1"
+            >
               <Square className="size-4" />
               Stop Recording
             </Button>
@@ -174,11 +187,19 @@ export function AudioRecorder({ onUploadComplete, onError }: AudioRecorderProps)
 
           {audioBlob && !isRecording && (
             <>
-              <Button onClick={uploadRecording} disabled={uploading} className="flex-1">
+              <Button
+                onClick={uploadRecording}
+                disabled={uploading}
+                className="flex-1"
+              >
                 <Upload className="size-4" />
                 {uploading ? "Uploading..." : "Upload to S3"}
               </Button>
-              <Button onClick={clearRecording} variant="outline" disabled={uploading}>
+              <Button
+                onClick={clearRecording}
+                variant="outline"
+                disabled={uploading}
+              >
                 <Trash2 className="size-4" />
                 Clear
               </Button>

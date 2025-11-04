@@ -1,14 +1,26 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { ArrowLeft, Plus, Search } from "lucide-react";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Search, ArrowLeft } from "lucide-react";
-import { MemoStatus } from "@/types";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import type { MemoStatus } from "@/types";
 
 interface Memo {
   id: string;
@@ -37,7 +49,7 @@ export default function MemosPage() {
 
   useEffect(() => {
     fetchMemos();
-  }, [statusFilter]);
+  }, [fetchMemos]);
 
   const fetchMemos = async () => {
     try {
@@ -60,9 +72,10 @@ export default function MemosPage() {
     }
   };
 
-  const filteredMemos = memos.filter((memo) =>
-    memo.title.toLowerCase().includes(search.toLowerCase()) ||
-    memo.content.toLowerCase().includes(search.toLowerCase())
+  const filteredMemos = memos.filter(
+    (memo) =>
+      memo.title.toLowerCase().includes(search.toLowerCase()) ||
+      memo.content.toLowerCase().includes(search.toLowerCase()),
   );
 
   return (
@@ -103,7 +116,9 @@ export default function MemosPage() {
             </div>
             <Select
               value={statusFilter}
-              onValueChange={(value) => setStatusFilter(value as MemoStatus | "ALL")}
+              onValueChange={(value) =>
+                setStatusFilter(value as MemoStatus | "ALL")
+              }
             >
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Filter by status" />
@@ -149,7 +164,10 @@ export default function MemosPage() {
                         <CardTitle className="text-lg line-clamp-1">
                           {memo.title}
                         </CardTitle>
-                        <Badge className={statusColors[memo.status]} variant="default">
+                        <Badge
+                          className={statusColors[memo.status]}
+                          variant="default"
+                        >
                           {memo.status}
                         </Badge>
                       </div>

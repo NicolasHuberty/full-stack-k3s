@@ -1,14 +1,20 @@
-import { Worker, Job } from "bullmq";
+import { type Job, Worker } from "bullmq";
 import IORedis from "ioredis";
-import { QUEUE_NAMES, type FileProcessJob } from "@/lib/queue";
+import {
+  type DocumentFormat,
+  generateDocument,
+} from "@/lib/document-generator";
+import { bucketName, minioClient } from "@/lib/minio";
 import { transcribeAudio } from "@/lib/mistral";
-import { generateDocument, type DocumentFormat } from "@/lib/document-generator";
-import { minioClient, bucketName } from "@/lib/minio";
+import { type FileProcessJob, QUEUE_NAMES } from "@/lib/queue";
 import { fileService } from "@/services";
 
-const connection = new IORedis(process.env.REDIS_URL || "redis://localhost:6379", {
-  maxRetriesPerRequest: null,
-});
+const connection = new IORedis(
+  process.env.REDIS_URL || "redis://localhost:6379",
+  {
+    maxRetriesPerRequest: null,
+  },
+);
 
 export const fileProcessWorker = new Worker<FileProcessJob>(
   QUEUE_NAMES.FILE_PROCESS,
@@ -21,7 +27,7 @@ export const fileProcessWorker = new Worker<FileProcessJob>(
       await job.updateProgress(10);
 
       switch (operation) {
-        case "transcribe":
+        case "transcribe": {
           console.log(`[Worker] Transcribing audio file: ${s3Key}`);
 
           // Get file info
@@ -48,7 +54,9 @@ export const fileProcessWorker = new Worker<FileProcessJob>(
 
           await job.updateProgress(60);
 
-          console.log(`[Worker] Transcription completed. Length: ${transcription.text.length} chars`);
+          console.log(
+            `[Worker] Transcription completed. Length: ${transcription.text.length} chars`,
+          );
 
           // Generate documents in multiple formats
           const formats: DocumentFormat[] = ["txt", "pdf", "docx"];
@@ -70,14 +78,20 @@ export const fileProcessWorker = new Worker<FileProcessJob>(
             const docFilename = `transcription-${fileId}-${Date.now()}.${format}`;
             const docS3Key = `transcriptions/${docFilename}`;
 
-            await minioClient.putObject(bucketName, docS3Key, docBuffer, docBuffer.length, {
-              "Content-Type":
-                format === "pdf"
-                  ? "application/pdf"
-                  : format === "docx"
-                  ? "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                  : "text/plain",
-            });
+            await minioClient.putObject(
+              bucketName,
+              docS3Key,
+              docBuffer,
+              docBuffer.length,
+              {
+                "Content-Type":
+                  format === "pdf"
+                    ? "application/pdf"
+                    : format === "docx"
+                      ? "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                      : "text/plain",
+              },
+            );
 
             // Create file record in database
             const docFile = await fileService.createFile({
@@ -86,15 +100,17 @@ export const fileProcessWorker = new Worker<FileProcessJob>(
                 format === "pdf"
                   ? "application/pdf"
                   : format === "docx"
-                  ? "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                  : "text/plain",
+                    ? "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                    : "text/plain",
               size: docBuffer.length,
               s3Key: docS3Key,
             });
 
             generatedDocs.push({ format, fileId: docFile.id });
 
-            console.log(`[Worker] Generated ${format.toUpperCase()} document: ${docFile.id}`);
+            console.log(
+              `[Worker] Generated ${format.toUpperCase()} document: ${docFile.id}`,
+            );
           }
 
           // Attach generated documents to the memo if memoId provided
@@ -103,9 +119,11 @@ export const fileProcessWorker = new Worker<FileProcessJob>(
             const { prisma } = await import("@/lib/prisma");
             const { MemoStatus } = await import("@/generated/prisma");
 
-            const docFileIds = generatedDocs.map(doc => doc.fileId);
+            const docFileIds = generatedDocs.map((doc) => doc.fileId);
             await memoService.attachFiles(memoId, { fileIds: docFileIds });
-            console.log(`[Worker] Attached ${docFileIds.length} document(s) to memo: ${memoId}`);
+            console.log(
+              `[Worker] Attached ${docFileIds.length} document(s) to memo: ${memoId}`,
+            );
 
             // Update memo status to DONE after successful transcription (direct update to avoid hooks)
             await prisma.memo.update({
@@ -125,6 +143,7 @@ export const fileProcessWorker = new Worker<FileProcessJob>(
             segmentCount: transcription.segments?.length || 0,
             documents: generatedDocs,
           };
+        }
 
         case "analyze":
           console.log(`[Worker] Analyzing file: ${s3Key}`);
@@ -147,7 +166,7 @@ export const fileProcessWorker = new Worker<FileProcessJob>(
   {
     connection,
     concurrency: 2, // Process 2 transcriptions simultaneously (API limits)
-  }
+  },
 );
 
 fileProcessWorker.on("completed", (job) => {
@@ -158,4 +177,6 @@ fileProcessWorker.on("failed", (job, err) => {
   console.error(`[Worker] Processing job ${job?.id} failed:`, err.message);
 });
 
-console.log(`[Worker] File process worker started, processing queue: ${QUEUE_NAMES.FILE_PROCESS}`);
+console.log(
+  `[Worker] File process worker started, processing queue: ${QUEUE_NAMES.FILE_PROCESS}`,
+);

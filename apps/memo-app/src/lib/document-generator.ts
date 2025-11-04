@@ -1,5 +1,12 @@
+import {
+  AlignmentType,
+  Document,
+  HeadingLevel,
+  Packer,
+  Paragraph,
+  TextRun,
+} from "docx";
 import PDFDocument from "pdfkit";
-import { Document, Paragraph, TextRun, HeadingLevel, AlignmentType, Packer } from "docx";
 import type { TranscriptionResult } from "./mistral";
 
 export type DocumentFormat = "txt" | "pdf" | "docx";
@@ -20,7 +27,7 @@ export interface GenerateDocumentOptions {
  * Generate document from transcription
  */
 export async function generateDocument(
-  options: GenerateDocumentOptions
+  options: GenerateDocumentOptions,
 ): Promise<Buffer> {
   switch (options.format) {
     case "txt":
@@ -63,13 +70,13 @@ function generateTextDocument(options: GenerateDocumentOptions): Buffer {
 
   // Full transcription
   content += "Transcription:\n";
-  content += "-".repeat(50) + "\n\n";
-  content += transcription.text + "\n\n";
+  content += `${"-".repeat(50)}\n\n`;
+  content += `${transcription.text}\n\n`;
 
   // Timestamps (if available and requested)
   if (includeTimestamps && transcription.segments?.length) {
     content += "\nTimestamped Segments:\n";
-    content += "-".repeat(50) + "\n\n";
+    content += `${"-".repeat(50)}\n\n`;
 
     for (const segment of transcription.segments) {
       const start = formatTime(segment.start);
@@ -84,7 +91,9 @@ function generateTextDocument(options: GenerateDocumentOptions): Buffer {
 /**
  * Generate PDF document
  */
-function generatePdfDocument(options: GenerateDocumentOptions): Promise<Buffer> {
+function generatePdfDocument(
+  options: GenerateDocumentOptions,
+): Promise<Buffer> {
   return new Promise((resolve, reject) => {
     const { title, transcription, includeTimestamps, metadata } = options;
 
@@ -154,7 +163,7 @@ function generatePdfDocument(options: GenerateDocumentOptions): Promise<Buffer> 
  * Generate DOCX document
  */
 async function generateDocxDocument(
-  options: GenerateDocumentOptions
+  options: GenerateDocumentOptions,
 ): Promise<Buffer> {
   const { title, transcription, includeTimestamps, metadata } = options;
 
@@ -166,7 +175,7 @@ async function generateDocxDocument(
       text: title,
       heading: HeadingLevel.HEADING_1,
       alignment: AlignmentType.CENTER,
-    })
+    }),
   );
 
   children.push(new Paragraph({ text: "" })); // Empty line
@@ -179,7 +188,7 @@ async function generateDocxDocument(
           new TextRun({ text: "Memo: ", bold: true }),
           new TextRun({ text: metadata.memoTitle }),
         ],
-      })
+      }),
     );
   }
   if (metadata?.createdAt) {
@@ -189,7 +198,7 @@ async function generateDocxDocument(
           new TextRun({ text: "Date: ", bold: true }),
           new TextRun({ text: metadata.createdAt.toLocaleString() }),
         ],
-      })
+      }),
     );
   }
   if (transcription.language) {
@@ -199,7 +208,7 @@ async function generateDocxDocument(
           new TextRun({ text: "Language: ", bold: true }),
           new TextRun({ text: transcription.language }),
         ],
-      })
+      }),
     );
   }
   if (transcription.duration) {
@@ -209,7 +218,7 @@ async function generateDocxDocument(
           new TextRun({ text: "Duration: ", bold: true }),
           new TextRun({ text: `${Math.round(transcription.duration)}s` }),
         ],
-      })
+      }),
     );
   }
 
@@ -220,14 +229,14 @@ async function generateDocxDocument(
     new Paragraph({
       text: "Transcription:",
       heading: HeadingLevel.HEADING_2,
-    })
+    }),
   );
 
   children.push(
     new Paragraph({
       text: transcription.text,
       alignment: AlignmentType.JUSTIFIED,
-    })
+    }),
   );
 
   children.push(new Paragraph({ text: "" })); // Empty line
@@ -238,7 +247,7 @@ async function generateDocxDocument(
       new Paragraph({
         text: "Timestamped Segments:",
         heading: HeadingLevel.HEADING_2,
-      })
+      }),
     );
 
     for (const segment of transcription.segments) {
@@ -248,10 +257,14 @@ async function generateDocxDocument(
       children.push(
         new Paragraph({
           children: [
-            new TextRun({ text: `[${start} - ${end}] `, bold: true, color: "666666" }),
+            new TextRun({
+              text: `[${start} - ${end}] `,
+              bold: true,
+              color: "666666",
+            }),
             new TextRun({ text: segment.text }),
           ],
-        })
+        }),
       );
     }
   }

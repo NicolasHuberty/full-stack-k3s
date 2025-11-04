@@ -1,6 +1,6 @@
+import type { FileFilters, UploadFileInput } from "@/dto";
+import { bucketName, minioClient } from "@/lib/minio";
 import { prisma } from "@/lib/prisma";
-import { minioClient, bucketName } from "@/lib/minio";
-import type { UploadFileInput, FileFilters } from "@/dto";
 import type { File, FileUploadResult } from "@/types";
 
 export class FileService {
@@ -116,7 +116,11 @@ export class FileService {
     }
 
     // Generate presigned URL (valid for 1 hour)
-    const url = await minioClient.presignedGetObject(bucketName, file.s3Key, 3600);
+    const url = await minioClient.presignedGetObject(
+      bucketName,
+      file.s3Key,
+      3600,
+    );
     return url;
   }
 

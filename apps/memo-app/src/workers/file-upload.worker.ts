@@ -1,12 +1,14 @@
-import { Worker, Job } from "bullmq";
+import { type Job, Worker } from "bullmq";
 import IORedis from "ioredis";
-import { fileService } from "@/services";
-import { memoService } from "@/services";
-import { QUEUE_NAMES, type FileUploadJob } from "@/lib/queue";
+import { type FileUploadJob, QUEUE_NAMES } from "@/lib/queue";
+import { fileService, memoService } from "@/services";
 
-const connection = new IORedis(process.env.REDIS_URL || "redis://localhost:6379", {
-  maxRetriesPerRequest: null,
-});
+const connection = new IORedis(
+  process.env.REDIS_URL || "redis://localhost:6379",
+  {
+    maxRetriesPerRequest: null,
+  },
+);
 
 export const fileUploadWorker = new Worker<FileUploadJob>(
   QUEUE_NAMES.FILE_UPLOAD,
@@ -38,7 +40,9 @@ export const fileUploadWorker = new Worker<FileUploadJob>(
         await memoService.attachFiles(memoId, {
           fileIds: [result.fileId],
         });
-        console.log(`[Worker] File ${result.fileId} attached to memo ${memoId}`);
+        console.log(
+          `[Worker] File ${result.fileId} attached to memo ${memoId}`,
+        );
       }
 
       await job.updateProgress(100);
@@ -63,7 +67,7 @@ export const fileUploadWorker = new Worker<FileUploadJob>(
       max: 10, // Max 10 jobs
       duration: 1000, // per second
     },
-  }
+  },
 );
 
 // Event handlers
@@ -94,4 +98,6 @@ process.on("SIGINT", async () => {
   process.exit(0);
 });
 
-console.log(`[Worker] File upload worker started, processing queue: ${QUEUE_NAMES.FILE_UPLOAD}`);
+console.log(
+  `[Worker] File upload worker started, processing queue: ${QUEUE_NAMES.FILE_UPLOAD}`,
+);

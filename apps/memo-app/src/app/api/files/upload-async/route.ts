@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { addFileUploadJob } from "@/lib/queue";
 
 export const runtime = "nodejs";
@@ -11,10 +11,7 @@ export async function POST(request: NextRequest) {
     const memoId = formData.get("memoId") as string | null;
 
     if (!file) {
-      return NextResponse.json(
-        { error: "No file provided" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "No file provided" }, { status: 400 });
     }
 
     // Convert File to Buffer and encode as base64
@@ -31,22 +28,22 @@ export async function POST(request: NextRequest) {
       memoId: memoId || undefined,
     });
 
-    return NextResponse.json({
-      success: true,
-      jobId: job.id,
-      message: "File upload queued successfully",
-    }, { status: 202 }); // 202 Accepted
+    return NextResponse.json(
+      {
+        success: true,
+        jobId: job.id,
+        message: "File upload queued successfully",
+      },
+      { status: 202 },
+    ); // 202 Accepted
   } catch (error) {
     console.error("File upload queue error:", error);
     if (error instanceof Error) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: error.message }, { status: 400 });
     }
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

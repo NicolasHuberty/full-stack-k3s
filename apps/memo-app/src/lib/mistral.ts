@@ -26,7 +26,7 @@ export async function transcribeAudio(
     filename?: string;
     language?: string;
     timestampGranularities?: "segment";
-  }
+  },
 ): Promise<TranscriptionResult> {
   try {
     const response = await mistralClient.audio.transcriptions.complete({
@@ -55,7 +55,7 @@ export async function transcribeAudio(
   } catch (error) {
     console.error("Mistral transcription error:", error);
     throw new Error(
-      `Transcription failed: ${error instanceof Error ? error.message : "Unknown error"}`
+      `Transcription failed: ${error instanceof Error ? error.message : "Unknown error"}`,
     );
   }
 }
@@ -69,7 +69,7 @@ export async function transcribeAudioFromUrl(
     filename?: string;
     language?: string;
     timestampGranularities?: "segment";
-  }
+  },
 ): Promise<TranscriptionResult> {
   try {
     const response = await mistralClient.audio.transcriptions.complete({
@@ -98,7 +98,7 @@ export async function transcribeAudioFromUrl(
   } catch (error) {
     console.error("Mistral transcription error:", error);
     throw new Error(
-      `Transcription failed: ${error instanceof Error ? error.message : "Unknown error"}`
+      `Transcription failed: ${error instanceof Error ? error.message : "Unknown error"}`,
     );
   }
 }

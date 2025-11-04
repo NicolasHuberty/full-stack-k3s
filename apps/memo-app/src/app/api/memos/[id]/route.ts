@@ -1,11 +1,11 @@
-import { NextRequest, NextResponse } from "next/server";
-import { memoService } from "@/services";
+import { type NextRequest, NextResponse } from "next/server";
 import { updateMemoSchema } from "@/dto";
+import { memoService } from "@/services";
 
 // GET /api/memos/[id] - Get memo by ID
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const { id } = await params;
@@ -15,23 +15,17 @@ export async function GET(
     const memo = await memoService.getMemoById(id, includeFiles);
 
     if (!memo) {
-      return NextResponse.json(
-        { error: "Memo not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Memo not found" }, { status: 404 });
     }
 
     return NextResponse.json({ data: memo });
   } catch (error) {
     if (error instanceof Error) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: error.message }, { status: 400 });
     }
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -39,7 +33,7 @@ export async function GET(
 // PATCH /api/memos/[id] - Update memo
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const { id } = await params;
@@ -57,22 +51,19 @@ export async function PATCH(
   } catch (error) {
     console.error(`[API] Failed to update memo ${(await params).id}:`, error);
     if (error instanceof Error) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: error.message }, { status: 400 });
     }
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
 // DELETE /api/memos/[id] - Delete memo (soft delete)
 export async function DELETE(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const { id } = await params;
@@ -81,14 +72,11 @@ export async function DELETE(
     return NextResponse.json({ message: "Memo deleted" });
   } catch (error) {
     if (error instanceof Error) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: error.message }, { status: 400 });
     }
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

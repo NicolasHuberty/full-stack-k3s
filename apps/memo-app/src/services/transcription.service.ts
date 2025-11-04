@@ -23,7 +23,9 @@ export async function triggerMemoTranscription(memoId: string) {
     return { success: false, message: "No audio files found", jobs: [] };
   }
 
-  console.log(`[Transcription] Found ${audioFiles.length} audio file(s) to transcribe`);
+  console.log(
+    `[Transcription] Found ${audioFiles.length} audio file(s) to transcribe`,
+  );
 
   // Queue transcription jobs for all audio files
   const jobs = [];
@@ -38,9 +40,14 @@ export async function triggerMemoTranscription(memoId: string) {
         userId: file.userId,
       });
       jobs.push({ fileId: file.id, jobId: job.id, filename: file.filename });
-      console.log(`[Transcription] Queued job ${job.id} for file: ${file.filename}`);
+      console.log(
+        `[Transcription] Queued job ${job.id} for file: ${file.filename}`,
+      );
     } catch (error) {
-      console.error(`[Transcription] Failed to queue job for file ${file.id}:`, error);
+      console.error(
+        `[Transcription] Failed to queue job for file ${file.id}:`,
+        error,
+      );
     }
   }
 

@@ -1,10 +1,13 @@
-import { Queue, Worker, QueueEvents } from "bullmq";
+import { Queue, QueueEvents } from "bullmq";
 import IORedis from "ioredis";
 
 // Redis connection
-const connection = new IORedis(process.env.REDIS_URL || "redis://localhost:6379", {
-  maxRetriesPerRequest: null,
-});
+const connection = new IORedis(
+  process.env.REDIS_URL || "redis://localhost:6379",
+  {
+    maxRetriesPerRequest: null,
+  },
+);
 
 // Queue names
 export const QUEUE_NAMES = {
@@ -38,45 +41,60 @@ export interface FileDeleteJob {
 }
 
 // Create queues
-export const fileUploadQueue = new Queue<FileUploadJob>(QUEUE_NAMES.FILE_UPLOAD, {
-  connection,
-  defaultJobOptions: {
-    attempts: 3,
-    backoff: {
-      type: "exponential",
-      delay: 2000,
+export const fileUploadQueue = new Queue<FileUploadJob>(
+  QUEUE_NAMES.FILE_UPLOAD,
+  {
+    connection,
+    defaultJobOptions: {
+      attempts: 3,
+      backoff: {
+        type: "exponential",
+        delay: 2000,
+      },
+      removeOnComplete: 100, // Keep last 100 completed jobs
+      removeOnFail: 500, // Keep last 500 failed jobs
     },
-    removeOnComplete: 100, // Keep last 100 completed jobs
-    removeOnFail: 500, // Keep last 500 failed jobs
   },
-});
+);
 
-export const fileProcessQueue = new Queue<FileProcessJob>(QUEUE_NAMES.FILE_PROCESS, {
-  connection,
-  defaultJobOptions: {
-    attempts: 2,
-    backoff: {
-      type: "exponential",
-      delay: 3000,
+export const fileProcessQueue = new Queue<FileProcessJob>(
+  QUEUE_NAMES.FILE_PROCESS,
+  {
+    connection,
+    defaultJobOptions: {
+      attempts: 2,
+      backoff: {
+        type: "exponential",
+        delay: 3000,
+      },
     },
   },
-});
+);
 
-export const fileDeleteQueue = new Queue<FileDeleteJob>(QUEUE_NAMES.FILE_DELETE, {
-  connection,
-  defaultJobOptions: {
-    attempts: 3,
-    backoff: {
-      type: "fixed",
-      delay: 1000,
+export const fileDeleteQueue = new Queue<FileDeleteJob>(
+  QUEUE_NAMES.FILE_DELETE,
+  {
+    connection,
+    defaultJobOptions: {
+      attempts: 3,
+      backoff: {
+        type: "fixed",
+        delay: 1000,
+      },
     },
   },
-});
+);
 
 // Queue events (for monitoring)
-export const fileUploadEvents = new QueueEvents(QUEUE_NAMES.FILE_UPLOAD, { connection });
-export const fileProcessEvents = new QueueEvents(QUEUE_NAMES.FILE_PROCESS, { connection });
-export const fileDeleteEvents = new QueueEvents(QUEUE_NAMES.FILE_DELETE, { connection });
+export const fileUploadEvents = new QueueEvents(QUEUE_NAMES.FILE_UPLOAD, {
+  connection,
+});
+export const fileProcessEvents = new QueueEvents(QUEUE_NAMES.FILE_PROCESS, {
+  connection,
+});
+export const fileDeleteEvents = new QueueEvents(QUEUE_NAMES.FILE_DELETE, {
+  connection,
+});
 
 // Helper to add file upload job
 export async function addFileUploadJob(data: FileUploadJob) {

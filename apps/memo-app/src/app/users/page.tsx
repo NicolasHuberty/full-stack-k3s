@@ -1,7 +1,13 @@
+import { ArrowLeft, Users as UsersIcon } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Users as UsersIcon } from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 export default function UsersPage() {
   return (
@@ -16,9 +22,7 @@ export default function UsersPage() {
             </Link>
             <div>
               <h1 className="text-3xl font-bold tracking-tight">Users</h1>
-              <p className="text-muted-foreground">
-                User management
-              </p>
+              <p className="text-muted-foreground">User management</p>
             </div>
           </div>
 
@@ -34,12 +38,10 @@ export default function UsersPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-sm text-muted-foreground">
-                For now, you can create memos without authentication.
-                All memos are associated with a default demo user.
+                For now, you can create memos without authentication. All memos
+                are associated with a default demo user.
               </p>
-              <p className="text-sm text-muted-foreground">
-                Future features:
-              </p>
+              <p className="text-sm text-muted-foreground">Future features:</p>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li className="flex items-center gap-2">
                   <div className="size-1.5 rounded-full bg-primary" />

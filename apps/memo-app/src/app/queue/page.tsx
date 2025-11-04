@@ -1,11 +1,24 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import {
+  Activity,
+  ArrowLeft,
+  CheckCircle,
+  Clock,
+  Loader,
+  XCircle,
+} from "lucide-react";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Activity, CheckCircle, XCircle, Clock, Loader } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 interface QueueHealth {
   redis: string;
@@ -25,7 +38,7 @@ export default function QueueDashboard() {
     fetchHealth();
     const interval = setInterval(fetchHealth, 5000); // Refresh every 5 seconds
     return () => clearInterval(interval);
-  }, []);
+  }, [fetchHealth]);
 
   const fetchHealth = async () => {
     try {
@@ -75,7 +88,9 @@ export default function QueueDashboard() {
             <Card>
               <CardContent className="py-12 text-center">
                 <Loader className="size-8 animate-spin mx-auto text-muted-foreground" />
-                <p className="mt-4 text-muted-foreground">Loading queue status...</p>
+                <p className="mt-4 text-muted-foreground">
+                  Loading queue status...
+                </p>
               </CardContent>
             </Card>
           ) : (
@@ -85,7 +100,11 @@ export default function QueueDashboard() {
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <CardTitle>Redis Connection</CardTitle>
-                    <Badge className={getStatusColor(health?.redis || "disconnected")}>
+                    <Badge
+                      className={getStatusColor(
+                        health?.redis || "disconnected",
+                      )}
+                    >
                       {health?.redis || "Unknown"}
                     </Badge>
                   </div>
@@ -103,8 +122,12 @@ export default function QueueDashboard() {
                   {/* File Upload Queue */}
                   <Card>
                     <CardHeader>
-                      <CardTitle className="text-base">File Upload Queue</CardTitle>
-                      <CardDescription>Async file uploads to MinIO</CardDescription>
+                      <CardTitle className="text-base">
+                        File Upload Queue
+                      </CardTitle>
+                      <CardDescription>
+                        Async file uploads to MinIO
+                      </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-3">
                       <div className="flex items-center justify-between text-sm">
@@ -112,28 +135,36 @@ export default function QueueDashboard() {
                           <Clock className="size-4 text-yellow-500" />
                           Waiting
                         </span>
-                        <span className="font-mono">{health.queues.fileUpload.waiting || 0}</span>
+                        <span className="font-mono">
+                          {health.queues.fileUpload.waiting || 0}
+                        </span>
                       </div>
                       <div className="flex items-center justify-between text-sm">
                         <span className="flex items-center gap-2">
                           <Loader className="size-4 text-blue-500 animate-spin" />
                           Active
                         </span>
-                        <span className="font-mono">{health.queues.fileUpload.active || 0}</span>
+                        <span className="font-mono">
+                          {health.queues.fileUpload.active || 0}
+                        </span>
                       </div>
                       <div className="flex items-center justify-between text-sm">
                         <span className="flex items-center gap-2">
                           <CheckCircle className="size-4 text-green-500" />
                           Completed
                         </span>
-                        <span className="font-mono">{health.queues.fileUpload.completed || 0}</span>
+                        <span className="font-mono">
+                          {health.queues.fileUpload.completed || 0}
+                        </span>
                       </div>
                       <div className="flex items-center justify-between text-sm">
                         <span className="flex items-center gap-2">
                           <XCircle className="size-4 text-red-500" />
                           Failed
                         </span>
-                        <span className="font-mono">{health.queues.fileUpload.failed || 0}</span>
+                        <span className="font-mono">
+                          {health.queues.fileUpload.failed || 0}
+                        </span>
                       </div>
                     </CardContent>
                   </Card>
@@ -141,8 +172,12 @@ export default function QueueDashboard() {
                   {/* File Process Queue */}
                   <Card>
                     <CardHeader>
-                      <CardTitle className="text-base">File Process Queue</CardTitle>
-                      <CardDescription>Audio transcription & analysis</CardDescription>
+                      <CardTitle className="text-base">
+                        File Process Queue
+                      </CardTitle>
+                      <CardDescription>
+                        Audio transcription & analysis
+                      </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-3">
                       <div className="flex items-center justify-between text-sm">
@@ -150,28 +185,36 @@ export default function QueueDashboard() {
                           <Clock className="size-4 text-yellow-500" />
                           Waiting
                         </span>
-                        <span className="font-mono">{health.queues.fileProcess.waiting || 0}</span>
+                        <span className="font-mono">
+                          {health.queues.fileProcess.waiting || 0}
+                        </span>
                       </div>
                       <div className="flex items-center justify-between text-sm">
                         <span className="flex items-center gap-2">
                           <Loader className="size-4 text-blue-500 animate-spin" />
                           Active
                         </span>
-                        <span className="font-mono">{health.queues.fileProcess.active || 0}</span>
+                        <span className="font-mono">
+                          {health.queues.fileProcess.active || 0}
+                        </span>
                       </div>
                       <div className="flex items-center justify-between text-sm">
                         <span className="flex items-center gap-2">
                           <CheckCircle className="size-4 text-green-500" />
                           Completed
                         </span>
-                        <span className="font-mono">{health.queues.fileProcess.completed || 0}</span>
+                        <span className="font-mono">
+                          {health.queues.fileProcess.completed || 0}
+                        </span>
                       </div>
                       <div className="flex items-center justify-between text-sm">
                         <span className="flex items-center gap-2">
                           <XCircle className="size-4 text-red-500" />
                           Failed
                         </span>
-                        <span className="font-mono">{health.queues.fileProcess.failed || 0}</span>
+                        <span className="font-mono">
+                          {health.queues.fileProcess.failed || 0}
+                        </span>
                       </div>
                     </CardContent>
                   </Card>
@@ -179,7 +222,9 @@ export default function QueueDashboard() {
                   {/* File Delete Queue */}
                   <Card>
                     <CardHeader>
-                      <CardTitle className="text-base">File Delete Queue</CardTitle>
+                      <CardTitle className="text-base">
+                        File Delete Queue
+                      </CardTitle>
                       <CardDescription>Cleanup & file deletion</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-3">
@@ -188,28 +233,36 @@ export default function QueueDashboard() {
                           <Clock className="size-4 text-yellow-500" />
                           Waiting
                         </span>
-                        <span className="font-mono">{health.queues.fileDelete.waiting || 0}</span>
+                        <span className="font-mono">
+                          {health.queues.fileDelete.waiting || 0}
+                        </span>
                       </div>
                       <div className="flex items-center justify-between text-sm">
                         <span className="flex items-center gap-2">
                           <Loader className="size-4 text-blue-500 animate-spin" />
                           Active
                         </span>
-                        <span className="font-mono">{health.queues.fileDelete.active || 0}</span>
+                        <span className="font-mono">
+                          {health.queues.fileDelete.active || 0}
+                        </span>
                       </div>
                       <div className="flex items-center justify-between text-sm">
                         <span className="flex items-center gap-2">
                           <CheckCircle className="size-4 text-green-500" />
                           Completed
                         </span>
-                        <span className="font-mono">{health.queues.fileDelete.completed || 0}</span>
+                        <span className="font-mono">
+                          {health.queues.fileDelete.completed || 0}
+                        </span>
                       </div>
                       <div className="flex items-center justify-between text-sm">
                         <span className="flex items-center gap-2">
                           <XCircle className="size-4 text-red-500" />
                           Failed
                         </span>
-                        <span className="font-mono">{health.queues.fileDelete.failed || 0}</span>
+                        <span className="font-mono">
+                          {health.queues.fileDelete.failed || 0}
+                        </span>
                       </div>
                     </CardContent>
                   </Card>
@@ -224,22 +277,32 @@ export default function QueueDashboard() {
                   <div>
                     <h3 className="font-medium mb-2">Async File Upload</h3>
                     <p className="text-sm text-muted-foreground">
-                      Use <code className="bg-muted px-1 py-0.5 rounded">POST /api/files/upload-async</code> instead of
-                      the synchronous endpoint. Returns a job ID immediately, processing happens in background.
+                      Use{" "}
+                      <code className="bg-muted px-1 py-0.5 rounded">
+                        POST /api/files/upload-async
+                      </code>{" "}
+                      instead of the synchronous endpoint. Returns a job ID
+                      immediately, processing happens in background.
                     </p>
                   </div>
                   <div>
                     <h3 className="font-medium mb-2">Check Job Status</h3>
                     <p className="text-sm text-muted-foreground">
-                      Use <code className="bg-muted px-1 py-0.5 rounded">GET /api/queue/job/[jobId]</code> to check
-                      the status and progress of any job.
+                      Use{" "}
+                      <code className="bg-muted px-1 py-0.5 rounded">
+                        GET /api/queue/job/[jobId]
+                      </code>{" "}
+                      to check the status and progress of any job.
                     </p>
                   </div>
                   <div>
                     <h3 className="font-medium mb-2">Start Workers</h3>
                     <p className="text-sm text-muted-foreground">
-                      Run <code className="bg-muted px-1 py-0.5 rounded">bun src/workers/index.ts</code> to start
-                      processing background jobs.
+                      Run{" "}
+                      <code className="bg-muted px-1 py-0.5 rounded">
+                        bun src/workers/index.ts
+                      </code>{" "}
+                      to start processing background jobs.
                     </p>
                   </div>
                 </CardContent>

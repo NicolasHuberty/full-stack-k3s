@@ -19,11 +19,9 @@ const ALLOWED_MIME_TYPES = [
 
 export const uploadFileSchema = z.object({
   filename: z.string().min(1, "Filename is required"),
-  mimeType: z
-    .string()
-    .refine((type) => ALLOWED_MIME_TYPES.includes(type), {
-      message: "File type not allowed",
-    }),
+  mimeType: z.string().refine((type) => ALLOWED_MIME_TYPES.includes(type), {
+    message: "File type not allowed",
+  }),
   size: z
     .number()
     .int()

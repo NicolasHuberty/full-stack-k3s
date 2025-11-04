@@ -1,15 +1,21 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { AudioRecorder } from "@/components/audio-recorder";
 import { ArrowLeft, Save } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { AudioRecorder } from "@/components/audio-recorder";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 export default function NewMemoPage() {
   const router = useRouter();
@@ -17,7 +23,9 @@ export default function NewMemoPage() {
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [uploadedFiles, setUploadedFiles] = useState<Array<{ id: string; name: string }>>([]);
+  const [uploadedFiles, setUploadedFiles] = useState<
+    Array<{ id: string; name: string }>
+  >([]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,7 +61,7 @@ export default function NewMemoPage() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            fileIds: uploadedFiles.map(f => f.id),
+            fileIds: uploadedFiles.map((f) => f.id),
           }),
         });
       }
@@ -78,9 +86,7 @@ export default function NewMemoPage() {
             </Link>
             <div>
               <h1 className="text-3xl font-bold tracking-tight">New Memo</h1>
-              <p className="text-muted-foreground">
-                Create a new memo
-              </p>
+              <p className="text-muted-foreground">Create a new memo</p>
             </div>
           </div>
 
@@ -122,7 +128,10 @@ export default function NewMemoPage() {
                   <Label>Audio Recording</Label>
                   <AudioRecorder
                     onUploadComplete={(fileId, filename) => {
-                      setUploadedFiles(prev => [...prev, { id: fileId, name: filename }]);
+                      setUploadedFiles((prev) => [
+                        ...prev,
+                        { id: fileId, name: filename },
+                      ]);
                     }}
                     onError={(err) => setError(err)}
                   />

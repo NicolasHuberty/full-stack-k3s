@@ -1,18 +1,30 @@
 "use client";
 
-import { useState, useEffect, use } from "react";
-import { useRouter } from "next/navigation";
+import { ArrowLeft, FileAudio, Save, Trash2 } from "lucide-react";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, Save, Trash2, FileAudio } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { use, useCallback, useEffect, useState } from "react";
 import { AudioRecorder } from "@/components/audio-recorder";
-import { MemoStatus } from "@/types";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import type { MemoStatus } from "@/types";
 
 interface Memo {
   id: string;
@@ -39,7 +51,11 @@ const statusColors: Record<MemoStatus, string> = {
   ARCHIVED: "bg-zinc-500",
 };
 
-export default function MemoDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default function MemoDetailPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const { id } = use(params);
   const router = useRouter();
   const [memo, setMemo] = useState<Memo | null>(null);
@@ -52,11 +68,7 @@ export default function MemoDetailPage({ params }: { params: Promise<{ id: strin
   const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([]);
   const [loadingFiles, setLoadingFiles] = useState(false);
 
-  useEffect(() => {
-    fetchMemo();
-  }, [id]);
-
-  const fetchMemo = async () => {
+  const fetchMemo = useCallback(async () => {
     try {
       setLoading(true);
 
@@ -76,11 +88,13 @@ export default function MemoDetailPage({ params }: { params: Promise<{ id: strin
       const filesResponse = await fetch(`/api/memos/${id}/files`);
       if (filesResponse.ok) {
         const filesData = await filesResponse.json();
-        setAttachedFiles(filesData.data.map((file: any) => ({
-          id: file.id,
-          filename: file.filename,
-          size: file.size,
-        })));
+        setAttachedFiles(
+          filesData.data.map((file: any) => ({
+            id: file.id,
+            filename: file.filename,
+            size: file.size,
+          })),
+        );
       }
       setLoadingFiles(false);
     } catch (err) {
@@ -88,7 +102,11 @@ export default function MemoDetailPage({ params }: { params: Promise<{ id: strin
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
+
+  useEffect(() => {
+    fetchMemo();
+  }, [fetchMemo]);
 
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -120,8 +138,15 @@ export default function MemoDetailPage({ params }: { params: Promise<{ id: strin
       setMemo(data.data);
 
       // Show message if changing to RUNNING with audio files
-      if (isChangingToRunning && attachedFiles.some(f => f.filename.match(/\.(webm|wav|mp3|ogg|m4a)$/i))) {
-        alert("Memo set to RUNNING! Audio transcription jobs have been queued automatically. Check the Queue Dashboard to monitor progress.");
+      if (
+        isChangingToRunning &&
+        attachedFiles.some((f) =>
+          f.filename.match(/\.(webm|wav|mp3|ogg|m4a)$/i),
+        )
+      ) {
+        alert(
+          "Memo set to RUNNING! Audio transcription jobs have been queued automatically. Check the Queue Dashboard to monitor progress.",
+        );
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to update memo");
@@ -172,12 +197,14 @@ export default function MemoDetailPage({ params }: { params: Promise<{ id: strin
       }
 
       // Add to attached files list
-      setAttachedFiles(prev => [...prev, { id: fileId, filename, size: 0 }]);
+      setAttachedFiles((prev) => [...prev, { id: fileId, filename, size: 0 }]);
 
       // Reload files to get the new one
       await fetchMemo();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to attach audio file");
+      setError(
+        err instanceof Error ? err.message : "Failed to attach audio file",
+      );
     }
   };
 
@@ -198,9 +225,13 @@ export default function MemoDetailPage({ params }: { params: Promise<{ id: strin
       }
 
       const data = await response.json();
-      alert(`Queued ${data.jobs?.length || 0} transcription job(s). Check the Queue Dashboard for status.`);
+      alert(
+        `Queued ${data.jobs?.length || 0} transcription job(s). Check the Queue Dashboard for status.`,
+      );
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to transcribe files");
+      setError(
+        err instanceof Error ? err.message : "Failed to transcribe files",
+      );
     } finally {
       setSaving(false);
     }
@@ -259,9 +290,7 @@ export default function MemoDetailPage({ params }: { params: Promise<{ id: strin
           <Card>
             <CardHeader>
               <CardTitle>Memo Details</CardTitle>
-              <CardDescription>
-                Update your memo information
-              </CardDescription>
+              <CardDescription>Update your memo information</CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleUpdate} className="space-y-4">
@@ -302,18 +331,24 @@ export default function MemoDetailPage({ params }: { params: Promise<{ id: strin
                     <SelectContent>
                       <SelectItem value="DRAFT">Draft</SelectItem>
                       <SelectItem value="PREPARING">Preparing</SelectItem>
-                      <SelectItem value="RUNNING">Running (Auto-transcribe audio)</SelectItem>
+                      <SelectItem value="RUNNING">
+                        Running (Auto-transcribe audio)
+                      </SelectItem>
                       <SelectItem value="DONE">Done</SelectItem>
                       <SelectItem value="CANCELLED">Cancelled</SelectItem>
                       <SelectItem value="FAILED">Failed</SelectItem>
                       <SelectItem value="ARCHIVED">Archived</SelectItem>
                     </SelectContent>
                   </Select>
-                  {status === "RUNNING" && attachedFiles.some(f => f.filename.match(/\.(webm|wav|mp3|ogg|m4a)$/i)) && (
-                    <p className="text-xs text-muted-foreground">
-                      Setting to RUNNING will automatically transcribe all audio files
-                    </p>
-                  )}
+                  {status === "RUNNING" &&
+                    attachedFiles.some((f) =>
+                      f.filename.match(/\.(webm|wav|mp3|ogg|m4a)$/i),
+                    ) && (
+                      <p className="text-xs text-muted-foreground">
+                        Setting to RUNNING will automatically transcribe all
+                        audio files
+                      </p>
+                    )}
                 </div>
 
                 <div className="space-y-2">
@@ -329,9 +364,13 @@ export default function MemoDetailPage({ params }: { params: Promise<{ id: strin
                     <CardHeader className="flex flex-row items-center justify-between">
                       <CardTitle className="text-base flex items-center gap-2">
                         <FileAudio className="size-4" />
-                        Attached Files {attachedFiles.length > 0 && `(${attachedFiles.length})`}
+                        Attached Files{" "}
+                        {attachedFiles.length > 0 &&
+                          `(${attachedFiles.length})`}
                       </CardTitle>
-                      {attachedFiles.some(f => f.filename.match(/\.(webm|wav|mp3|ogg|m4a)$/i)) && (
+                      {attachedFiles.some((f) =>
+                        f.filename.match(/\.(webm|wav|mp3|ogg|m4a)$/i),
+                      ) && (
                         <Button
                           onClick={handleTranscribeAll}
                           variant="outline"
@@ -344,31 +383,40 @@ export default function MemoDetailPage({ params }: { params: Promise<{ id: strin
                     </CardHeader>
                     <CardContent className="space-y-4">
                       {loadingFiles && !attachedFiles.length ? (
-                        <div className="text-sm text-muted-foreground">Loading files...</div>
+                        <div className="text-sm text-muted-foreground">
+                          Loading files...
+                        </div>
                       ) : (
                         attachedFiles.map((file) => (
-                        <div key={file.id} className="space-y-2 p-3 border rounded-md">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <FileAudio className="size-4 text-muted-foreground" />
-                              <span className="text-sm font-medium">{file.filename}</span>
+                          <div
+                            key={file.id}
+                            className="space-y-2 p-3 border rounded-md"
+                          >
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <FileAudio className="size-4 text-muted-foreground" />
+                                <span className="text-sm font-medium">
+                                  {file.filename}
+                                </span>
+                              </div>
+                              <a
+                                href={`/api/files/${file.id}/download`}
+                                download
+                                className="text-xs text-primary hover:underline"
+                              >
+                                Download
+                              </a>
                             </div>
-                            <a
-                              href={`/api/files/${file.id}/download`}
-                              download
-                              className="text-xs text-primary hover:underline"
-                            >
-                              Download
-                            </a>
+                            {file.filename.match(
+                              /\.(webm|wav|mp3|ogg|m4a)$/i,
+                            ) && (
+                              <audio
+                                controls
+                                src={`/api/files/${file.id}/download`}
+                                className="w-full"
+                              />
+                            )}
                           </div>
-                          {file.filename.match(/\.(webm|wav|mp3|ogg|m4a)$/i) && (
-                            <audio
-                              controls
-                              src={`/api/files/${file.id}/download`}
-                              className="w-full"
-                            />
-                          )}
-                        </div>
                         ))
                       )}
                     </CardContent>

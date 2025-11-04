@@ -1,7 +1,13 @@
+import { Activity, FileText, Plus, Users } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { FileText, Plus, Users, Activity } from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 export default function Home() {
   return (
@@ -9,9 +15,7 @@ export default function Home() {
       <div className="container mx-auto px-4 py-16">
         <div className="max-w-4xl mx-auto space-y-8">
           <div className="text-center space-y-4">
-            <h1 className="text-4xl font-bold tracking-tight">
-              Memo App
-            </h1>
+            <h1 className="text-4xl font-bold tracking-tight">Memo App</h1>
             <p className="text-lg text-muted-foreground">
               Manage your memos with status tracking and file attachments
             </p>
@@ -94,7 +98,8 @@ export default function Home() {
                 </li>
                 <li className="flex items-center gap-2">
                   <div className="size-1.5 rounded-full bg-primary" />
-                  Track memo status: Draft, Preparing, Running, Done, Cancelled, Failed, Archived
+                  Track memo status: Draft, Preparing, Running, Done, Cancelled,
+                  Failed, Archived
                 </li>
                 <li className="flex items-center gap-2">
                   <div className="size-1.5 rounded-full bg-primary" />

@@ -1,13 +1,13 @@
-import { prisma } from "@/lib/prisma";
 import type {
+  AttachFilesInput,
   CreateMemoInput,
+  MemoFilters,
   UpdateMemoInput,
   UpdateMemoStatusInput,
-  MemoFilters,
-  AttachFilesInput,
 } from "@/dto";
-import type { Memo, MemoWithFiles } from "@/types";
 import { MemoStatus } from "@/generated/prisma";
+import { prisma } from "@/lib/prisma";
+import type { Memo, MemoWithFiles } from "@/types";
 
 export class MemoService {
   /**
@@ -50,7 +50,15 @@ export class MemoService {
 
     if (includeFiles) {
       const memoWithFiles = memo as typeof memo & {
-        memoFiles: Array<{ file: { id: string; filename: string; mimeType: string; size: number; s3Key: string } }>;
+        memoFiles: Array<{
+          file: {
+            id: string;
+            filename: string;
+            mimeType: string;
+            size: number;
+            s3Key: string;
+          };
+        }>;
       };
       return {
         ...memo,
@@ -104,7 +112,9 @@ export class MemoService {
     // If status changed to RUNNING, trigger transcription
     if (data.status === MemoStatus.RUNNING) {
       // Import queue functions dynamically to avoid circular dependencies
-      const { triggerMemoTranscription } = await import("./transcription.service");
+      const { triggerMemoTranscription } = await import(
+        "./transcription.service"
+      );
       await triggerMemoTranscription(id).catch((error) => {
         console.error(`Failed to trigger transcription for memo ${id}:`, error);
         // Don't throw - we still want to update the status even if transcription fails
@@ -127,7 +137,10 @@ export class MemoService {
     }
 
     // Business rule: Cannot transition from RUNNING to DRAFT
-    if (memo.status === MemoStatus.RUNNING && data.status === MemoStatus.DRAFT) {
+    if (
+      memo.status === MemoStatus.RUNNING &&
+      data.status === MemoStatus.DRAFT
+    ) {
       throw new Error("Cannot change running memo back to draft");
     }
 

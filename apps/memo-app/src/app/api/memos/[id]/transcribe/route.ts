@@ -1,13 +1,13 @@
-import { NextRequest, NextResponse } from "next/server";
-import { fileService, memoService } from "@/services";
+import { type NextRequest, NextResponse } from "next/server";
 import { addFileProcessJob } from "@/lib/queue";
+import { fileService } from "@/services";
 
 export const runtime = "nodejs";
 
 // POST /api/memos/[id]/transcribe - Transcribe all audio files attached to memo
 export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const { id } = await params;
@@ -18,17 +18,19 @@ export async function POST(
     if (files.length === 0) {
       return NextResponse.json(
         { error: "No files attached to this memo" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     // Filter audio files only
-    const audioFiles = files.filter((file) => file.mimeType.startsWith("audio/"));
+    const audioFiles = files.filter((file) =>
+      file.mimeType.startsWith("audio/"),
+    );
 
     if (audioFiles.length === 0) {
       return NextResponse.json(
         { error: "No audio files found" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -52,14 +54,11 @@ export async function POST(
   } catch (error) {
     console.error("Transcription queue error:", error);
     if (error instanceof Error) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: error.message }, { status: 400 });
     }
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

@@ -1,11 +1,11 @@
-import { NextRequest, NextResponse } from "next/server";
-import { memoService, fileService } from "@/services";
+import { type NextRequest, NextResponse } from "next/server";
 import { attachFilesSchema } from "@/dto";
+import { fileService, memoService } from "@/services";
 
 // GET /api/memos/[id]/files - Get files attached to memo
 export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const { id } = await params;
@@ -14,14 +14,11 @@ export async function GET(
     return NextResponse.json({ data: files });
   } catch (error) {
     if (error instanceof Error) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: error.message }, { status: 400 });
     }
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -29,7 +26,7 @@ export async function GET(
 // POST /api/memos/[id]/files - Attach files to memo
 export async function POST(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const { id } = await params;
@@ -41,14 +38,11 @@ export async function POST(
     return NextResponse.json({ message: "Files attached successfully" });
   } catch (error) {
     if (error instanceof Error) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: error.message }, { status: 400 });
     }
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

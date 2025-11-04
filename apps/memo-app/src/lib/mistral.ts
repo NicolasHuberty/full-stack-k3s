@@ -49,7 +49,7 @@ export async function transcribeAudio(
         end: seg.end,
         text: seg.text,
       })),
-      language: response.language,
+      language: response.language ?? undefined,
       duration: response.duration,
     };
   } catch (error) {
@@ -92,7 +92,7 @@ export async function transcribeAudioFromUrl(
         end: seg.end,
         text: seg.text,
       })),
-      language: response.language,
+      language: response.language ?? undefined,
       duration: response.duration,
     };
   } catch (error) {

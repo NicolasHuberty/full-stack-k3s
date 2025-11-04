@@ -11,7 +11,13 @@ WORKDIR /app
 
 # Install dependencies using npm
 COPY package.json package-lock.json ./
-RUN npm ci --include=optional
+RUN npm ci
+
+# Install platform-specific native binaries explicitly
+# These are needed for Tailwind CSS v4 + Turbopack on Linux
+RUN npm install --no-save \
+    lightningcss-linux-x64-gnu \
+    @tailwindcss/oxide-linux-x64-gnu
 
 # Rebuild the source code only when needed
 FROM base AS builder

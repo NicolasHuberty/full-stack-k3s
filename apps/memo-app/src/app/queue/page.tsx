@@ -9,7 +9,7 @@ import {
   XCircle,
 } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -34,13 +34,7 @@ export default function QueueDashboard() {
   const [health, setHealth] = useState<QueueHealth | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchHealth();
-    const interval = setInterval(fetchHealth, 5000); // Refresh every 5 seconds
-    return () => clearInterval(interval);
-  }, [fetchHealth]);
-
-  const fetchHealth = async () => {
+  const fetchHealth = useCallback(async () => {
     try {
       const response = await fetch("/api/queue/health");
       const data = await response.json();
@@ -50,7 +44,13 @@ export default function QueueDashboard() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchHealth();
+    const interval = setInterval(fetchHealth, 5000); // Refresh every 5 seconds
+    return () => clearInterval(interval);
+  }, [fetchHealth]);
 
   const getStatusColor = (status: string) => {
     switch (status) {

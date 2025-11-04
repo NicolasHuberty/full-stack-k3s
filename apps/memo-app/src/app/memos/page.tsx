@@ -2,7 +2,7 @@
 
 import { ArrowLeft, Plus, Search } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -47,11 +47,7 @@ export default function MemosPage() {
   const [statusFilter, setStatusFilter] = useState<MemoStatus | "ALL">("ALL");
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchMemos();
-  }, [fetchMemos]);
-
-  const fetchMemos = async () => {
+  const fetchMemos = useCallback(async () => {
     try {
       setLoading(true);
       const params = new URLSearchParams();
@@ -70,7 +66,11 @@ export default function MemosPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [statusFilter, search]);
+
+  useEffect(() => {
+    fetchMemos();
+  }, [fetchMemos]);
 
   const filteredMemos = memos.filter(
     (memo) =>

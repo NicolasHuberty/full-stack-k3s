@@ -14,6 +14,10 @@ export class MemoService {
    * Create a new memo
    */
   async createMemo(data: CreateMemoInput): Promise<Memo> {
+    if (!data.userId) {
+      throw new Error("userId is required to create a memo");
+    }
+
     const memo = await prisma.memo.create({
       data: {
         title: data.title,

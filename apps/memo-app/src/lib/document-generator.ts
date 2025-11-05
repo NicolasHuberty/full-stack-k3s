@@ -339,7 +339,13 @@ function generateIntelligentTextDocument(
   for (const section of sections) {
     content += `${section.title}\n`;
     content += `${"-".repeat(section.title.length)}\n\n`;
-    content += `${section.content}\n\n`;
+    // Ensure content is a string
+    const contentStr = Array.isArray(section.content)
+      ? section.content.join("\n")
+      : typeof section.content === "string"
+        ? section.content
+        : JSON.stringify(section.content);
+    content += `${contentStr}\n\n`;
   }
 
   return Buffer.from(content, "utf-8");
@@ -378,7 +384,13 @@ function generateIntelligentPdfDocument(
       doc.moveDown(0.5);
 
       // Parse content for bullet points
-      const lines = section.content.split("\n");
+      // Ensure content is a string
+      const contentStr = Array.isArray(section.content)
+        ? section.content.join("\n")
+        : typeof section.content === "string"
+          ? section.content
+          : JSON.stringify(section.content);
+      const lines = contentStr.split("\n");
       doc.fontSize(11).font("Helvetica");
 
       for (const line of lines) {
@@ -445,7 +457,13 @@ async function generateIntelligentDocxDocument(
     );
 
     // Parse content for bullet points and paragraphs
-    const lines = section.content.split("\n");
+    // Ensure content is a string (AI might return array or object)
+    const contentStr = Array.isArray(section.content)
+      ? section.content.join("\n")
+      : typeof section.content === "string"
+        ? section.content
+        : JSON.stringify(section.content);
+    const lines = contentStr.split("\n");
 
     for (const line of lines) {
       const trimmedLine = line.trim();

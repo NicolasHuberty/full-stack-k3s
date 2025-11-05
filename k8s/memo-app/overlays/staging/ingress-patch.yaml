@@ -7,6 +7,7 @@ metadata:
     cert-manager.io/cluster-issuer: letsencrypt-prod
     external-dns.alpha.kubernetes.io/hostname: staging.memo.docuralis.com
 spec:
+  ingressClassName: nginx
   tls:
   - hosts:
     - staging.memo.docuralis.com

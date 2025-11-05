@@ -234,7 +234,7 @@ export const fileProcessWorker = new Worker<FileProcessJob>(
               // Find transcription and document files
               const transcriptionFile = updatedMemo.memoFiles.find(
                 (f) =>
-                  f.file.name.endsWith(".txt") &&
+                  f.file.filename.endsWith(".txt") &&
                   f.file.mimeType === "text/plain",
               );
               const documentFiles = updatedMemo.memoFiles
@@ -246,15 +246,11 @@ export const fileProcessWorker = new Worker<FileProcessJob>(
                 )
                 .map((f) => ({
                   type: f.file.mimeType === "application/pdf" ? "pdf" : "docx",
-                  url:
-                    f.file.url ||
-                    `${process.env.NEXT_PUBLIC_APP_URL}/api/files/${f.file.id}`,
+                  url: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/api/files/${f.file.id}`,
                 }));
 
               if (transcriptionFile && updatedMemo.user.email) {
-                const transcriptionUrl =
-                  transcriptionFile.file.url ||
-                  `${process.env.NEXT_PUBLIC_APP_URL}/api/files/${transcriptionFile.file.id}`;
+                const transcriptionUrl = `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/api/files/${transcriptionFile.file.id}`;
 
                 await sendMemoCompletedEmail(
                   updatedMemo.user.email,

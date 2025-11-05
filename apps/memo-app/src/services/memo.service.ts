@@ -23,7 +23,7 @@ export class MemoService {
         title: data.title,
         content: data.content,
         userId: data.userId,
-        status: MemoStatus.DRAFT,
+        status: MemoStatus.RUNNING, // Auto-set to RUNNING when user saves
       },
     });
 

@@ -135,20 +135,27 @@ Your task:
 3. Identify the structure requested (sections, bullet points, etc.)
 4. Extract and reorganize the content according to user's request
 5. Improve and rewrite the content professionally while keeping the original meaning
+6. CRITICAL: Write the document in the SAME LANGUAGE as the transcription (French→French, English→English, etc.)
+7. Create a COMPLETE, USER-READY document (not a copy of the transcription)
 
 Respond in JSON format with:
 {
   "intent": "brief description of what user wants",
-  "userRequest": "summary of the user's request",
+  "userRequest": "title for the document in the source language",
   "shouldGenerateDocument": true/false,
   "documentType": "docx|pdf|txt|presentation|etc",
   "sections": [
     {
-      "title": "Section name",
-      "content": "Professionally rewritten content with bullet points or paragraphs as appropriate"
+      "title": "Section name in source language",
+      "content": "Professionally written content as bullet points (one per line with • prefix) or paragraphs. Write in the SAME language as the transcription. Make it user-ready, not a transcription copy."
     }
   ]
 }
+
+Example for French transcription requesting bullet points:
+- Generate bullet points as: "• Point un\n• Point deux\n• Point trois"
+- Each bullet point on a new line with • prefix
+- Write everything in French
 
 If the user is just recording thoughts without requesting a document, set shouldGenerateDocument to false.`;
 

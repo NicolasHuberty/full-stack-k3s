@@ -19,10 +19,12 @@ export function AudioRecorder({
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     return () => {
@@ -148,6 +150,59 @@ export function AudioRecorder({
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
+  const handleFileSelect = (file: File) => {
+    // Validate file type
+    const validTypes = [
+      "audio/webm",
+      "audio/wav",
+      "audio/mp3",
+      "audio/mpeg",
+      "audio/m4a",
+      "audio/x-m4a",
+      "image/webp",
+    ];
+    if (
+      !validTypes.includes(file.type) &&
+      !file.name.match(/\.(webm|wav|mp3|m4a|webp)$/i)
+    ) {
+      onError?.(
+        "Invalid file type. Please upload webm, wav, mp3, m4a, or webp files.",
+      );
+      return;
+    }
+
+    setAudioBlob(file);
+    const url = URL.createObjectURL(file);
+    setAudioUrl(url);
+  };
+
+  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      handleFileSelect(file);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      handleFileSelect(file);
+    }
+  };
+
   return (
     <Card>
       <CardContent className="pt-6 space-y-4">
@@ -171,14 +226,52 @@ export function AudioRecorder({
           )}
         </div>
 
+        {!isRecording && !audioBlob && (
+          <div
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+              isDragging
+                ? "border-primary bg-primary/5"
+                : "border-muted-foreground/25 hover:border-primary/50"
+            }`}
+          >
+            <Upload className="size-8 mx-auto mb-2 text-muted-foreground" />
+            <p className="text-sm text-muted-foreground">
+              Drag and drop audio files here
+            </p>
+            <p className="text-xs text-muted-foreground mt-1">
+              Supports: webm, wav, mp3, m4a, webp
+            </p>
+          </div>
+        )}
+
         {audioUrl && <audio controls src={audioUrl} className="w-full" />}
 
         <div className="flex gap-2">
           {!isRecording && !audioBlob && (
-            <Button onClick={startRecording} className="flex-1">
-              <Mic className="size-4" />
-              Start Recording
-            </Button>
+            <>
+              <Button onClick={startRecording} className="flex-1">
+                <Mic className="size-4" />
+                Start Recording
+              </Button>
+              <Button
+                onClick={() => fileInputRef.current?.click()}
+                variant="outline"
+                className="flex-1"
+              >
+                <Upload className="size-4" />
+                Upload File
+              </Button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="audio/webm,audio/wav,audio/mp3,audio/mpeg,audio/m4a,audio/x-m4a,image/webp,.webm,.wav,.mp3,.m4a,.webp"
+                onChange={handleFileInputChange}
+                className="hidden"
+              />
+            </>
           )}
 
           {isRecording && (

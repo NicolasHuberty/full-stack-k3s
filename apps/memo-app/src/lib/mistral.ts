@@ -72,11 +72,21 @@ export async function transcribeAudioFromUrl(
   },
 ): Promise<TranscriptionResult> {
   try {
+    // Fetch the audio data from the URL
+    const audioResponse = await fetch(audioUrl);
+    if (!audioResponse.ok) {
+      throw new Error(`Failed to fetch audio from URL: ${audioResponse.statusText}`);
+    }
+
+    // Convert to ArrayBuffer
+    const arrayBuffer = await audioResponse.arrayBuffer();
+    const audioBuffer = Buffer.from(arrayBuffer);
+
     const response = await mistralClient.audio.transcriptions.complete({
       model: "voxtral-mini-latest",
       file: {
         fileName: options?.filename || "audio.webm",
-        content: audioUrl, // Can be URL or Buffer
+        content: audioBuffer,
       },
       language: options?.language,
       timestamp_granularities: options?.timestampGranularities

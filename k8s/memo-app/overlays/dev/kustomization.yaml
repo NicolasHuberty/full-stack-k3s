@@ -12,6 +12,7 @@ resources:
 patches:
   - path: ingress-patch.yaml
   - path: replica-patch.yaml
+  - path: resources-patch.yaml
 
 images:
   - name: ghcr.io/nicolashuberty/memo-app

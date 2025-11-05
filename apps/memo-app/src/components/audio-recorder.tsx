@@ -41,7 +41,7 @@ export function AudioRecorder({
       // Check if mediaDevices API is available
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         throw new Error(
-          "Media recording is not supported. Please use HTTPS or enable microphone permissions."
+          "Media recording is not supported. Please use HTTPS or enable microphone permissions.",
         );
       }
 

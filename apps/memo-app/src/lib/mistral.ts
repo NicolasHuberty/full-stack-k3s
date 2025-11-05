@@ -74,7 +74,9 @@ export async function transcribeAudioFromUrl(
     // Fetch the audio data from the URL
     const audioResponse = await fetch(audioUrl);
     if (!audioResponse.ok) {
-      throw new Error(`Failed to fetch audio from URL: ${audioResponse.statusText}`);
+      throw new Error(
+        `Failed to fetch audio from URL: ${audioResponse.statusText}`,
+      );
     }
 
     // Convert to ArrayBuffer
@@ -107,6 +109,74 @@ export async function transcribeAudioFromUrl(
     console.error("Mistral transcription error:", error);
     throw new Error(
       `Transcription failed: ${error instanceof Error ? error.message : "Unknown error"}`,
+    );
+  }
+}
+
+/**
+ * Analyze transcription to understand user intent and extract structured information
+ */
+export async function analyzeTranscriptionIntent(
+  transcriptionText: string,
+): Promise<{
+  intent: string;
+  userRequest?: string;
+  structuredData?: any;
+  shouldGenerateDocument: boolean;
+  documentType?: string;
+  sections?: Array<{ title: string; content: string }>;
+}> {
+  try {
+    const systemPrompt = `You are an AI assistant that analyzes voice transcriptions to understand what the user wants to accomplish.
+
+Your task:
+1. Identify if the user is requesting a document to be created
+2. Extract the type of document (Word/DOCX, PDF, presentation, report, etc.)
+3. Identify the structure requested (sections, bullet points, etc.)
+4. Extract and reorganize the content according to user's request
+5. Improve and rewrite the content professionally while keeping the original meaning
+
+Respond in JSON format with:
+{
+  "intent": "brief description of what user wants",
+  "userRequest": "summary of the user's request",
+  "shouldGenerateDocument": true/false,
+  "documentType": "docx|pdf|txt|presentation|etc",
+  "sections": [
+    {
+      "title": "Section name",
+      "content": "Professionally rewritten content with bullet points or paragraphs as appropriate"
+    }
+  ]
+}
+
+If the user is just recording thoughts without requesting a document, set shouldGenerateDocument to false.`;
+
+    const response = await mistralClient.chat.complete({
+      model: "mistral-large-latest",
+      messages: [
+        { role: "system", content: systemPrompt },
+        {
+          role: "user",
+          content: `Analyze this transcription and extract the user's intent:\n\n${transcriptionText}`,
+        },
+      ],
+      responseFormat: { type: "json_object" },
+    });
+
+    const content = response.choices?.[0]?.message?.content;
+    if (!content) {
+      throw new Error("No response from Mistral");
+    }
+
+    const contentStr =
+      typeof content === "string" ? content : JSON.stringify(content);
+    const analysis = JSON.parse(contentStr);
+    return analysis;
+  } catch (error) {
+    console.error("Mistral intent analysis error:", error);
+    throw new Error(
+      `Intent analysis failed: ${error instanceof Error ? error.message : "Unknown error"}`,
     );
   }
 }

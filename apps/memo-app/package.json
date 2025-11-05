@@ -13,9 +13,22 @@
     "prisma:studio": "bun --env-file=.env prisma studio",
     "prisma:seed": "bun --env-file=.env tsx prisma/seed.ts",
     "worker": "bun --env-file=.env src/workers/index.ts",
-    "worker:dev": "bun --watch --env-file=.env src/workers/index.ts"
+    "worker:dev": "bun --watch --env-file=.env src/workers/index.ts",
+    "cap:sync": "npx cap sync",
+    "cap:sync:ios": "npx cap sync ios",
+    "cap:sync:android": "npx cap sync android",
+    "cap:open:ios": "npx cap open ios",
+    "cap:open:android": "npx cap open android",
+    "cap:run:ios": "npx cap run ios",
+    "cap:run:android": "npx cap run android"
   },
   "dependencies": {
+    "@capacitor/android": "^7.4.4",
+    "@capacitor/camera": "^7.0.2",
+    "@capacitor/cli": "^7.4.4",
+    "@capacitor/core": "^7.4.4",
+    "@capacitor/filesystem": "^7.1.4",
+    "@capacitor/ios": "^7.4.4",
     "@mistralai/mistralai": "^1.10.0",
     "@prisma/client": "^6.18.0",
     "@prisma/extension-accelerate": "^2.0.2",

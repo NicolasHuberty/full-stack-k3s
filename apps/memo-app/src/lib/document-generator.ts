@@ -286,3 +286,202 @@ function formatTime(seconds: number): string {
   const secs = Math.floor(seconds % 60);
   return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
 }
+
+/**
+ * Generate intelligent document based on AI analysis of user intent
+ */
+export interface GenerateIntelligentDocumentOptions {
+  title: string;
+  sections: Array<{ title: string; content: string }>;
+  format: DocumentFormat;
+  metadata?: {
+    memoTitle?: string;
+    createdAt?: Date;
+    originalTranscription?: string;
+  };
+}
+
+export async function generateIntelligentDocument(
+  options: GenerateIntelligentDocumentOptions,
+): Promise<Buffer> {
+  switch (options.format) {
+    case "txt":
+      return generateIntelligentTextDocument(options);
+    case "pdf":
+      return generateIntelligentPdfDocument(options);
+    case "docx":
+      return generateIntelligentDocxDocument(options);
+    default:
+      throw new Error(`Unsupported format: ${options.format}`);
+  }
+}
+
+/**
+ * Generate intelligent plain text document
+ */
+function generateIntelligentTextDocument(
+  options: GenerateIntelligentDocumentOptions,
+): Buffer {
+  const { title, sections, metadata } = options;
+
+  let content = "";
+
+  // Header
+  content += `${title}\n`;
+  content += `${"=".repeat(title.length)}\n\n`;
+
+  // Metadata
+  if (metadata?.createdAt) {
+    content += `Date: ${metadata.createdAt.toLocaleString()}\n\n`;
+  }
+
+  // Sections
+  for (const section of sections) {
+    content += `${section.title}\n`;
+    content += `${"-".repeat(section.title.length)}\n\n`;
+    content += `${section.content}\n\n`;
+  }
+
+  return Buffer.from(content, "utf-8");
+}
+
+/**
+ * Generate intelligent PDF document
+ */
+function generateIntelligentPdfDocument(
+  options: GenerateIntelligentDocumentOptions,
+): Promise<Buffer> {
+  return new Promise((resolve, reject) => {
+    const { title, sections, metadata } = options;
+
+    const doc = new PDFDocument({ margin: 50 });
+    const chunks: Buffer[] = [];
+
+    doc.on("data", (chunk) => chunks.push(chunk));
+    doc.on("end", () => resolve(Buffer.concat(chunks)));
+    doc.on("error", reject);
+
+    // Title
+    doc.fontSize(20).font("Helvetica-Bold").text(title, { align: "center" });
+    doc.moveDown();
+
+    // Metadata
+    if (metadata?.createdAt) {
+      doc.fontSize(10).font("Helvetica");
+      doc.text(`Date: ${metadata.createdAt.toLocaleString()}`);
+      doc.moveDown();
+    }
+
+    // Sections
+    for (const section of sections) {
+      doc.fontSize(14).font("Helvetica-Bold").text(section.title);
+      doc.moveDown(0.5);
+
+      // Parse content for bullet points
+      const lines = section.content.split("\n");
+      doc.fontSize(11).font("Helvetica");
+
+      for (const line of lines) {
+        if (line.trim().startsWith("•") || line.trim().startsWith("-")) {
+          // Bullet point
+          doc.text(line.trim(), { indent: 20 });
+        } else if (line.trim()) {
+          // Regular paragraph
+          doc.text(line.trim(), { align: "justify" });
+        }
+        if (line.trim()) {
+          doc.moveDown(0.3);
+        }
+      }
+
+      doc.moveDown();
+    }
+
+    doc.end();
+  });
+}
+
+/**
+ * Generate intelligent DOCX document
+ */
+async function generateIntelligentDocxDocument(
+  options: GenerateIntelligentDocumentOptions,
+): Promise<Buffer> {
+  const { title, sections, metadata } = options;
+
+  const children: Paragraph[] = [];
+
+  // Title
+  children.push(
+    new Paragraph({
+      text: title,
+      heading: HeadingLevel.HEADING_1,
+      alignment: AlignmentType.CENTER,
+    }),
+  );
+
+  children.push(new Paragraph({ text: "" })); // Empty line
+
+  // Metadata
+  if (metadata?.createdAt) {
+    children.push(
+      new Paragraph({
+        children: [
+          new TextRun({ text: "Date: ", bold: true }),
+          new TextRun({ text: metadata.createdAt.toLocaleString() }),
+        ],
+      }),
+    );
+    children.push(new Paragraph({ text: "" }));
+  }
+
+  // Sections
+  for (const section of sections) {
+    children.push(
+      new Paragraph({
+        text: section.title,
+        heading: HeadingLevel.HEADING_2,
+      }),
+    );
+
+    // Parse content for bullet points and paragraphs
+    const lines = section.content.split("\n");
+
+    for (const line of lines) {
+      const trimmedLine = line.trim();
+      if (!trimmedLine) {
+        children.push(new Paragraph({ text: "" }));
+        continue;
+      }
+
+      if (trimmedLine.startsWith("•") || trimmedLine.startsWith("-")) {
+        // Bullet point
+        children.push(
+          new Paragraph({
+            text: trimmedLine.substring(1).trim(),
+            bullet: {
+              level: 0,
+            },
+          }),
+        );
+      } else {
+        // Regular paragraph
+        children.push(
+          new Paragraph({
+            text: trimmedLine,
+            alignment: AlignmentType.JUSTIFIED,
+          }),
+        );
+      }
+    }
+
+    children.push(new Paragraph({ text: "" })); // Empty line after section
+  }
+
+  const doc = new Document({
+    sections: [{ children }],
+  });
+
+  const buffer = await Packer.toBuffer(doc);
+  return Buffer.from(buffer);
+}

@@ -3,9 +3,10 @@ import IORedis from "ioredis";
 import {
   type DocumentFormat,
   generateDocument,
+  generateIntelligentDocument,
 } from "@/lib/document-generator";
 import { bucketName, minioClient } from "@/lib/minio";
-import { transcribeAudio } from "@/lib/mistral";
+import { analyzeTranscriptionIntent, transcribeAudio } from "@/lib/mistral";
 import { type FileProcessJob, QUEUE_NAMES } from "@/lib/queue";
 import { fileService } from "@/services";
 
@@ -19,7 +20,7 @@ const connection = new IORedis(
 export const fileProcessWorker = new Worker<FileProcessJob>(
   QUEUE_NAMES.FILE_PROCESS,
   async (job: Job<FileProcessJob>) => {
-    const { fileId, s3Key, mimeType, operation, memoId, userId } = job.data;
+    const { fileId, s3Key, operation, memoId } = job.data;
 
     console.log(`[Worker] Processing file: ${fileId}, operation: ${operation}`);
 
@@ -58,7 +59,18 @@ export const fileProcessWorker = new Worker<FileProcessJob>(
             `[Worker] Transcription completed. Length: ${transcription.text.length} chars`,
           );
 
-          // Generate documents in multiple formats
+          // Analyze transcription to understand user intent
+          console.log("[Worker] Analyzing user intent from transcription...");
+          const intentAnalysis = await analyzeTranscriptionIntent(
+            transcription.text,
+          );
+          console.log(
+            `[Worker] Intent analysis: ${intentAnalysis.shouldGenerateDocument ? "Document requested" : "No document requested"}`,
+          );
+
+          await job.updateProgress(70);
+
+          // Generate standard transcription documents in multiple formats
           const formats: DocumentFormat[] = ["txt", "pdf", "docx"];
           const generatedDocs: Array<{ format: string; fileId: string }> = [];
 
@@ -109,7 +121,72 @@ export const fileProcessWorker = new Worker<FileProcessJob>(
             generatedDocs.push({ format, fileId: docFile.id });
 
             console.log(
-              `[Worker] Generated ${format.toUpperCase()} document: ${docFile.id}`,
+              `[Worker] Generated ${format.toUpperCase()} transcription: ${docFile.id}`,
+            );
+          }
+
+          // Generate intelligent document if user requested one
+          if (
+            intentAnalysis.shouldGenerateDocument &&
+            intentAnalysis.sections
+          ) {
+            console.log(
+              `[Worker] Generating intelligent ${intentAnalysis.documentType || "DOCX"} document based on user request...`,
+            );
+
+            const intelligentFormat =
+              (intentAnalysis.documentType?.toLowerCase() as DocumentFormat) ||
+              "docx";
+
+            const intelligentDocBuffer = await generateIntelligentDocument({
+              title: intentAnalysis.userRequest || "AI-Generated Document",
+              sections: intentAnalysis.sections,
+              format: intelligentFormat,
+              metadata: {
+                createdAt: new Date(),
+                originalTranscription: transcription.text,
+              },
+            });
+
+            // Upload intelligent document to MinIO
+            const intelligentDocFilename = `ai-document-${fileId}-${Date.now()}.${intelligentFormat}`;
+            const intelligentDocS3Key = `documents/${intelligentDocFilename}`;
+
+            await minioClient.putObject(
+              bucketName,
+              intelligentDocS3Key,
+              intelligentDocBuffer,
+              intelligentDocBuffer.length,
+              {
+                "Content-Type":
+                  intelligentFormat === "pdf"
+                    ? "application/pdf"
+                    : intelligentFormat === "docx"
+                      ? "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                      : "text/plain",
+              },
+            );
+
+            // Create file record for intelligent document
+            const intelligentDocFile = await fileService.createFile({
+              filename: intelligentDocFilename,
+              mimeType:
+                intelligentFormat === "pdf"
+                  ? "application/pdf"
+                  : intelligentFormat === "docx"
+                    ? "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                    : "text/plain",
+              size: intelligentDocBuffer.length,
+              s3Key: intelligentDocS3Key,
+            });
+
+            generatedDocs.push({
+              format: `ai-${intelligentFormat}`,
+              fileId: intelligentDocFile.id,
+            });
+
+            console.log(
+              `[Worker] Generated AI ${intelligentFormat.toUpperCase()} document: ${intelligentDocFile.id}`,
             );
           }
 

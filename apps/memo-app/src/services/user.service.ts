@@ -1,6 +1,7 @@
 import type { CreateUserInput, LoginInput, UpdateUserInput } from "@/dto";
 import { prisma } from "@/lib/prisma";
-import type { SafeUser, User, UserWithStats } from "@/types";
+import type { User } from "@/generated/prisma";
+import type { SafeUser, UserWithStats } from "@/types";
 
 export class UserService {
   /**

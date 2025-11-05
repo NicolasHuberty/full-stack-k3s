@@ -202,12 +202,22 @@ export const fileProcessWorker = new Worker<FileProcessJob>(
               `[Worker] Attached ${docFileIds.length} document(s) to memo: ${memoId}`,
             );
 
-            // Update memo status to DONE after successful transcription (direct update to avoid hooks)
+            // Update memo with AI-generated title, transcription content, and DONE status
+            const memoTitle =
+              intentAnalysis.userRequest ||
+              transcription.text.substring(0, 100) ||
+              "Voice Memo";
             await prisma.memo.update({
               where: { id: memoId },
-              data: { status: MemoStatus.DONE },
+              data: {
+                title: memoTitle,
+                content: transcription.text,
+                status: MemoStatus.DONE,
+              },
             });
-            console.log(`[Worker] Updated memo status to DONE: ${memoId}`);
+            console.log(
+              `[Worker] Updated memo with title "${memoTitle}" and status DONE: ${memoId}`,
+            );
           }
 
           await job.updateProgress(100);

@@ -19,8 +19,6 @@ import { Textarea } from "@/components/ui/textarea";
 
 export default function NewMemoPage() {
   const router = useRouter();
-  const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [uploadedFiles, setUploadedFiles] = useState<
@@ -33,14 +31,15 @@ export default function NewMemoPage() {
     setLoading(true);
 
     try {
+      // Create memo with auto-generated title and content
       const response = await fetch("/api/memos", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          title,
-          content,
+          title: "New Voice Memo", // Temporary title, will be updated by AI
+          content: "", // Will be filled with transcription
           // userId is optional, will use default user if not provided
         }),
       });
@@ -92,38 +91,14 @@ export default function NewMemoPage() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Memo Details</CardTitle>
+              <CardTitle>Record Voice Memo</CardTitle>
               <CardDescription>
-                Fill in the information below to create a new memo
+                Record or upload audio - AI will generate title and
+                transcription
               </CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="title">Title</Label>
-                  <Input
-                    id="title"
-                    placeholder="Enter memo title..."
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    required
-                    maxLength={255}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="content">Content</Label>
-                  <Textarea
-                    id="content"
-                    placeholder="Enter memo content..."
-                    value={content}
-                    onChange={(e) => setContent(e.target.value)}
-                    required
-                    rows={10}
-                    className="resize-y"
-                  />
-                </div>
-
                 <div className="space-y-2">
                   <Label>Audio Recording</Label>
                   <AudioRecorder

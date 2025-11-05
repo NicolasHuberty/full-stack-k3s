@@ -50,7 +50,6 @@ export async function transcribeAudio(
         text: seg.text,
       })),
       language: response.language ?? undefined,
-      duration: response.duration,
     };
   } catch (error) {
     console.error("Mistral transcription error:", error);
@@ -93,7 +92,6 @@ export async function transcribeAudioFromUrl(
         text: seg.text,
       })),
       language: response.language ?? undefined,
-      duration: response.duration,
     };
   } catch (error) {
     console.error("Mistral transcription error:", error);

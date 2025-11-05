@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: memo-frontend
+spec:
+  template:
+    spec:
+      containers:
+      - name: frontend
+        env:
+        - name: REDIS_URL
+          value: redis://dev-redis:6379
+        - name: MINIO_ENDPOINT
+          value: dev-minio
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: memo-worker
+spec:
+  template:
+    spec:
+      containers:
+      - name: memo-worker
+        env:
+        - name: REDIS_URL
+          value: redis://dev-redis:6379
+        - name: MINIO_ENDPOINT
+          value: dev-minio

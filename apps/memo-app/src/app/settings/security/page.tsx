@@ -56,6 +56,14 @@ export default function SecuritySettingsPage() {
         setBackupCodes(result.data.backupCodes || []);
         setTotpEnabled(true);
         setShowSetup(false);
+
+        // Send email notification
+        try {
+          await fetch("/api/email/2fa-enabled", { method: "POST" });
+        } catch (emailError) {
+          console.error("Failed to send 2FA email:", emailError);
+          // Don't fail the whole operation if email fails
+        }
       } else {
         setError("Invalid code. Please try again.");
       }

@@ -207,17 +207,73 @@ export const fileProcessWorker = new Worker<FileProcessJob>(
               intentAnalysis.userRequest ||
               transcription.text.substring(0, 100) ||
               "Voice Memo";
-            await prisma.memo.update({
+            const updatedMemo = await prisma.memo.update({
               where: { id: memoId },
               data: {
                 title: memoTitle,
                 content: transcription.text,
                 status: MemoStatus.DONE,
               },
+              include: {
+                user: true,
+                files: {
+                  include: {
+                    file: true,
+                  },
+                },
+              },
             });
             console.log(
               `[Worker] Updated memo with title "${memoTitle}" and status DONE: ${memoId}`,
             );
+
+            // Send email notification
+            try {
+              const { sendMemoCompletedEmail } = await import("@/lib/email");
+
+              // Find transcription and document files
+              const transcriptionFile = updatedMemo.files.find(
+                (f) =>
+                  f.file.name.endsWith(".txt") &&
+                  f.file.mimeType === "text/plain",
+              );
+              const documentFiles = updatedMemo.files
+                .filter(
+                  (f) =>
+                    f.file.mimeType === "application/pdf" ||
+                    f.file.mimeType ===
+                      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                )
+                .map((f) => ({
+                  type: f.file.mimeType === "application/pdf" ? "pdf" : "docx",
+                  url:
+                    f.file.url ||
+                    `${process.env.NEXT_PUBLIC_APP_URL}/api/files/${f.file.id}`,
+                }));
+
+              if (transcriptionFile && updatedMemo.user.email) {
+                const transcriptionUrl =
+                  transcriptionFile.file.url ||
+                  `${process.env.NEXT_PUBLIC_APP_URL}/api/files/${transcriptionFile.file.id}`;
+
+                await sendMemoCompletedEmail(
+                  updatedMemo.user.email,
+                  updatedMemo.user.name || "User",
+                  memoTitle,
+                  transcriptionUrl,
+                  documentFiles,
+                );
+                console.log(
+                  `[Worker] Sent completion email to ${updatedMemo.user.email}`,
+                );
+              }
+            } catch (emailError) {
+              console.error(
+                "[Worker] Failed to send completion email:",
+                emailError,
+              );
+              // Don't fail the job if email fails
+            }
           }
 
           await job.updateProgress(100);

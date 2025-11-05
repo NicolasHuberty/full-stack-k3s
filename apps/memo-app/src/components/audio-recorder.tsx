@@ -38,6 +38,13 @@ export function AudioRecorder({
 
   const startRecording = async () => {
     try {
+      // Check if mediaDevices API is available
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        throw new Error(
+          "Media recording is not supported. Please use HTTPS or enable microphone permissions."
+        );
+      }
+
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
 
       const mediaRecorder = new MediaRecorder(stream, {

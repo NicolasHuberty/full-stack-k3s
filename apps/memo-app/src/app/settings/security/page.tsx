@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import QRCode from "qrcode";
 import { enable2FA, disable2FA, verify2FA } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,6 +18,9 @@ import { Shield, ShieldCheck } from "lucide-react";
 export default function SecuritySettingsPage() {
   const [totpEnabled, setTotpEnabled] = useState(false);
   const [showSetup, setShowSetup] = useState(false);
+  const [showPasswordPrompt, setShowPasswordPrompt] = useState(false);
+  const [showDisablePrompt, setShowDisablePrompt] = useState(false);
+  const [password, setPassword] = useState("");
   const [qrCode, setQrCode] = useState("");
   const [secret, setSecret] = useState("");
   const [verificationCode, setVerificationCode] = useState("");
@@ -24,19 +28,31 @@ export default function SecuritySettingsPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleEnable2FA = async () => {
+  const handleEnable2FA = async (e: React.FormEvent) => {
+    e.preventDefault();
     setLoading(true);
     setError("");
 
     try {
-      const result = await enable2FA();
+      const result = await enable2FA({ password });
       if (result.data) {
-        setQrCode(result.data.qrCode);
-        setSecret(result.data.secret);
+        // Extract secret from totpURI (format: otpauth://totp/...?secret=XXX)
+        const uri = result.data.totpURI;
+        const secretMatch = uri.match(/secret=([^&]+)/);
+        const extractedSecret = secretMatch ? secretMatch[1] : "";
+
+        // Generate QR code from URI
+        const qrDataUrl = await QRCode.toDataURL(uri);
+
+        setQrCode(qrDataUrl);
+        setSecret(extractedSecret);
+        setBackupCodes(result.data.backupCodes || []);
         setShowSetup(true);
+        setShowPasswordPrompt(false);
+        setPassword("");
       }
     } catch (err) {
-      setError("Failed to enable 2FA");
+      setError("Failed to enable 2FA. Please check your password.");
     } finally {
       setLoading(false);
     }
@@ -53,7 +69,6 @@ export default function SecuritySettingsPage() {
       });
 
       if (result.data) {
-        setBackupCodes(result.data.backupCodes || []);
         setTotpEnabled(true);
         setShowSetup(false);
 
@@ -74,21 +89,22 @@ export default function SecuritySettingsPage() {
     }
   };
 
-  const handleDisable2FA = async () => {
-    if (!confirm("Are you sure you want to disable 2FA?")) return;
-
+  const handleDisable2FA = async (e: React.FormEvent) => {
+    e.preventDefault();
     setLoading(true);
     setError("");
 
     try {
-      await disable2FA();
+      await disable2FA({ password });
       setTotpEnabled(false);
       setShowSetup(false);
+      setShowDisablePrompt(false);
+      setPassword("");
       setQrCode("");
       setSecret("");
       setBackupCodes([]);
     } catch (err) {
-      setError("Failed to disable 2FA");
+      setError("Failed to disable 2FA. Please check your password.");
     } finally {
       setLoading(false);
     }
@@ -117,16 +133,59 @@ export default function SecuritySettingsPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {!totpEnabled && !showSetup && (
+            {!totpEnabled && !showSetup && !showPasswordPrompt && (
               <div className="space-y-4">
                 <p className="text-sm text-muted-foreground">
                   Two-factor authentication is currently disabled. Enable it to
                   protect your account.
                 </p>
-                <Button onClick={handleEnable2FA} disabled={loading}>
-                  {loading ? "Loading..." : "Enable 2FA"}
+                <Button
+                  onClick={() => setShowPasswordPrompt(true)}
+                  disabled={loading}
+                >
+                  Enable 2FA
                 </Button>
               </div>
+            )}
+
+            {showPasswordPrompt && !showSetup && (
+              <form onSubmit={handleEnable2FA} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="password">Confirm your password</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Enter your password to enable 2FA
+                  </p>
+                </div>
+
+                {error && (
+                  <div className="text-sm text-destructive">{error}</div>
+                )}
+
+                <div className="flex gap-2">
+                  <Button type="submit" disabled={loading}>
+                    {loading ? "Verifying..." : "Continue"}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      setShowPasswordPrompt(false);
+                      setPassword("");
+                      setError("");
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </form>
             )}
 
             {showSetup && (
@@ -186,7 +245,7 @@ export default function SecuritySettingsPage() {
               </div>
             )}
 
-            {totpEnabled && backupCodes.length > 0 && (
+            {totpEnabled && backupCodes.length > 0 && !showDisablePrompt && (
               <div className="space-y-4">
                 <div className="bg-green-50 dark:bg-green-950 p-4 rounded-lg">
                   <p className="text-sm font-semibold text-green-900 dark:text-green-100">
@@ -209,12 +268,56 @@ export default function SecuritySettingsPage() {
 
                 <Button
                   variant="destructive"
-                  onClick={handleDisable2FA}
+                  onClick={() => setShowDisablePrompt(true)}
                   disabled={loading}
                 >
-                  {loading ? "Disabling..." : "Disable 2FA"}
+                  Disable 2FA
                 </Button>
               </div>
+            )}
+
+            {showDisablePrompt && (
+              <form onSubmit={handleDisable2FA} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="disablePassword">Confirm your password</Label>
+                  <Input
+                    id="disablePassword"
+                    type="password"
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Enter your password to disable 2FA
+                  </p>
+                </div>
+
+                {error && (
+                  <div className="text-sm text-destructive">{error}</div>
+                )}
+
+                <div className="flex gap-2">
+                  <Button
+                    type="submit"
+                    variant="destructive"
+                    disabled={loading}
+                  >
+                    {loading ? "Disabling..." : "Confirm Disable"}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      setShowDisablePrompt(false);
+                      setPassword("");
+                      setError("");
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </form>
             )}
 
             {error && !showSetup && (

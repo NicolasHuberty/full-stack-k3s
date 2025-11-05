@@ -6,12 +6,9 @@ export const authClient = createAuthClient({
   plugins: [twoFactorClient()],
 });
 
-export const {
-  signIn,
-  signUp,
-  signOut,
-  useSession,
-  enable2FA,
-  disable2FA,
-  verify2FA,
-} = authClient;
+export const { signIn, signUp, signOut, useSession } = authClient;
+
+// Two-factor authentication functions
+export const enable2FA = authClient.twoFactor.enable;
+export const disable2FA = authClient.twoFactor.disable;
+export const verify2FA = authClient.twoFactor.verifyTotp;

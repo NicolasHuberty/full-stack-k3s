@@ -216,7 +216,7 @@ export const fileProcessWorker = new Worker<FileProcessJob>(
               },
               include: {
                 user: true,
-                files: {
+                memoFiles: {
                   include: {
                     file: true,
                   },
@@ -232,12 +232,12 @@ export const fileProcessWorker = new Worker<FileProcessJob>(
               const { sendMemoCompletedEmail } = await import("@/lib/email");
 
               // Find transcription and document files
-              const transcriptionFile = updatedMemo.files.find(
+              const transcriptionFile = updatedMemo.memoFiles.find(
                 (f) =>
                   f.file.name.endsWith(".txt") &&
                   f.file.mimeType === "text/plain",
               );
-              const documentFiles = updatedMemo.files
+              const documentFiles = updatedMemo.memoFiles
                 .filter(
                   (f) =>
                     f.file.mimeType === "application/pdf" ||

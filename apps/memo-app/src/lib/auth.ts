@@ -14,7 +14,6 @@ export const auth = betterAuth({
   plugins: [
     twoFactor({
       issuer: "Memo App",
-      totpWindow: 1,
     }),
   ],
   session: {

@@ -39,4 +39,4 @@ COPY --from=builder /app/package.json ./package.json
 
 USER worker
 
-CMD ["node", "--loader", "tsx", "src/workers/index.ts"]
+CMD ["node", "--import", "tsx", "src/workers/index.ts"]

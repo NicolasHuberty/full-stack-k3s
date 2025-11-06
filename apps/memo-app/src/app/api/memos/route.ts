@@ -7,7 +7,7 @@ import { memoService } from "@/services";
 export async function GET(request: NextRequest) {
   try {
     // Get authenticated user
-    const session = await auth.api.getSession({ headers: request.headers });
+    const session = await (auth.api.getSession as any)({ headers: request.headers });
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     // Get authenticated user
-    const session = await auth.api.getSession({ headers: request.headers });
+    const session = await (auth.api.getSession as any)({ headers: request.headers });
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }

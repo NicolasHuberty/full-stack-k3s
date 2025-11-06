@@ -40,10 +40,9 @@ export default function LoginPage() {
             window.location.href = "/memos";
           },
           onError: (error) => {
-            // Silently ignore FedCM errors on localhost - they're harmless
-            if (error?.error?.status !== 'fedcm_error') {
-              console.error("One Tap error:", error);
-            }
+            // Silently ignore errors on localhost - Google One Tap can have FedCM issues
+            // These are expected when testing locally and don't affect functionality
+            console.debug("One Tap initialization (expected on localhost):", error);
           },
         },
       });

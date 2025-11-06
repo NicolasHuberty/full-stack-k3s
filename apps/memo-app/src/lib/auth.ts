@@ -37,7 +37,6 @@ export const auth =
     emailAndPassword: {
       enabled: true,
       requireEmailVerification: true, // Enable email verification
-      autoSignInAfterVerification: true, // Auto sign-in after email verification
       sendResetPassword: async ({ user, url, token }) => {
         // Send password reset email with code
         console.log(`[Auth] Sending password reset email to ${user.email}`);
@@ -184,18 +183,6 @@ export const auth =
         enabled: true,
         maxAge: 60 * 5, // Cache session for 5 minutes
       },
-    },
-    // Advanced session configuration for iOS
-    advanced: {
-      cookieOptions: {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        maxAge: 60 * 60 * 24 * 365, // 1 year
-      },
-      // Enable refresh tokens for mobile apps
-      useRefreshTokens: true,
-      refreshTokenExpiresIn: 60 * 60 * 24 * 365 * 10, // 10 years for iOS
     },
   });
 

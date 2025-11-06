@@ -17,7 +17,7 @@ export default function Home() {
           <div className="text-center space-y-4">
             <h1 className="text-4xl font-bold tracking-tight">Memo App</h1>
             <p className="text-lg text-muted-foreground">
-              Manage your memos with status tracking and file attachments
+              AI-powered voice memos with automatic transcription and document generation
             </p>
           </div>
 
@@ -94,20 +94,23 @@ export default function Home() {
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li className="flex items-center gap-2">
                   <div className="size-1.5 rounded-full bg-primary" />
-                  Create and manage memos with titles and content
+                  Record or upload voice memos with secure authentication
                 </li>
                 <li className="flex items-center gap-2">
                   <div className="size-1.5 rounded-full bg-primary" />
-                  Track memo status: Draft, Preparing, Running, Done, Cancelled,
-                  Failed, Archived
+                  Automatic AI transcription using Mistral Voxtral
                 </li>
                 <li className="flex items-center gap-2">
                   <div className="size-1.5 rounded-full bg-primary" />
-                  Attach files to memos with MinIO storage
+                  Generate intelligent documents (PDF, DOCX, TXT) from transcriptions
                 </li>
                 <li className="flex items-center gap-2">
                   <div className="size-1.5 rounded-full bg-primary" />
-                  Filter and search memos
+                  Email notifications with downloadable documents
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="size-1.5 rounded-full bg-primary" />
+                  Two-factor authentication (TOTP) for enhanced security
                 </li>
               </ul>
             </CardContent>

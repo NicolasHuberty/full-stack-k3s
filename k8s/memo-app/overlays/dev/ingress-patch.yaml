@@ -2,7 +2,6 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: memo-app-ingress
-  namespace: memo-app-dev
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod
     external-dns.alpha.kubernetes.io/hostname: dev.memo.docuralis.com
@@ -19,6 +18,6 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: dev-memo-frontend
+            name: memo-frontend
             port:
               number: 3000

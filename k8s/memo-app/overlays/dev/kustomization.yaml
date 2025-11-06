@@ -10,11 +10,30 @@ resources:
   - ../../base
 
 patches:
-  - path: ingress-patch.yaml
   - path: replica-patch.yaml
   - path: resources-patch.yaml
   - path: env-patch.yaml
   - path: image-pull-policy-patch.yaml
+
+patchesJson6902:
+  - target:
+      group: networking.k8s.io
+      version: v1
+      kind: Ingress
+      name: memo-app-ingress
+    patch: |-
+      - op: replace
+        path: /spec/rules/0/host
+        value: dev.memo.docuralis.com
+      - op: replace
+        path: /spec/tls/0/hosts/0
+        value: dev.memo.docuralis.com
+      - op: replace
+        path: /spec/tls/0/secretName
+        value: memo-app-dev-tls
+      - op: replace
+        path: /metadata/annotations/external-dns.alpha.kubernetes.io~1hostname
+        value: dev.memo.docuralis.com
 
 images:
   - name: ghcr.io/nicolashuberty/memo-app

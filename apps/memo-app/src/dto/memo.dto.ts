@@ -3,7 +3,7 @@ import { MemoStatus } from "@/generated/prisma";
 
 export const createMemoSchema = z.object({
   title: z.string().min(1, "Title is required").max(255, "Title too long"),
-  content: z.string().min(1, "Content is required"),
+  content: z.string().default(""), // Allow empty content for voice memos that will be transcribed
   userId: z.string().uuid("Invalid user ID").optional(),
 });
 
@@ -18,7 +18,7 @@ export const updateMemoStatusSchema = z.object({
 });
 
 export const memoFiltersSchema = z.object({
-  userId: z.string().uuid().optional(),
+  userId: z.string().optional(), // Changed from uuid() to string() to support better-auth IDs
   status: z.nativeEnum(MemoStatus).optional(),
   search: z.string().optional(),
   limit: z.number().int().positive().max(100).default(20),

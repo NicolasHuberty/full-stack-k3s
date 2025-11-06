@@ -47,10 +47,28 @@ export function AudioRecorder({
         );
       }
 
+      console.log("[AudioRecorder] Requesting microphone access...");
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      console.log("[AudioRecorder] Microphone access granted");
+
+      // Check if MediaRecorder is supported
+      if (!window.MediaRecorder) {
+        throw new Error("MediaRecorder is not supported in this browser");
+      }
+
+      // Try to determine best mime type
+      let mimeType = "audio/webm";
+      if (!MediaRecorder.isTypeSupported("audio/webm")) {
+        if (MediaRecorder.isTypeSupported("audio/mp4")) {
+          mimeType = "audio/mp4";
+        } else if (MediaRecorder.isTypeSupported("audio/ogg")) {
+          mimeType = "audio/ogg";
+        }
+      }
+      console.log(`[AudioRecorder] Using mime type: ${mimeType}`);
 
       const mediaRecorder = new MediaRecorder(stream, {
-        mimeType: "audio/webm",
+        mimeType: mimeType,
       });
 
       mediaRecorderRef.current = mediaRecorder;
@@ -58,12 +76,19 @@ export function AudioRecorder({
 
       mediaRecorder.ondataavailable = (event) => {
         if (event.data.size > 0) {
+          console.log(
+            `[AudioRecorder] Data chunk received: ${event.data.size} bytes`,
+          );
           chunksRef.current.push(event.data);
         }
       };
 
       mediaRecorder.onstop = () => {
-        const blob = new Blob(chunksRef.current, { type: "audio/webm" });
+        console.log(
+          `[AudioRecorder] Recording stopped. Total chunks: ${chunksRef.current.length}`,
+        );
+        const blob = new Blob(chunksRef.current, { type: mimeType });
+        console.log(`[AudioRecorder] Created blob: ${blob.size} bytes`);
         setAudioBlob(blob);
         const url = URL.createObjectURL(blob);
         setAudioUrl(url);
@@ -72,19 +97,27 @@ export function AudioRecorder({
         stream.getTracks().forEach((track) => track.stop());
       };
 
-      mediaRecorder.start();
+      mediaRecorder.onerror = (event: any) => {
+        console.error("[AudioRecorder] MediaRecorder error:", event.error);
+        onError?.(`Recording error: ${event.error?.message || "Unknown error"}`);
+      };
+
+      mediaRecorder.start(1000); // Collect data every second
       setIsRecording(true);
       setRecordingTime(0);
+      console.log("[AudioRecorder] Recording started");
 
       // Start timer
       timerRef.current = setInterval(() => {
         setRecordingTime((prev) => prev + 1);
       }, 1000);
     } catch (err) {
-      console.error("Error starting recording:", err);
-      onError?.(
-        "Failed to start recording. Please check microphone permissions.",
-      );
+      console.error("[AudioRecorder] Error starting recording:", err);
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : "Failed to start recording. Please check microphone permissions.";
+      onError?.(errorMessage);
     }
   };
 
@@ -107,7 +140,19 @@ export function AudioRecorder({
       setUploading(true);
 
       const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
-      const filename = `recording-${timestamp}.webm`;
+      // Determine file extension based on blob type
+      const mimeType = audioBlob.type;
+      let extension = "webm";
+      if (mimeType.includes("mp4")) extension = "mp4";
+      else if (mimeType.includes("ogg")) extension = "ogg";
+      else if (mimeType.includes("wav")) extension = "wav";
+      else if (mimeType.includes("mp3") || mimeType.includes("mpeg"))
+        extension = "mp3";
+
+      const filename = `recording-${timestamp}.${extension}`;
+      console.log(
+        `[AudioRecorder] Uploading file: ${filename} (${audioBlob.size} bytes)`,
+      );
 
       const formData = new FormData();
       formData.append("file", audioBlob, filename);
@@ -123,12 +168,13 @@ export function AudioRecorder({
       }
 
       const data = await response.json();
+      console.log("[AudioRecorder] Upload successful:", data.data);
       onUploadComplete?.(data.data.fileId, data.data.filename);
 
       // Clear the recording after successful upload
       clearRecording();
     } catch (err) {
-      console.error("Upload error:", err);
+      console.error("[AudioRecorder] Upload error:", err);
       onError?.(err instanceof Error ? err.message : "Upload failed");
     } finally {
       setUploading(false);

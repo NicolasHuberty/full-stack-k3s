@@ -12,9 +12,9 @@ model User {
   id String @id @default(uuid())
   email String @unique
   name String
-  password String
   emailVerified Boolean @default(false)
   image String?
+  twoFactorEnabled Boolean @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   memos Memo[]
@@ -44,6 +44,9 @@ model Account {
   providerId String
   accessToken String?
   refreshToken String?
+  idToken String?
+  accessTokenExpiresAt DateTime?
+  scope String?
   expiresAt DateTime?
   password String?
   createdAt DateTime @default(now())
@@ -63,6 +66,17 @@ model TwoFactor {
   updatedAt DateTime @updatedAt
 
   @@unique([userId])
+}
+
+model Verification {
+  id String @id @default(uuid())
+  identifier String
+  value String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([identifier, value])
 }
 
 model Memo {

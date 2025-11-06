@@ -1,12 +1,20 @@
 import { createAuthClient } from "better-auth/react";
-import { twoFactorClient } from "better-auth/client/plugins";
+import { twoFactorClient, oneTapClient } from "better-auth/client/plugins";
 
 export const authClient = createAuthClient({
   baseURL: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
-  plugins: [twoFactorClient()],
+  plugins: [
+    twoFactorClient(),
+    oneTapClient({
+      clientId: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "",
+      autoSelect: false,
+      cancelOnTapOutside: true,
+      context: "signin",
+    }),
+  ],
 });
 
-export const { signIn, signUp, signOut, useSession } = authClient;
+export const { signIn, signUp, signOut, useSession, oneTap } = authClient;
 
 // Two-factor authentication functions
 export const enable2FA = authClient.twoFactor.enable;

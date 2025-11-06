@@ -23,7 +23,7 @@ export class MemoService {
         title: data.title,
         content: data.content,
         userId: data.userId,
-        status: MemoStatus.RUNNING, // Auto-set to RUNNING when user saves
+        status: MemoStatus.DRAFT, // Start as DRAFT, will change to RUNNING when files are attached
       },
     });
 

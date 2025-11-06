@@ -1,15 +1,24 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { createMemoSchema, memoFiltersSchema } from "@/dto";
-import { DEFAULT_USER_ID } from "@/lib/constants";
+import { auth } from "@/lib/auth";
 import { memoService } from "@/services";
 
 // GET /api/memos - Get all memos with filters
 export async function GET(request: NextRequest) {
   try {
+    // Get authenticated user
+    const session = await auth.api.getSession({ headers: request.headers });
+    if (!session?.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const searchParams = request.nextUrl.searchParams;
 
+    // Always filter by current user's ID
+    console.log("[API] Session user ID:", session.user.id);
+    console.log("[API] Session user:", JSON.stringify(session.user));
     const filters = memoFiltersSchema.parse({
-      userId: searchParams.get("userId") || undefined,
+      userId: session.user.id, // Use authenticated user's ID
       status: searchParams.get("status") || undefined,
       search: searchParams.get("search") || undefined,
       limit: searchParams.get("limit")
@@ -24,6 +33,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ data: memos });
   } catch (error) {
+    console.error("[API] Error fetching memos:", error);
     if (error instanceof Error) {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
@@ -37,13 +47,19 @@ export async function GET(request: NextRequest) {
 // POST /api/memos - Create a new memo
 export async function POST(request: NextRequest) {
   try {
+    // Get authenticated user
+    const session = await auth.api.getSession({ headers: request.headers });
+    if (!session?.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const body = await request.json();
     const data = createMemoSchema.parse(body);
 
-    // Use default user ID if not provided (for demo without auth)
+    // Create memo for authenticated user
     const memo = await memoService.createMemo({
       ...data,
-      userId: data.userId || DEFAULT_USER_ID,
+      userId: session.user.id,
     });
 
     return NextResponse.json({ data: memo }, { status: 201 });

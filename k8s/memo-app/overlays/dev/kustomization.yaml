@@ -14,6 +14,7 @@ patches:
   - path: replica-patch.yaml
   - path: resources-patch.yaml
   - path: env-patch.yaml
+  - path: image-pull-policy-patch.yaml
 
 images:
   - name: ghcr.io/nicolashuberty/memo-app

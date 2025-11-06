@@ -6,6 +6,9 @@ async function main() {
   console.log("Starting seed...");
 
   // Create default demo user
+  // Note: With better-auth, users must be created through the authentication flow
+  // which handles password hashing and account creation. This seed just creates
+  // a user record for testing purposes. Password is managed in Account model.
   const defaultUser = await prisma.user.upsert({
     where: { id: "00000000-0000-0000-0000-000000000000" },
     update: {},
@@ -13,7 +16,7 @@ async function main() {
       id: "00000000-0000-0000-0000-000000000000",
       email: "demo@memo-app.local",
       name: "Demo User",
-      password: "demo-password", // In production, this should be hashed!
+      emailVerified: false,
     },
   });
 

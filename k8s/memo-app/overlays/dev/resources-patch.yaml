@@ -40,7 +40,7 @@ spec:
   template:
     spec:
       containers:
-      - name: memo-frontend
+      - name: frontend
         resources:
           requests:
             cpu: 50m
@@ -57,7 +57,7 @@ spec:
   template:
     spec:
       containers:
-      - name: memo-worker
+      - name: worker
         resources:
           requests:
             cpu: 50m

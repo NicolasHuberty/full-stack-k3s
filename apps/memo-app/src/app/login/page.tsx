@@ -1,5 +1,6 @@
 "use client";
 
+// Force rebuild - OAuth features
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { signIn, authClient, oneTap } from "@/lib/auth-client";

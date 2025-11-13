@@ -80,22 +80,28 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 
-# Install tesseract for OCR
-RUN apk add --no-cache tesseract-ocr tesseract-ocr-data-eng
+# Install tesseract for OCR and dependencies for native modules
+RUN apk add --no-cache tesseract-ocr tesseract-ocr-data-eng libc6-compat python3 make g++
 
-# Create non-root user
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 worker
+# Copy package files and source first
+COPY package.json bun.lock* ./
+COPY prisma ./prisma/
 
-# Copy dependencies from deps stage (not builder, as Next.js build may tree-shake)
-COPY --from=deps /app/node_modules ./node_modules
-COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/src ./src
-COPY --from=builder /app/package.json ./package.json
-COPY --from=builder /app/tsconfig.json ./tsconfig.json
+# Install ALL dependencies fresh (don't rely on builder stage)
+RUN bun install --frozen-lockfile
 
-# Create logs directory
-RUN mkdir -p /app/logs && chown -R worker:nodejs /app
+# Generate Prisma Client
+RUN bunx prisma generate
+
+# Now copy application source
+COPY src ./src
+COPY tsconfig.json ./tsconfig.json
+
+# Create non-root user and set permissions
+RUN addgroup --system --gid 1001 nodejs && \
+    adduser --system --uid 1001 worker && \
+    mkdir -p /app/logs && \
+    chown -R worker:nodejs /app
 
 USER worker
 

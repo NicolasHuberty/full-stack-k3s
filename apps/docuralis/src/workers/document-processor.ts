@@ -276,7 +276,7 @@ async function processDocumentJob(job: {
       await qdrant.upsertChunks(
         document.collectionId,
         vectorData,
-        document.collection.embeddingModel as unknown as string
+        document.collection.embeddingModel as EmbeddingModel
       )
 
       // Update chunks with vector IDs

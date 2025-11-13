@@ -67,7 +67,9 @@ export async function POST(request: NextRequest) {
           content: validatedData.message,
           agentId: validatedData.agentId,
           modelUsed: validatedData.model,
-          actionState: validatedData.actionState,
+          actionState: validatedData.actionState
+            ? JSON.parse(JSON.stringify(validatedData.actionState))
+            : undefined,
         },
       })
 
@@ -80,7 +82,9 @@ export async function POST(request: NextRequest) {
           documentChunks: JSON.parse(JSON.stringify(agentResult.sources)),
           agentId: validatedData.agentId,
           modelUsed: validatedData.model,
-          actionState: validatedData.actionState,
+          actionState: validatedData.actionState
+            ? JSON.parse(JSON.stringify(validatedData.actionState))
+            : undefined,
           promptTokens: agentResult.inputTokens,
           completionTokens: agentResult.outputTokens,
         },

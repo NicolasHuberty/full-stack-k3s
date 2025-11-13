@@ -159,7 +159,9 @@ export class AgentService {
         where: { id: existing.id },
         data: {
           isActive: true,
-          actionState: actionState || existing.actionState,
+          actionState: actionState
+            ? JSON.parse(JSON.stringify(actionState))
+            : existing.actionState,
         },
       })
     }
@@ -170,7 +172,9 @@ export class AgentService {
         collectionId,
         agentId,
         isActive: true,
-        actionState,
+        actionState: actionState
+          ? JSON.parse(JSON.stringify(actionState))
+          : undefined,
       },
     })
 
@@ -225,7 +229,9 @@ export class AgentService {
 
     return prisma.collectionAgent.update({
       where: { id: collectionAgent.id },
-      data: { actionState },
+      data: {
+        actionState: JSON.parse(JSON.stringify(actionState)),
+      },
     })
   }
 }

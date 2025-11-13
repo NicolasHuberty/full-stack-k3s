@@ -28,6 +28,7 @@ export default function ChatPage() {
   const [selectedCollectionId, setSelectedCollectionId] = useState<string>('')
   const [collections, setCollections] = useState<Collection[]>([])
   const [loading, setLoading] = useState(true)
+  const [refreshTrigger, setRefreshTrigger] = useState(0)
 
   const handleSelectSession = (sessionId: string) => {
     setSelectedSessionId(sessionId)
@@ -42,6 +43,11 @@ export default function ChatPage() {
   const handleNewSession = (sessionId: string) => {
     setSelectedSessionId(sessionId)
     setShowNewChat(false)
+    setRefreshTrigger((prev) => prev + 1)
+  }
+
+  const handleMessageSent = () => {
+    setRefreshTrigger((prev) => prev + 1)
   }
 
   useEffect(() => {
@@ -114,6 +120,7 @@ export default function ChatPage() {
             <ChatList
               onSelectSession={handleSelectSession}
               selectedSessionId={selectedSessionId}
+              refreshTrigger={refreshTrigger}
             />
           </div>
         </div>
@@ -125,6 +132,7 @@ export default function ChatPage() {
               sessionId={selectedSessionId || undefined}
               collectionId={selectedCollectionId}
               onNewSession={handleNewSession}
+              onMessageSent={handleMessageSent}
             />
           ) : (
             <div className="flex-1 flex items-center justify-center text-gray-500">

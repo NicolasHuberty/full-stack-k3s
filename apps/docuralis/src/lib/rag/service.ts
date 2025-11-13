@@ -351,6 +351,11 @@ ${context}`,
               name: true,
             },
           },
+          sharedWith: {
+            select: {
+              userId: true,
+            },
+          },
         },
       })
 
@@ -358,7 +363,11 @@ ${context}`,
         throw new Error('Session not found')
       }
 
-      if (session.userId !== userId) {
+      // Check if user is owner or has shared access
+      const isOwner = session.userId === userId
+      const hasSharedAccess = session.sharedWith.some((s) => s.userId === userId)
+
+      if (!isOwner && !hasSharedAccess) {
         throw new Error('You do not have access to this session')
       }
 
@@ -372,18 +381,65 @@ ${context}`,
   /**
    * Get all chat sessions for a user
    */
-  async getUserSessions(userId: string, collectionId?: string) {
+  async getUserSessions(userId: string, collectionId?: string, filter?: 'owned' | 'shared' | 'all') {
     try {
-      const sessions = await prisma.chatSession.findMany({
-        where: {
+      const filterType = filter || 'all'
+
+      let whereClause: any = {}
+
+      if (filterType === 'owned') {
+        whereClause = {
           userId,
           ...(collectionId && { collectionId }),
-        },
+        }
+      } else if (filterType === 'shared') {
+        whereClause = {
+          sharedWith: {
+            some: { userId },
+          },
+          ...(collectionId && { collectionId }),
+        }
+      } else {
+        // 'all' - both owned and shared
+        whereClause = {
+          OR: [
+            { userId },
+            { sharedWith: { some: { userId } } },
+          ],
+          ...(collectionId && { collectionId }),
+        }
+      }
+
+      console.log('getUserSessions - userId:', userId, 'filter:', filterType, 'whereClause:', JSON.stringify(whereClause, null, 2))
+
+      const sessions = await prisma.chatSession.findMany({
+        where: whereClause,
         include: {
           collection: {
             select: {
               id: true,
               name: true,
+            },
+          },
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              image: true,
+            },
+          },
+          sharedWith: {
+            select: {
+              userId: true,
+              user: {
+                select: {
+                  id: true,
+                  name: true,
+                  email: true,
+                  image: true,
+                },
+              },
             },
           },
           _count: {
@@ -396,7 +452,6 @@ ${context}`,
           updatedAt: 'desc',
         },
       })
-
       return sessions
     } catch (error) {
       console.error('Failed to get user sessions:', error)
@@ -470,4 +525,79 @@ export function getRAGService(): RAGService {
     ragService = new RAGService()
   }
   return ragService
+}
+
+/**
+ * Standalone function to search documents for agent use
+ */
+export async function searchDocuments(
+  collectionId: string,
+  query: string,
+  limit: number = 10
+): Promise<Array<{
+  pageContent: string
+  metadata: {
+    title: string
+    source: string
+    pageNumber: number
+    similarity: number
+  }
+}>> {
+  try {
+    // Get collection
+    const collection = await prisma.collection.findUnique({
+      where: { id: collectionId },
+    })
+
+    if (!collection) {
+      throw new Error('Collection not found')
+    }
+
+    // Generate query embedding
+    const embeddingService = getEmbeddingService()
+    const queryEmbedding = await embeddingService.generateQueryEmbedding(
+      query,
+      collection.embeddingModel as any
+    )
+
+    // Search in Qdrant
+    const qdrant = getQdrantClient()
+    const results = await qdrant.searchSimilar(
+      collectionId,
+      queryEmbedding,
+      limit,
+      {
+        collectionId: collectionId,
+      }
+    )
+
+    // Get document names
+    const documentIds = [...new Set(results.map((r) => r.payload.documentId))]
+    const documents = await prisma.document.findMany({
+      where: { id: { in: documentIds } },
+      select: { id: true, originalName: true, filename: true },
+    })
+
+    const docMap = new Map(documents.map((d) => [d.id, {
+      title: d.originalName,
+      source: d.filename
+    }]))
+
+    // Format results to match Emate structure
+    return results.map((result) => {
+      const doc = docMap.get(result.payload.documentId)
+      return {
+        pageContent: result.payload.content,
+        metadata: {
+          title: doc?.title || 'Unknown',
+          source: doc?.source || 'Unknown',
+          pageNumber: result.payload.chunkIndex || 0,
+          similarity: result.score,
+        }
+      }
+    })
+  } catch (error) {
+    console.error('Search documents failed:', error)
+    throw error
+  }
 }

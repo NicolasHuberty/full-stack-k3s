@@ -138,6 +138,37 @@ export default function TeamsPage() {
     }
   }
 
+  const handleResendInvitation = async (invitationId: string) => {
+    if (!selectedOrg) return
+
+    setLoading(true)
+    setMessage(null)
+
+    try {
+      const res = await fetch(
+        `/api/organizations/${selectedOrg.id}/invitations/${invitationId}/resend`,
+        {
+          method: 'POST',
+        }
+      )
+
+      if (res.ok) {
+        setMessage({ type: 'success', text: t('resendSuccess') })
+        await fetchOrganizationDetails(selectedOrg.id)
+      } else {
+        const error = await res.json()
+        setMessage({
+          type: 'error',
+          text: error.error || t('resendError'),
+        })
+      }
+    } catch (error) {
+      setMessage({ type: 'error', text: t('resendError') })
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
     <DashboardLayout>
       <div className="max-w-6xl mx-auto p-8">
@@ -302,9 +333,21 @@ export default function TeamsPage() {
                               </p>
                             </div>
                           </div>
-                          <span className="px-3 py-1 rounded-full text-xs font-medium bg-orange-500/10 text-orange-600">
-                            {invitation.role}
-                          </span>
+                          
+                          <div className="flex items-center gap-3">
+                            <span className="px-3 py-1 rounded-full text-xs font-medium bg-orange-500/10 text-orange-600">
+                              {invitation.role}
+                            </span>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleResendInvitation(invitation.id)}
+                              disabled={loading}
+                            >
+                              <Mail className="h-3 w-3 mr-1" />
+                              {t('resendInvitation')}
+                            </Button>
+                          </div>
                         </div>
                       ))}
                     </div>

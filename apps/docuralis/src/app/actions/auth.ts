@@ -34,7 +34,7 @@ export async function register(formData: FormData) {
 
   // Create user
   try {
-    await prisma.user.create({
+    const newUser = await prisma.user.create({
       data: {
         name,
         email,
@@ -47,12 +47,26 @@ export async function register(formData: FormData) {
       },
     })
 
+    console.log('User created successfully:', {
+      id: newUser.id,
+      email: newUser.email,
+      name: newUser.name,
+    })
+
+    // Verify user exists by querying it back
+    const verifyUser = await prisma.user.findUnique({
+      where: { id: newUser.id },
+    })
+    console.log('User verification query result:', verifyUser ? 'FOUND' : 'NOT FOUND')
+
     // Auto sign in after registration
-    await signIn('credentials', {
+    const signInResult = await signIn('credentials', {
       email,
       password,
       redirect: false,
     })
+
+    console.log('Sign in after registration result:', signInResult)
 
     return { success: true }
   } catch (error) {

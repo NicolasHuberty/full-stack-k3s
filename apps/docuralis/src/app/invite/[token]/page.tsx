@@ -28,19 +28,23 @@ export default function InvitePage() {
   const [success, setSuccess] = useState(false)
 
   useEffect(() => {
-    // If not authenticated, redirect to login with return URL
-    if (status === 'unauthenticated') {
-      router.push(`/login?callbackUrl=/invite/${token}`)
-      return
-    }
-
-    // Fetch invitation details
-    if (status === 'authenticated' && token) {
+    // Fetch invitation details when token is available
+    if (token) {
       fetchInvitation()
     }
-  }, [status, token, router])
+  }, [token])
+
+  useEffect(() => {
+    // If not authenticated and we have invitation details, redirect to login with email
+    if (status === 'unauthenticated' && invitation) {
+      router.push(`/login?callbackUrl=/invite/${token}&email=${encodeURIComponent(invitation.email)}`)
+    }
+  }, [status, invitation, token, router])
 
   const fetchInvitation = async () => {
+    // Prevent duplicate calls
+    if (invitation || error || !loading) return
+
     try {
       const res = await fetch(`/api/invite/${token}`)
       if (res.ok) {
@@ -51,6 +55,7 @@ export default function InvitePage() {
         setError(error.error || 'Invalid or expired invitation')
       }
     } catch (err) {
+      console.error('Failed to load invitation:', err)
       setError('Failed to load invitation')
     } finally {
       setLoading(false)
@@ -58,6 +63,14 @@ export default function InvitePage() {
   }
 
   const handleAcceptInvitation = async () => {
+    // Check if user is authenticated
+    if (!session?.user?.id) {
+      setError('Please log in first to accept this invitation')
+      return
+    }
+
+    console.log('Accepting invitation for user:', session.user.email, 'ID:', session.user.id)
+
     setAccepting(true)
     setError(null)
 
@@ -73,9 +86,11 @@ export default function InvitePage() {
         }, 2000)
       } else {
         const error = await res.json()
+        console.error('Accept invitation error:', error)
         setError(error.error || 'Failed to accept invitation')
       }
     } catch (err) {
+      console.error('Accept invitation exception:', err)
       setError('An error occurred')
     } finally {
       setAccepting(false)
@@ -189,9 +204,15 @@ export default function InvitePage() {
 
             {/* Signed in as */}
             {session?.user && (
-              <div className="text-center text-sm text-muted-foreground">
-                Signed in as{' '}
-                <span className="font-medium">{session.user.email}</span>
+              <div className="text-center text-sm">
+                <span className="text-muted-foreground">Signed in as{' '}</span>
+                <span className="font-medium text-foreground">{session.user.email}</span>
+                {session.user.email !== invitation.email && (
+                  <div className="mt-2 text-xs text-amber-600 bg-amber-50 p-2 rounded">
+                    ⚠️ This invitation was sent to <strong>{invitation.email}</strong>.
+                    You may need to sign in with that email instead.
+                  </div>
+                )}
               </div>
             )}
           </div>

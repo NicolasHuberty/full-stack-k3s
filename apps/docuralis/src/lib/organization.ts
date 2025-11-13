@@ -104,7 +104,7 @@ export async function inviteMemberToOrganization(data: {
     },
   })
 
-  // Send invitation email
+  // Send invitation email (non-blocking - don't fail invitation if email fails)
   const emailContent = getOrganizationInvitationEmail(
     data.email,
     invitation.organization.name,
@@ -113,21 +113,92 @@ export async function inviteMemberToOrganization(data: {
     data.role
   )
 
-  await sendEmail({
+  // Send email asynchronously - don't block invitation creation
+  sendEmail({
     to: data.email,
     subject: emailContent.subject,
     html: emailContent.html,
+  }).catch((error) => {
+    console.error('Failed to send invitation email (invitation still created):', error)
+    // In development, you might want to log the invitation link
+    if (process.env.NODE_ENV === 'development') {
+      const inviteUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3001'}/invite/${token}`
+      console.log(`\n📧 Invitation link for ${data.email}: ${inviteUrl}\n`)
+    }
+  })
+
+  return invitation
+}
+
+/**
+ * Resend an invitation email for a pending organization invitation
+ * @param invitationId - The ID of the invitation to resend
+ * @returns The invitation object
+ */
+export async function resendInvitationEmail(invitationId: string) {
+  // Find the invitation
+  const invitation = await prisma.organizationInvitation.findUnique({
+    where: { id: invitationId },
+    include: {
+      organization: true,
+      invitedBy: true,
+    },
+  })
+
+  if (!invitation) {
+    throw new Error('Invitation not found')
+  }
+
+  if (invitation.status !== 'PENDING') {
+    throw new Error('Invitation is no longer pending')
+  }
+
+  // Check if invitation has expired
+  if (invitation.expiresAt < new Date()) {
+    // Extend expiration by 7 days
+    const newExpiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+    await prisma.organizationInvitation.update({
+      where: { id: invitationId },
+      data: { expiresAt: newExpiresAt },
+    })
+  }
+
+  // Resend invitation email
+  const emailContent = getOrganizationInvitationEmail(
+    invitation.email,
+    invitation.organization.name,
+    invitation.invitedBy?.name || 'A team member',
+    invitation.token,
+    invitation.role
+  )
+
+  // Send email asynchronously - don't block
+  sendEmail({
+    to: invitation.email,
+    subject: emailContent.subject,
+    html: emailContent.html,
+  }).catch((error) => {
+    console.error('Failed to resend invitation email:', error)
+    // In development, log the invitation link
+    if (process.env.NODE_ENV === 'development') {
+      const inviteUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3001'}/invite/${invitation.token}`
+      console.log(`\n📧 Resent invitation link for ${invitation.email}: ${inviteUrl}\n`)
+    }
   })
 
   return invitation
 }
 
 export async function acceptInvitation(token: string, userId: string) {
+  console.log('acceptInvitation called with userId:', userId, 'token:', token)
+
   // Find invitation
   const invitation = await prisma.organizationInvitation.findUnique({
     where: { token },
     include: { organization: true },
   })
+
+  console.log('Invitation found:', invitation ? 'yes' : 'no', invitation?.email)
 
   if (!invitation) {
     throw new Error('Invitation not found')
@@ -151,17 +222,34 @@ export async function acceptInvitation(token: string, userId: string) {
   }
 
   // Get user
+  console.log('Looking up user with ID:', userId)
   const user = await prisma.user.findUnique({
     where: { id: userId },
   })
 
+  console.log('User found by ID:', user ? 'yes' : 'no', user?.email)
+
   if (!user) {
-    throw new Error('User not found')
+    // Try to find user by email as fallback
+    const userByEmail = await prisma.user.findUnique({
+      where: { email: invitation.email },
+    })
+    console.log('User found by email:', userByEmail ? 'yes' : 'no', userByEmail?.id)
+
+    if (userByEmail) {
+      throw new Error(
+        `User exists with email ${invitation.email} but session user ID (${userId}) doesn't match database ID (${userByEmail.id}). Please try logging out and logging back in.`
+      )
+    }
+
+    throw new Error('User not found. Please make sure you are logged in.')
   }
 
   // Check if email matches
   if (user.email !== invitation.email) {
-    throw new Error('Email does not match invitation')
+    throw new Error(
+      `This invitation was sent to ${invitation.email}. Please sign in with that email address to accept the invitation. You are currently signed in as ${user.email}.`
+    )
   }
 
   // Add member and update invitation in a transaction

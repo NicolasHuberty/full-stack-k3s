@@ -1,14 +1,3 @@
-// Import tiktoken lazily to avoid WASM issues
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-let encoding_for_model: any = null
-try {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const tiktoken = require('tiktoken')
-  encoding_for_model = tiktoken.encoding_for_model
-} catch {
-  console.warn('Tiktoken not available, will use fallback token counting')
-}
-
 export interface TextChunk {
   content: string
   index: number
@@ -18,17 +7,63 @@ export interface TextChunk {
 }
 
 export interface ChunkingOptions {
-  chunkSize: number // in characters
-  chunkOverlap: number // in characters
+  chunkSize: number // in characters or tokens
+  chunkOverlap: number // in characters or tokens
   respectSentences?: boolean // try to break at sentence boundaries
+  useTokens?: boolean // if true, chunkSize and chunkOverlap are in tokens
 }
 
 export class ChunkingService {
   /**
+   * Split text into token-based chunks (matching Emate backend logic)
+   * This splits by words (tokens) not characters
+   */
+  chunkTextByTokens(text: string, chunkSize: number = 500, chunkOverlap: number = 0): TextChunk[] {
+    if (!text || text.trim().length === 0) {
+      return []
+    }
+
+    // Split text into words (tokens)
+    const tokens = text.split(/\s+/).filter(token => token.length > 0)
+    const chunks: TextChunk[] = []
+    let start = 0
+    let index = 0
+    let charOffset = 0
+
+    while (start < tokens.length) {
+      const end = Math.min(start + chunkSize, tokens.length)
+      const chunkTokens = tokens.slice(start, end)
+      const content = chunkTokens.join(' ')
+
+      const startChar = charOffset
+      const endChar = startChar + content.length
+
+      chunks.push({
+        content,
+        index,
+        startChar,
+        endChar,
+        tokenCount: chunkTokens.length,
+      })
+
+      index++
+      charOffset = endChar + 1 // +1 for the space
+      start += chunkSize - chunkOverlap
+    }
+
+    return chunks
+  }
+
+  /**
    * Split text into overlapping chunks
    */
   chunkText(text: string, options: ChunkingOptions): TextChunk[] {
-    const { chunkSize, chunkOverlap, respectSentences = true } = options
+    const { chunkSize, chunkOverlap, respectSentences = true, useTokens = false } = options
+
+    // If useTokens is true, use the token-based chunking
+    if (useTokens) {
+      return this.chunkTextByTokens(text, chunkSize, chunkOverlap)
+    }
 
     if (chunkSize <= 0) {
       throw new Error('Chunk size must be greater than 0')
@@ -123,45 +158,24 @@ export class ChunkingService {
   }
 
   /**
-   * Count tokens in text using tiktoken (with fallback)
+   * Estimate token count using simple word-based approximation
+   * OpenAI will return actual token count in API response
    */
-  async countTokens(
-    text: string,
-    model: string = 'gpt-3.5-turbo'
-  ): Promise<number> {
-    try {
-      if (!encoding_for_model) {
-        // Tiktoken not available, use fallback
-        return Math.ceil(text.length / 4)
-      }
-
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const encoder = encoding_for_model(model as any)
-      const tokens = encoder.encode(text)
-      const count = tokens.length
-      encoder.free()
-      return count
-    } catch (error) {
-      // Fallback to rough estimation if tiktoken fails
-      // Roughly 4 characters per token for English text
-      return Math.ceil(text.length / 4)
-    }
+  estimateTokenCount(text: string): number {
+    // Simple word-based estimation: split by whitespace
+    const words = text.split(/\s+/).filter(word => word.length > 0)
+    return words.length
   }
 
   /**
-   * Add token counts to chunks
+   * Add estimated token counts to chunks
+   * Actual token counts will come from OpenAI API response
    */
-  async addTokenCounts(
-    chunks: TextChunk[],
-    model: string = 'gpt-3.5-turbo'
-  ): Promise<TextChunk[]> {
-    const chunksWithTokens = await Promise.all(
-      chunks.map(async (chunk) => ({
-        ...chunk,
-        tokenCount: await this.countTokens(chunk.content, model),
-      }))
-    )
-    return chunksWithTokens
+  addTokenCounts(chunks: TextChunk[]): TextChunk[] {
+    return chunks.map((chunk) => ({
+      ...chunk,
+      tokenCount: this.estimateTokenCount(chunk.content),
+    }))
   }
 
   /**

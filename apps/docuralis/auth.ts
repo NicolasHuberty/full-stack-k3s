@@ -137,7 +137,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (token && session.user && token.id) {
         session.user.id = token.id as string
 
-        // Fetch latest user data including plan info
+        // Fetch latest user data including plan info and admin status
         const user = await prisma.user.findUnique({
           where: { id: token.id as string },
           select: {
@@ -149,6 +149,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             planStatus: true,
             storageUsed: true,
             storageLimit: true,
+            isSystemAdmin: true,
           },
         })
 
@@ -157,6 +158,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           session.user.planStatus = user.planStatus
           session.user.storageUsed = user.storageUsed.toString()
           session.user.storageLimit = user.storageLimit.toString()
+          session.user.isSystemAdmin = user.isSystemAdmin
         }
       }
       return session

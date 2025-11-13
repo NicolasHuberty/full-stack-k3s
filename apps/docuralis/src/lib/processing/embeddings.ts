@@ -37,7 +37,7 @@ export class EmbeddingService {
    */
   async generateEmbedding(
     text: string,
-    model: EmbeddingModel = 'text-embedding-3-small'
+    model: EmbeddingModel = 'text-embedding-3-large'
   ): Promise<EmbeddingResult> {
     try {
       if (!text || text.trim().length === 0) {
@@ -74,7 +74,7 @@ export class EmbeddingService {
    */
   async generateBatchEmbeddings(
     texts: string[],
-    model: EmbeddingModel = 'text-embedding-3-small',
+    model: EmbeddingModel = 'text-embedding-3-large',
     batchSize: number = 100
   ): Promise<BatchEmbeddingResult> {
     try {
@@ -135,7 +135,7 @@ export class EmbeddingService {
    */
   async generateQueryEmbedding(
     query: string,
-    model: EmbeddingModel = 'text-embedding-3-small'
+    model: EmbeddingModel = 'text-embedding-3-large'
   ): Promise<number[]> {
     try {
       const result = await this.generateEmbedding(query, model)

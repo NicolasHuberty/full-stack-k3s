@@ -46,6 +46,8 @@ import {
   File,
   Mail,
   FolderUp,
+  Bot,
+  Plus,
 } from 'lucide-react'
 import {
   Select,
@@ -121,11 +123,24 @@ interface Collection {
   totalChatMessages: number
 }
 
+interface CollectionAgent {
+  id: string
+  agent: {
+    id: string
+    name: string
+    description: string
+    icon?: string
+  }
+  actionState: Record<string, any>
+  isActive: boolean
+}
+
 export default function CollectionDetailPage() {
   const params = useParams()
   const router = useRouter()
   const t = useTranslations('collectionDetail')
   const [collection, setCollection] = useState<Collection | null>(null)
+  const [agents, setAgents] = useState<CollectionAgent[]>([])
   const [loading, setLoading] = useState(true)
   const [uploading, setUploading] = useState(false)
   const [dragActive, setDragActive] = useState(false)
@@ -210,6 +225,7 @@ export default function CollectionDetailPage() {
 
   useEffect(() => {
     fetchCollection()
+    fetchAgents()
   }, [collectionId])
 
   // Auto-refresh every 5 seconds if there are pending/processing documents
@@ -281,6 +297,18 @@ export default function CollectionDetailPage() {
       setMessage({ type: 'error', text: t('fetchError') })
     } finally {
       if (!silent) setLoading(false)
+    }
+  }
+
+  const fetchAgents = async () => {
+    try {
+      const res = await fetch(`/api/collections/${collectionId}/agents`)
+      if (res.ok) {
+        const data = await res.json()
+        setAgents(data)
+      }
+    } catch (error) {
+      console.error('Failed to fetch agents:', error)
     }
   }
 
@@ -900,6 +928,107 @@ export default function CollectionDetailPage() {
                   />
                 </div>
               </div>
+            </div>
+
+            {/* Connected Agents */}
+            <div className="mb-6">
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                  <Bot className="h-4 w-4" />
+                  Connected Agents ({agents.filter(a => a.isActive).length})
+                </h2>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => router.push('/dashboard/agents')}
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Browse Agents
+                </Button>
+              </div>
+
+              {agents.length === 0 ? (
+                <div className="border rounded-lg p-8 bg-card text-center">
+                  <Bot className="h-12 w-12 mx-auto mb-3 text-muted-foreground" />
+                  <h3 className="font-medium mb-2">No agents connected</h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Activate intelligent agents to enhance your collection with automated workflows
+                  </p>
+                  <Button
+                    variant="default"
+                    onClick={() => router.push('/dashboard/agents')}
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Browse Agent Marketplace
+                  </Button>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {agents.map((collectionAgent) => (
+                    <div
+                      key={collectionAgent.id}
+                      className="border rounded-lg p-4 bg-card hover:shadow-md transition-shadow"
+                    >
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center gap-3">
+                          <div className="text-2xl">
+                            {collectionAgent.agent.icon || '🤖'}
+                          </div>
+                          <div>
+                            <h3 className="font-medium">
+                              {collectionAgent.agent.name}
+                            </h3>
+                            {collectionAgent.isActive ? (
+                              <span className="inline-flex items-center gap-1 text-xs text-green-600">
+                                <span className="h-2 w-2 rounded-full bg-green-600"></span>
+                                Active
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1 text-xs text-gray-400">
+                                <span className="h-2 w-2 rounded-full bg-gray-400"></span>
+                                Inactive
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
+                        {collectionAgent.agent.description}
+                      </p>
+                      {collectionAgent.actionState &&
+                       Object.keys(collectionAgent.actionState).length > 0 && (
+                        <div className="border-t pt-3">
+                          <div className="text-xs text-muted-foreground mb-2">
+                            Enabled Actions:
+                          </div>
+                          <div className="flex flex-wrap gap-2">
+                            {Object.entries(collectionAgent.actionState)
+                              .filter(([_, enabled]) => enabled)
+                              .map(([action]) => (
+                                <span
+                                  key={action}
+                                  className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-primary/10 text-primary"
+                                >
+                                  {action}
+                                </span>
+                              ))}
+                          </div>
+                        </div>
+                      )}
+                      <div className="mt-3 pt-3 border-t">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="w-full"
+                          onClick={() => router.push(`/dashboard/agents/${collectionAgent.agent.id}`)}
+                        >
+                          View Details
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Access Users */}

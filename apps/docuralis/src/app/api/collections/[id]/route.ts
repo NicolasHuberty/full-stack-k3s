@@ -95,12 +95,13 @@ export async function GET(
       }),
     ])
 
-    // Build access users list (owner + permissions)
+    // Build access users list
     const accessUsers = []
+    const userMap = new Map()
 
     // Add owner as ADMIN
     if (collection.owner) {
-      accessUsers.push({
+      userMap.set(collection.owner.id, {
         id: collection.owner.id,
         name: collection.owner.name,
         email: collection.owner.email,
@@ -109,15 +110,46 @@ export async function GET(
       })
     }
 
-    // Add users with explicit permissions (exclude owner to avoid duplicates)
+    // Add users with explicit permissions
     accessStats.forEach((p) => {
-      if (p.user.id !== collection.ownerId) {
-        accessUsers.push({
+      if (!userMap.has(p.user.id)) {
+        userMap.set(p.user.id, {
           ...p.user,
           permission: p.permission,
         })
       }
     })
+
+    // For ORGANIZATION visibility, add all organization members
+    if (collection.visibility === 'ORGANIZATION' && collection.organizationId) {
+      const orgMembers = await prisma.organizationMember.findMany({
+        where: {
+          organizationId: collection.organizationId,
+          isActive: true,
+        },
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              image: true,
+            },
+          },
+        },
+      })
+
+      orgMembers.forEach((member) => {
+        if (!userMap.has(member.user.id)) {
+          userMap.set(member.user.id, {
+            ...member.user,
+            permission: 'VIEWER' as const, // Default permission for org members
+          })
+        }
+      })
+    }
+
+    accessUsers.push(...userMap.values())
 
     // Convert BigInt to string
     const serializedCollection = {

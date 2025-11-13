@@ -3,11 +3,13 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { useTranslations } from 'next-intl'
-import { Send, Loader2, FileText, ExternalLink, BookOpen } from 'lucide-react'
+import { Send, Loader2, FileText, ExternalLink, BookOpen, Bot } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent } from '@/components/ui/card'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import ReactMarkdown from 'react-markdown'
+import { AgentActions } from './agent-actions'
 
 interface Message {
   id: string
@@ -31,12 +33,14 @@ interface ChatInterfaceProps {
   sessionId?: string
   collectionId?: string
   onNewSession?: (sessionId: string) => void
+  onMessageSent?: () => void
 }
 
 export function ChatInterface({
   sessionId,
   collectionId,
   onNewSession,
+  onMessageSent,
 }: ChatInterfaceProps) {
   const t = useTranslations('chat')
   const [session, setSession] = useState<ChatSession | null>(null)
@@ -46,7 +50,20 @@ export function ChatInterface({
   const [optimisticMessage, setOptimisticMessage] = useState<string | null>(
     null
   )
+  const [currentUser, setCurrentUser] = useState<{
+    id: string
+    name: string | null
+    email: string
+    image: string | null
+  } | null>(null)
+  const [selectedAgentId, setSelectedAgentId] = useState<string | null>(null)
+  const [agentActionState, setAgentActionState] = useState<Record<string, any>>({})
+  const [selectedModel, setSelectedModel] = useState<string>('gpt-4o-mini')
   const messagesEndRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    loadCurrentUser()
+  }, [])
 
   useEffect(() => {
     if (sessionId) {
@@ -59,6 +76,30 @@ export function ChatInterface({
   useEffect(() => {
     scrollToBottom()
   }, [session?.messages, optimisticMessage, loading])
+
+  const loadCurrentUser = async () => {
+    try {
+      const res = await fetch('/api/auth/session')
+      const data = await res.json()
+      if (data?.user) {
+        setCurrentUser(data.user)
+      }
+    } catch (error) {
+      console.error('Failed to load current user:', error)
+    }
+  }
+
+  const getUserInitials = (name: string | null, email: string) => {
+    if (name) {
+      return name
+        .split(' ')
+        .map((n) => n[0])
+        .join('')
+        .toUpperCase()
+        .slice(0, 2)
+    }
+    return email[0].toUpperCase()
+  }
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -79,6 +120,12 @@ export function ChatInterface({
     }
   }
 
+  const handleAgentChange = (agentId: string | null, actionState: Record<string, any>, model: string) => {
+    setSelectedAgentId(agentId)
+    setAgentActionState(actionState)
+    setSelectedModel(model)
+  }
+
   const sendMessage = async () => {
     if (!message.trim() || loading) return
 
@@ -95,6 +142,9 @@ export function ChatInterface({
           message: userMessage,
           sessionId: session?.id,
           collectionId: collectionId || session?.collection?.id,
+          agentId: selectedAgentId,
+          actionState: agentActionState,
+          model: selectedModel,
         }),
       })
 
@@ -114,6 +164,11 @@ export function ChatInterface({
         const sessionRes = await fetch(`/api/chat/sessions/${data.sessionId}`)
         const sessionData = await sessionRes.json()
         setSession(sessionData.session)
+      }
+
+      // Notify parent that a message was sent
+      if (onMessageSent) {
+        onMessageSent()
       }
     } catch (error) {
       console.error('Failed to send message:', error)
@@ -161,16 +216,24 @@ export function ChatInterface({
         </div>
       )}
 
+      {/* Agent Actions Bar */}
+      {(collectionId || session?.collection?.id) && (
+        <AgentActions
+          collectionId={collectionId || session?.collection?.id || ''}
+          onAgentChange={handleAgentChange}
+        />
+      )}
+
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
         {!session && (
           <div className="text-center text-gray-500 mt-8">
             <MessageSquare className="h-16 w-16 mx-auto mb-4 text-gray-300" />
-            <p className="text-lg font-medium">Start a new conversation</p>
+            <p className="text-lg font-medium">{t('startConversation')}</p>
             <p className="text-sm mt-2">
               {collectionId
-                ? 'Ask questions about your documents'
-                : 'Select a collection or start a general chat'}
+                ? t('askAboutDocs')
+                : t('selectOrGeneral')}
             </p>
           </div>
         )}
@@ -178,8 +241,19 @@ export function ChatInterface({
         {session?.messages.map((msg) => (
           <div
             key={msg.id}
-            className={`flex ${msg.role === 'USER' ? 'justify-end' : 'justify-start'}`}
+            className={`flex gap-3 ${msg.role === 'USER' ? 'justify-end' : 'justify-start'}`}
           >
+            {/* AI Avatar - Left side */}
+            {msg.role === 'ASSISTANT' && (
+              <Avatar className="h-8 w-8 flex-shrink-0 mt-1">
+                <img
+                  src="/docuralis.ico"
+                  alt="AI"
+                  className="h-8 w-8 rounded-full bg-white border border-gray-200"
+                />
+              </Avatar>
+            )}
+
             <Card
               className={`max-w-[80%] ${
                 msg.role === 'USER'
@@ -242,11 +316,21 @@ export function ChatInterface({
                   )}
               </CardContent>
             </Card>
+
+            {/* User Avatar - Right side */}
+            {msg.role === 'USER' && currentUser && (
+              <Avatar className="h-8 w-8 flex-shrink-0 mt-1">
+                <AvatarImage src={currentUser.image || undefined} />
+                <AvatarFallback className="bg-blue-600 text-white text-xs">
+                  {getUserInitials(currentUser.name, currentUser.email)}
+                </AvatarFallback>
+              </Avatar>
+            )}
           </div>
         ))}
         {/* Optimistic user message while waiting for response */}
         {optimisticMessage && (
-          <div className="flex justify-end">
+          <div className="flex gap-3 justify-end">
             <Card className="max-w-[80%] bg-blue-500 text-white">
               <CardContent className="p-3">
                 <div className="prose prose-sm max-w-none dark:prose-invert">
@@ -254,11 +338,24 @@ export function ChatInterface({
                 </div>
               </CardContent>
             </Card>
+            {currentUser && (
+              <Avatar className="h-8 w-8 flex-shrink-0 mt-1">
+                <AvatarImage src={currentUser.image || undefined} />
+                <AvatarFallback className="bg-blue-600 text-white text-xs">
+                  {getUserInitials(currentUser.name, currentUser.email)}
+                </AvatarFallback>
+              </Avatar>
+            )}
           </div>
         )}
         {/* AI loading indicator */}
         {loading && (
-          <div className="flex justify-start">
+          <div className="flex gap-3 justify-start">
+            <Avatar className="h-8 w-8 flex-shrink-0 mt-1">
+              <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600">
+                <Bot className="h-4 w-4 text-white" />
+              </AvatarFallback>
+            </Avatar>
             <Card className="bg-white">
               <CardContent className="p-3">
                 <Loader2 className="h-5 w-5 animate-spin text-blue-500" />

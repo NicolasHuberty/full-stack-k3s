@@ -1,13 +1,16 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { register } from '@/app/actions/auth'
 import { signIn } from 'next-auth/react'
 import Link from 'next/link'
 
 export default function RegisterPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const callbackUrl = searchParams.get('callbackUrl') || '/dashboard'
+  const invitationEmail = searchParams.get('email') || ''
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -28,7 +31,7 @@ export default function RegisterPage() {
       setError(result.error)
       setLoading(false)
     } else {
-      router.push('/dashboard')
+      router.push(callbackUrl)
       router.refresh()
     }
   }
@@ -37,7 +40,7 @@ export default function RegisterPage() {
     provider: 'google' | 'github' | 'microsoft'
   ) {
     setLoading(true)
-    await signIn(provider, { callbackUrl: '/dashboard' })
+    await signIn(provider, { callbackUrl })
   }
 
   return (
@@ -45,9 +48,15 @@ export default function RegisterPage() {
       <div className="w-full max-w-md space-y-8 rounded-lg border border-border bg-card p-8 shadow-lg">
         <div>
           <h2 className="text-center text-3xl font-bold">Create Account</h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Start your 14-day free trial
-          </p>
+          {invitationEmail ? (
+            <p className="mt-2 text-center text-sm text-gray-600">
+              Create your account to join the team
+            </p>
+          ) : (
+            <p className="mt-2 text-center text-sm text-gray-600">
+              Start your 14-day free trial
+            </p>
+          )}
         </div>
 
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
@@ -80,14 +89,16 @@ export default function RegisterPage() {
                 htmlFor="email"
                 className="block text-sm font-medium text-gray-700"
               >
-                Email
+                Email{invitationEmail && <span className="text-xs text-gray-500 ml-2">(from invitation)</span>}
               </label>
               <input
                 id="email"
                 name="email"
                 type="email"
                 required
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                defaultValue={invitationEmail}
+                readOnly={!!invitationEmail}
+                className={`mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 ${invitationEmail ? 'bg-gray-50 cursor-not-allowed' : ''}`}
                 placeholder="john@example.com"
               />
             </div>
@@ -191,7 +202,10 @@ export default function RegisterPage() {
         <p className="text-center text-sm text-muted-foreground">
           Already have an account?{' '}
           <Link
-            href="/login"
+            href={`/login?${new URLSearchParams({
+              ...(callbackUrl !== '/dashboard' && { callbackUrl }),
+              ...(invitationEmail && { email: invitationEmail })
+            }).toString()}`}
             className="font-medium text-accent hover:underline"
           >
             Sign in

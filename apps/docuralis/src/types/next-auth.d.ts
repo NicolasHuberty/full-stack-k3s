@@ -9,6 +9,7 @@ declare module 'next-auth' {
       planStatus: PlanStatus
       storageUsed: string
       storageLimit: string
+      isSystemAdmin: boolean
     } & DefaultSession['user']
   }
 
@@ -16,6 +17,7 @@ declare module 'next-auth' {
     id: string
     planType?: PlanType
     planStatus?: PlanStatus
+    isSystemAdmin?: boolean
   }
 }
 

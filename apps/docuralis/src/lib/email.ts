@@ -1,15 +1,26 @@
 import nodemailer from 'nodemailer'
 
 // Create transporter with Hostinger SMTP
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || 'smtp.hostinger.com',
-  port: parseInt(process.env.SMTP_PORT || '465'),
-  secure: true, // use SSL
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASSWORD,
-  },
-})
+// Only create transporter if SMTP credentials are configured
+const getTransporter = () => {
+  if (!process.env.SMTP_USER || !process.env.SMTP_PASSWORD) {
+    console.warn('⚠️  SMTP credentials not configured. Email sending will fail.')
+    console.warn('   Set SMTP_USER and SMTP_PASSWORD environment variables.')
+    return null
+  }
+
+  return nodemailer.createTransport({
+    host: process.env.SMTP_HOST || 'smtp.hostinger.com',
+    port: parseInt(process.env.SMTP_PORT || '465'),
+    secure: true, // use SSL
+    auth: {
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASSWORD,
+    },
+  })
+}
+
+const transporter = getTransporter()
 
 export interface EmailOptions {
   to: string
@@ -19,6 +30,19 @@ export interface EmailOptions {
 }
 
 export async function sendEmail({ to, subject, html, text }: EmailOptions) {
+  // Skip email sending if SMTP is not configured
+  if (!transporter) {
+    const errorMsg = 'SMTP transporter not configured. Please set SMTP_USER and SMTP_PASSWORD environment variables.'
+    if (process.env.NODE_ENV === 'development') {
+      console.warn(`⚠️  Email sending skipped (SMTP not configured):`)
+      console.warn(`   To: ${to}`)
+      console.warn(`   Subject: ${subject}`)
+      return { success: false, error: errorMsg }
+    }
+    // In production, throw error
+    throw new Error(errorMsg)
+  }
+
   try {
     const info = await transporter.sendMail({
       from: `"${process.env.SMTP_FROM_NAME || 'Docuralis'}" <${process.env.SMTP_USER}>`,
@@ -28,11 +52,12 @@ export async function sendEmail({ to, subject, html, text }: EmailOptions) {
       text: text || html.replace(/<[^>]*>/g, ''), // Strip HTML as fallback
     })
 
-    console.log('Email sent:', info.messageId)
+    console.log('✅ Email sent:', info.messageId)
     return { success: true, messageId: info.messageId }
   } catch (error) {
-    console.error('Failed to send email:', error)
-    return { success: false, error }
+    console.error('❌ Failed to send email:', error)
+    // Re-throw to allow caller to handle
+    throw error
   }
 }
 

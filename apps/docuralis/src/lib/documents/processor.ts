@@ -5,8 +5,10 @@ import { getQdrantClient } from '@/lib/vector/qdrant'
 import { getTextExtractor } from '@/lib/processing/extract'
 import { getChunkingService } from '@/lib/processing/chunking'
 import { getEmbeddingService } from '@/lib/processing/embeddings'
+import { sendDocumentProcessingJob } from '@/lib/queue/pgboss'
 import { DocumentStatus } from '@prisma/client'
 import { randomBytes } from 'crypto'
+import { logger } from '@/lib/logger'
 
 export interface ProcessDocumentInput {
   collectionId: string
@@ -92,18 +94,32 @@ export class DocumentProcessor {
         },
       })
 
-      // Create processing job
+      // Determine priority based on document type (scanned PDFs get lower priority)
+      const isScannedPDF = input.mimeType === 'application/pdf' // Will be determined by worker
+      const priority = isScannedPDF ? -1 : 0 // Higher number = higher priority
+
+      // Send job to pg-boss queue
+      const jobId = await sendDocumentProcessingJob({
+        documentId: document.id,
+        collectionId: input.collectionId,
+        userId: input.uploadedById,
+        priority,
+      })
+
+      // Create processing job record
       await prisma.processingJob.create({
         data: {
           documentId: document.id,
           status: 'QUEUED',
-          priority: 0,
+          priority,
+          pgBossJobId: jobId,
         },
       })
 
-      // Start processing asynchronously (don't await)
-      this.processDocument(document.id).catch((error) => {
-        console.error(`Failed to process document ${document.id}:`, error)
+      logger.info('Document uploaded and queued for processing', {
+        documentId: document.id,
+        jobId,
+        priority,
       })
 
       return {
@@ -364,6 +380,7 @@ export class DocumentProcessor {
     try {
       const job = await prisma.processingJob.findUnique({
         where: { documentId },
+        include: { document: true },
       })
 
       if (!job) {
@@ -374,12 +391,23 @@ export class DocumentProcessor {
         throw new Error('Maximum retry attempts reached')
       }
 
+      // Send new job to pg-boss queue
+      const newJobId = await sendDocumentProcessingJob({
+        documentId,
+        collectionId: job.document.collectionId,
+        userId: job.document.uploadedById,
+        priority: job.priority,
+      })
+
       // Reset job status
       await prisma.processingJob.update({
         where: { documentId },
         data: {
           status: 'QUEUED',
           error: null,
+          pgBossJobId: newJobId,
+          retryAfter: null,
+          failedAt: null,
         },
       })
 
@@ -392,10 +420,12 @@ export class DocumentProcessor {
         },
       })
 
-      // Start processing
-      await this.processDocument(documentId)
+      logger.info('Document processing retry queued', {
+        documentId,
+        jobId: newJobId,
+      })
     } catch (error) {
-      console.error('Failed to retry processing:', error)
+      logger.error('Failed to retry processing', error)
       throw error
     }
   }

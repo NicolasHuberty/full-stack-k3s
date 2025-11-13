@@ -60,6 +60,9 @@ model User {
   image         String?
   language      String    @default("en") // User's preferred language
 
+  // Admin flag
+  isSystemAdmin Boolean   @default(false)
+
   // Plan information (for individual users)
   planType      PlanType   @default(FREE)
   planStatus    PlanStatus @default(TRIAL)
@@ -91,6 +94,7 @@ model User {
 
   // Chat sessions
   chatSessions          ChatSession[] @relation("ChatSessions")
+  sharedChats           ChatSharedWith[] @relation("SharedChats")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -225,15 +229,16 @@ model Collection {
   allowPublicRead Boolean @default(false)
 
   // RAG Settings
-  embeddingModel String @default("text-embedding-3-small")
-  chunkSize      Int @default(1000)
-  chunkOverlap   Int @default(200)
+  embeddingModel String @default("text-embedding-3-large")
+  chunkSize      Int @default(500)
+  chunkOverlap   Int @default(0)
 
   // Relations
   documents      Document[]
   permissions    CollectionPermission[]
   tags           CollectionTag[]
   chatSessions   ChatSession[]
+  agents         CollectionAgent[]
 
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
@@ -394,15 +399,26 @@ model ProcessingJob {
   priority   Int @default(0)
 
   attempts   Int @default(0)
-  maxAttempts Int @default(3)
+  maxAttempts Int @default(10)
 
-  error      String?
+  // pg-boss integration
+  pgBossJobId String? @unique
+  workerId    String?
+  retryAfter  DateTime?
+  failedAt    DateTime?
+
+  // Processing state tracking
+  metadata    Json?
+  currentStep String?
+
+  error      String? @db.Text
 
   startedAt  DateTime?
   completedAt DateTime?
   createdAt  DateTime @default(now())
 
-  @@index([status, priority])
+  @@index([status, priority, createdAt])
+  @@index([pgBossJobId])
 }
 
 enum JobStatus {
@@ -410,26 +426,6 @@ enum JobStatus {
   PROCESSING
   COMPLETED
   FAILED
-}
-
-model ChatSession {
-  id           String @id @default(cuid())
-
-  collectionId String?
-  collection   Collection? @relation(fields: [collectionId], references: [id], onDelete: SetNull)
-
-  userId       String
-  user         User @relation("ChatSessions", fields: [userId], references: [id], onDelete: Cascade)
-
-  title        String?
-
-  messages     ChatMessage[]
-
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-
-  @@index([userId])
-  @@index([collectionId])
 }
 
 model ChatMessage {
@@ -444,6 +440,11 @@ model ChatMessage {
   // RAG context
   documentChunks Json?
 
+  // Per-message agent configuration
+  agentId      String?
+  modelUsed    String?  // Model used for this specific message
+  actionState  Json?    // Agent action state for this message
+
   // Token usage
   promptTokens     Int?
   completionTokens Int?
@@ -453,8 +454,176 @@ model ChatMessage {
   @@index([sessionId])
 }
 
+model ChatSharedWith {
+  id        String @id @default(cuid())
+
+  sessionId String
+  session   ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  userId    String
+  user      User @relation("SharedChats", fields: [userId], references: [id], onDelete: Cascade)
+
+  sharedAt  DateTime @default(now())
+
+  @@unique([sessionId, userId])
+  @@index([userId])
+  @@index([sessionId])
+}
+
 enum MessageRole {
   USER
   ASSISTANT
   SYSTEM
+}
+
+// Agent Marketplace
+enum AgentStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum AgentActionType {
+  TOGGLE
+  SELECT
+  INPUT
+}
+
+model Agent {
+  id          String @id @default(cuid())
+
+  name        String
+  description String @db.Text
+  icon        String?
+
+  status      AgentStatus @default(DRAFT)
+
+  // Agent configuration
+  systemPrompt String @db.Text
+  temperature  Float @default(0.0)
+  model        String @default("gpt-4o-mini")
+
+  // LangGraph configuration
+  graphConfig  Json?
+
+  // Marketplace
+  isPublic     Boolean @default(true)
+  featured     Boolean @default(false)
+
+  // Stats
+  installCount Int @default(0)
+
+  // Actions/buttons for this agent
+  actions      AgentAction[]
+
+  // Collection activations
+  collectionAgents CollectionAgent[]
+
+  // Chat sessions using this agent
+  chatSessions     ChatSession[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([status])
+  @@index([featured])
+}
+
+model AgentAction {
+  id       String @id @default(cuid())
+
+  agentId  String
+  agent    Agent @relation(fields: [agentId], references: [id], onDelete: Cascade)
+
+  name     String // e.g. "translator_mode", "smart_mode"
+  label    String // e.g. "Translator Mode"
+  icon     String // Icon name from lucide-react
+  type     AgentActionType @default(TOGGLE)
+
+  // For SELECT type
+  options  Json?
+
+  // Default value
+  defaultValue String?
+
+  // Order in UI
+  order    Int @default(0)
+
+  createdAt DateTime @default(now())
+
+  @@index([agentId])
+  @@unique([agentId, name])
+}
+
+model CollectionAgent {
+  id           String @id @default(cuid())
+
+  collectionId String
+  collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+
+  agentId      String
+  agent        Agent @relation(fields: [agentId], references: [id], onDelete: Cascade)
+
+  isActive     Boolean @default(true)
+
+  // Action state for this collection (e.g. {"translator_mode": true, "smart_mode": false})
+  actionState  Json?
+
+  activatedAt  DateTime @default(now())
+  createdAt    DateTime @default(now())
+
+  @@unique([collectionId, agentId])
+  @@index([collectionId])
+  @@index([agentId])
+}
+
+model LLMModel {
+  id          String @id @default(cuid())
+
+  name        String @unique  // e.g. "gpt-4o-mini"
+  displayName String          // e.g. "GPT-4o Mini"
+  provider    String          // e.g. "openai", "anthropic"
+
+  // Model specs
+  contextWindow Int?
+  maxTokens     Int?
+
+  // Pricing (per 1M tokens)
+  inputPrice  Float?
+  outputPrice Float?
+
+  // Availability
+  isActive    Boolean @default(true)
+  isDefault   Boolean @default(false)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([provider])
+  @@index([isActive])
+}
+
+model ChatSession {
+  id           String @id @default(cuid())
+
+  collectionId String?
+  collection   Collection? @relation(fields: [collectionId], references: [id], onDelete: SetNull)
+
+  userId       String
+  user         User @relation("ChatSessions", fields: [userId], references: [id], onDelete: Cascade)
+
+  agentId      String?
+  agent        Agent? @relation(fields: [agentId], references: [id], onDelete: SetNull)
+
+  title        String?
+
+  messages     ChatMessage[]
+  sharedWith   ChatSharedWith[]
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([userId])
+  @@index([collectionId])
+  @@index([agentId])
 }

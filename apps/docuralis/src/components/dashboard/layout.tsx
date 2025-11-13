@@ -15,6 +15,8 @@ import {
   Home,
   User,
   ChevronDown,
+  Bot,
+  Shield,
 } from 'lucide-react'
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -22,6 +24,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { data: session } = useSession()
   const pathname = usePathname()
   const [dropdownOpen, setDropdownOpen] = useState(false)
+  const [isAdmin, setIsAdmin] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -37,6 +40,24 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
+  useEffect(() => {
+    // Check if user is system admin
+    const checkAdminStatus = async () => {
+      try {
+        const response = await fetch('/api/user/me')
+        if (response.ok) {
+          const data = await response.json()
+          setIsAdmin(data.isSystemAdmin || false)
+        }
+      } catch (error) {
+        console.error('Failed to check admin status:', error)
+      }
+    }
+    if (session?.user?.id) {
+      checkAdminStatus()
+    }
+  }, [session])
+
   const navItems = [
     { id: 'home', label: t('home'), icon: Home, href: '/dashboard' },
     {
@@ -51,6 +72,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       icon: Database,
       href: '/dashboard/collections',
     },
+    { id: 'agents', label: 'Agents', icon: Bot, href: '/dashboard/agents' },
     { id: 'teams', label: 'Teams', icon: Users, href: '/dashboard/teams' },
     {
       id: 'settings',
@@ -59,6 +81,13 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       href: '/dashboard/settings',
     },
   ]
+
+  // Add admin item only if user is system admin
+  const adminNavItems = isAdmin
+    ? [{ id: 'admin', label: 'Admin', icon: Shield, href: '/dashboard/admin' }]
+    : []
+
+  const allNavItems = [...navItems, ...adminNavItems]
 
   return (
     <div className="flex h-screen bg-background">
@@ -79,9 +108,9 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
 
         {/* Navigation */}
         <nav className="flex-1 p-4 space-y-1">
-          {navItems.map((item) => {
+          {allNavItems.map((item) => {
             const Icon = item.icon
-            const isActive = pathname === item.href
+            const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
             return (
               <Link
                 key={item.id}

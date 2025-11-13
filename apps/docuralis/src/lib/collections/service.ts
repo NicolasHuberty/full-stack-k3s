@@ -31,11 +31,39 @@ export interface UpdateCollectionInput {
  */
 export async function createCollection(input: CreateCollectionInput) {
   try {
-    // If organizationId is provided, check permission
-    if (input.organizationId) {
+    let organizationId = input.organizationId
+    const visibility = input.visibility || 'PRIVATE'
+
+    // If visibility is ORGANIZATION but no organizationId provided, auto-select one
+    if (visibility === 'ORGANIZATION' && !organizationId) {
+      // Get user's organizations
+      const userOrgs = await prisma.organizationMember.findMany({
+        where: {
+          userId: input.ownerId,
+          isActive: true,
+        },
+        include: {
+          organization: true,
+        },
+      })
+
+      if (userOrgs.length === 0) {
+        throw new Error(
+          'You must be a member of an organization to create organization collections'
+        )
+      }
+
+      // Use the first organization
+      // TODO: In the future, allow user to select which organization
+      organizationId = userOrgs[0].organizationId
+      console.log(`Auto-selected organization ${organizationId} for ORGANIZATION collection`)
+    }
+
+    // If organizationId is provided or auto-selected, check permission
+    if (organizationId) {
       const canCreate = await canCreateOrgCollection(
         input.ownerId,
-        input.organizationId
+        organizationId
       )
       if (!canCreate) {
         throw new Error(
@@ -49,9 +77,9 @@ export async function createCollection(input: CreateCollectionInput) {
       data: {
         name: input.name,
         description: input.description,
-        visibility: input.visibility || 'PRIVATE',
+        visibility,
         allowPublicRead: input.allowPublicRead || false,
-        organizationId: input.organizationId,
+        organizationId,
         ownerId: input.ownerId,
         embeddingModel: input.embeddingModel || 'text-embedding-3-small',
         chunkSize: input.chunkSize || 1000,
@@ -168,6 +196,63 @@ export async function updateCollection(
     const hasAccess = await hasCollectionAccess(userId, collectionId, 'manage')
     if (!hasAccess) {
       throw new Error('You do not have permission to update this collection')
+    }
+
+    // If changing visibility to ORGANIZATION, ensure organizationId is set
+    if (input.visibility === 'ORGANIZATION') {
+      const currentCollection = await prisma.collection.findUnique({
+        where: { id: collectionId },
+        select: { organizationId: true, ownerId: true },
+      })
+
+      if (currentCollection && !currentCollection.organizationId) {
+        // Check if collection has an owner
+        if (!currentCollection.ownerId) {
+          throw new Error('Collection must have an owner to set visibility to ORGANIZATION')
+        }
+
+        // Get user's organizations
+        const userOrgs = await prisma.organizationMember.findMany({
+          where: {
+            userId: currentCollection.ownerId,
+            isActive: true,
+          },
+        })
+
+        if (userOrgs.length === 0) {
+          throw new Error(
+            'You must be a member of an organization to set visibility to ORGANIZATION'
+          )
+        }
+
+        // Auto-select the first organization
+        const organizationId = userOrgs[0].organizationId
+        console.log(`Auto-setting organizationId ${organizationId} for collection ${collectionId}`)
+
+        // Update with organizationId
+        const collection = await prisma.collection.update({
+          where: { id: collectionId },
+          data: { ...input, organizationId },
+          include: {
+            owner: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                image: true,
+              },
+            },
+            organization: {
+              select: {
+                id: true,
+                name: true,
+                slug: true,
+              },
+            },
+          },
+        })
+        return collection
+      }
     }
 
     const collection = await prisma.collection.update({

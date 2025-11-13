@@ -1,9 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import mammoth from 'mammoth'
 import PDFParser from 'pdf2json'
+import { isScannedPDF, performPDFOCR, performImageOCR } from './ocr'
+import { logger } from '@/lib/logger'
 
 export interface ExtractionResult {
   text: string
+  isScanned?: boolean
   metadata?: {
     pageCount?: number
     wordCount?: number
@@ -14,10 +17,30 @@ export interface ExtractionResult {
 
 export class TextExtractor {
   /**
-   * Extract text from a PDF file using pdf2json
+   * Extract text from a PDF file using pdf2json, with OCR fallback for scanned PDFs
    */
   async extractFromPDF(buffer: Buffer): Promise<ExtractionResult> {
     try {
+      // First, check if this is a scanned PDF
+      const isScanned = await isScannedPDF(buffer)
+
+      if (isScanned) {
+        logger.info('Detected scanned PDF, using OCR')
+        const pageTexts = await performPDFOCR(buffer)
+
+        const fullText = pageTexts.map(pt => pt.text).join('\n\n')
+
+        return {
+          text: fullText,
+          isScanned: true,
+          metadata: {
+            pageCount: pageTexts.length,
+            wordCount: this.countWords(fullText),
+          },
+        }
+      }
+
+      // Normal PDF extraction
       return new Promise((resolve, reject) => {
         const pdfParser = new PDFParser(null, true)
 
@@ -52,19 +75,63 @@ export class TextExtractor {
             })
 
             if (decodingErrors > 0) {
-              console.warn(
+              logger.warn(
                 `PDF extraction had ${decodingErrors} URI decoding errors, used raw text`
               )
             }
 
             const trimmedText = fullText.trim()
 
-            // Check if extraction was successful
-            if (!trimmedText || trimmedText.length === 0) {
-              console.warn('PDF extraction resulted in empty text')
+            // Check if extraction was successful - if not, try OCR
+            if (!trimmedText || trimmedText.length < 50) {
+              logger.warn('PDF extraction resulted in minimal text, trying OCR')
+
+              // Try OCR as fallback
+              performPDFOCR(buffer).then(pageTexts => {
+                const ocrText = pageTexts.map(pt => pt.text).join('\n\n')
+
+                if (ocrText && ocrText.length > trimmedText.length) {
+                  logger.info('OCR produced better results than PDF extraction')
+                  resolve({
+                    text: ocrText,
+                    isScanned: true,
+                    metadata: {
+                      pageCount: pageTexts.length,
+                      wordCount: this.countWords(ocrText),
+                    },
+                  })
+                } else {
+                  // Use whatever we got from pdf2json
+                  const meta = pdfData.Meta || {}
+                  resolve({
+                    text: trimmedText,
+                    isScanned: false,
+                    metadata: {
+                      pageCount: pages.length,
+                      wordCount: this.countWords(trimmedText),
+                      author: meta.Author,
+                      title: meta.Title,
+                    },
+                  })
+                }
+              }).catch(() => {
+                // If OCR fails, just use the pdf2json result
+                const meta = pdfData.Meta || {}
+                resolve({
+                  text: trimmedText,
+                  isScanned: false,
+                  metadata: {
+                    pageCount: pages.length,
+                    wordCount: this.countWords(trimmedText),
+                    author: meta.Author,
+                    title: meta.Title,
+                  },
+                })
+              })
+              return
             }
 
-            console.log(
+            logger.info(
               `Extracted ${trimmedText.length} characters from ${pages.length} pages`
             )
 
@@ -73,6 +140,7 @@ export class TextExtractor {
 
             resolve({
               text: trimmedText,
+              isScanned: false,
               metadata: {
                 pageCount: pages.length,
                 wordCount: this.countWords(trimmedText),
@@ -88,7 +156,7 @@ export class TextExtractor {
         pdfParser.parseBuffer(buffer)
       })
     } catch (error) {
-      console.error('Failed to extract text from PDF:', error)
+      logger.error('Failed to extract text from PDF', error)
       throw new Error(
         `PDF extraction failed: ${error instanceof Error ? error.message : 'Unknown error'}`
       )
@@ -151,9 +219,33 @@ export class TextExtractor {
         },
       }
     } catch (error) {
-      console.error('Failed to extract text from Markdown:', error)
+      logger.error('Failed to extract text from Markdown', error)
       throw new Error(
         `Markdown extraction failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+      )
+    }
+  }
+
+  /**
+   * Extract text from an image file using OCR
+   */
+  async extractFromImage(buffer: Buffer): Promise<ExtractionResult> {
+    try {
+      logger.info('Extracting text from image using OCR')
+      const pageText = await performImageOCR(buffer)
+
+      return {
+        text: pageText.text,
+        isScanned: true,
+        metadata: {
+          pageCount: 1,
+          wordCount: this.countWords(pageText.text),
+        },
+      }
+    } catch (error) {
+      logger.error('Failed to extract text from image', error)
+      throw new Error(
+        `Image OCR failed: ${error instanceof Error ? error.message : 'Unknown error'}`
       )
     }
   }
@@ -181,6 +273,13 @@ export class TextExtractor {
         case 'text/x-markdown':
           return await this.extractFromMarkdown(buffer)
 
+        case 'image/png':
+        case 'image/jpeg':
+        case 'image/jpg':
+        case 'image/tiff':
+        case 'image/bmp':
+          return await this.extractFromImage(buffer)
+
         default:
           // Try to extract as plain text for unknown types
           try {
@@ -190,7 +289,7 @@ export class TextExtractor {
           }
       }
     } catch (error) {
-      console.error('Text extraction failed:', error)
+      logger.error('Text extraction failed', error)
       throw error
     }
   }

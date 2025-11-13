@@ -2,11 +2,14 @@
 
 import { useState } from 'react'
 import { signIn } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 
 export default function LoginPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const callbackUrl = searchParams.get('callbackUrl') || '/dashboard'
+  const invitationEmail = searchParams.get('email') || ''
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -30,14 +33,14 @@ export default function LoginPage() {
     if (result?.error) {
       setError('Invalid credentials')
     } else {
-      router.push('/dashboard')
+      router.push(callbackUrl)
       router.refresh()
     }
   }
 
   async function handleOAuthSignIn(provider: 'google' | 'github' | 'azure-ad') {
     setLoading(true)
-    await signIn(provider, { callbackUrl: '/dashboard' })
+    await signIn(provider, { callbackUrl })
   }
 
   return (
@@ -45,9 +48,15 @@ export default function LoginPage() {
       <div className="w-full max-w-md space-y-8 rounded-lg border border-border bg-card p-8 shadow-lg">
         <div>
           <h2 className="text-center text-3xl font-bold">Sign in</h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Demo: demo@example.com / password
-          </p>
+          {invitationEmail ? (
+            <p className="mt-2 text-center text-sm text-gray-600">
+              Sign in with <span className="font-medium">{invitationEmail}</span> to accept your invitation
+            </p>
+          ) : (
+            <p className="mt-2 text-center text-sm text-gray-600">
+              Demo: demo@example.com / password
+            </p>
+          )}
         </div>
 
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
@@ -70,6 +79,7 @@ export default function LoginPage() {
                 name="email"
                 type="email"
                 required
+                defaultValue={invitationEmail}
                 className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 placeholder="demo@example.com"
               />
@@ -173,7 +183,10 @@ export default function LoginPage() {
         <p className="text-center text-sm text-muted-foreground">
           Don&apos;t have an account?{' '}
           <Link
-            href="/register"
+            href={`/register?${new URLSearchParams({
+              ...(callbackUrl !== '/dashboard' && { callbackUrl }),
+              ...(invitationEmail && { email: invitationEmail })
+            }).toString()}`}
             className="font-medium text-accent hover:underline"
           >
             Sign up

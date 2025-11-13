@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   postgres:
     image: postgres:16-alpine
@@ -55,6 +53,43 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: worker
+    container_name: docuralis-worker
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      qdrant:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://docuralis:docuralis_dev_password@postgres:5432/docuralis
+      MINIO_ENDPOINT: minio
+      MINIO_PORT: 9000
+      MINIO_ACCESS_KEY: minioadmin
+      MINIO_SECRET_KEY: minioadmin
+      MINIO_USE_SSL: 'false'
+      QDRANT_URL: http://qdrant:6333
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      # pg-boss configuration
+      PGBOSS_MAX_CONNECTIONS: '10'
+      PGBOSS_POLL_INTERVAL: '2000'
+      PGBOSS_RETRY_LIMIT: '10'
+      PGBOSS_RETRY_DELAY: '60'
+      PGBOSS_ARCHIVE_COMPLETED_AFTER: '604800'
+      PGBOSS_TEAM_SIZE: '5'
+      PGBOSS_TEAM_CONCURRENCY: '1'
+      # Logging
+      LOG_LEVEL: info
+      NODE_ENV: production
+    volumes:
+      - ./logs:/app/logs
 
 volumes:
   postgres_data:

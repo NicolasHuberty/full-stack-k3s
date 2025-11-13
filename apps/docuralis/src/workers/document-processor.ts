@@ -12,7 +12,10 @@ import { getMinIOClient } from '../lib/storage/minio'
 import { getQdrantClient } from '../lib/vector/qdrant'
 import { getTextExtractor } from '../lib/processing/extract'
 import { getChunkingService } from '../lib/processing/chunking'
-import { getEmbeddingService } from '../lib/processing/embeddings'
+import {
+  getEmbeddingService,
+  type EmbeddingModel,
+} from '../lib/processing/embeddings'
 import { logger } from '../lib/logger'
 import { Prisma } from '@prisma/client'
 
@@ -211,7 +214,7 @@ async function processDocumentJob(job: {
 
       const result = await embeddingService.generateBatchEmbeddings(
         chunkTexts,
-        document.collection.embeddingModel as unknown as string
+        document.collection.embeddingModel as EmbeddingModel
       )
 
       embeddings = result.embeddings
@@ -242,7 +245,7 @@ async function processDocumentJob(job: {
 
       const result = await embeddingService.generateBatchEmbeddings(
         chunkTexts,
-        document.collection.embeddingModel as unknown as string
+        document.collection.embeddingModel as EmbeddingModel
       )
 
       embeddings = result.embeddings

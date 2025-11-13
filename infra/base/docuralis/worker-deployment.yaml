@@ -1,0 +1,97 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: docuralis-worker
+  labels:
+    app: docuralis-worker
+    managed-by: argocd
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: docuralis-worker
+  template:
+    metadata:
+      labels:
+        app: docuralis-worker
+    spec:
+      containers:
+        - name: worker
+          image: ghcr.io/nicolashuberty/full-stack-k3s/docuralis:latest
+          imagePullPolicy: Always
+          command: ["bun"]
+          args: ["src/workers/document-processor.ts"]
+          env:
+            # Database
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: docuralis-secrets
+                  key: database-url
+
+            # MinIO
+            - name: MINIO_ENDPOINT
+              valueFrom:
+                secretKeyRef:
+                  name: docuralis-secrets
+                  key: minio-endpoint
+
+            - name: MINIO_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: docuralis-secrets
+                  key: minio-port
+
+            - name: MINIO_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: docuralis-secrets
+                  key: minio-access-key
+
+            - name: MINIO_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: docuralis-secrets
+                  key: minio-secret-key
+
+            - name: MINIO_USE_SSL
+              value: "false"
+
+            - name: MINIO_BUCKET_NAME
+              value: "docuralis"
+
+            # Qdrant
+            - name: QDRANT_URL
+              valueFrom:
+                secretKeyRef:
+                  name: docuralis-secrets
+                  key: qdrant-url
+
+            - name: QDRANT_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: docuralis-secrets
+                  key: qdrant-api-key
+                  optional: true
+
+            # OpenAI
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: docuralis-secrets
+                  key: openai-api-key
+
+            # App Configuration
+            - name: NODE_ENV
+              value: "production"
+
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+
+      imagePullSecrets:
+        - name: ghcr-credentials

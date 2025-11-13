@@ -85,7 +85,13 @@ export async function GET(request: NextRequest) {
     const options: JobListOptions = {
       page: parseInt(searchParams.get('page') || '1'),
       pageSize: parseInt(searchParams.get('pageSize') || '50'),
-      orderBy: (searchParams.get('orderBy') as unknown) || 'createdAt',
+      orderBy:
+        (searchParams.get('orderBy') as
+          | 'createdAt'
+          | 'startedAt'
+          | 'completedAt'
+          | 'priority'
+          | null) || 'createdAt',
       orderDir: (searchParams.get('orderDir') as 'asc' | 'desc') || 'desc',
     }
 

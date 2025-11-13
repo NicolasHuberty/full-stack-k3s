@@ -245,7 +245,7 @@ export default function AgentDetailPage() {
                           </div>
                           <Switch
                             id={action.name}
-                            checked={actionState[action.name] || false}
+                            checked={Boolean(actionState[action.name])}
                             onCheckedChange={(checked) =>
                               setActionState((prev) => ({
                                 ...prev,

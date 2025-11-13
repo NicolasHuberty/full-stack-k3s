@@ -1,0 +1,25 @@
+---
+# PostgreSQL NodePort Service for External Access
+# Exposes PostgreSQL on a specific NodePort for external access
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgresql-external
+  namespace: database
+  labels:
+    app: postgresql
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: postgres.docuralis.com
+    external-dns.alpha.kubernetes.io/cloudflare-proxied: "false"
+    external-dns.alpha.kubernetes.io/ttl: "300"
+spec:
+  type: NodePort
+  ports:
+    - port: 5432
+      targetPort: 5432
+      nodePort: 30543  # Custom NodePort for PostgreSQL
+      protocol: TCP
+      name: postgresql
+  selector:
+    app: postgresql

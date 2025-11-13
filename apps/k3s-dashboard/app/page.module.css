@@ -1,0 +1,444 @@
+.main {
+  min-height: 100vh;
+  padding: 2rem;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #1e293b;
+}
+
+.header h1 {
+  font-size: 2rem;
+  color: #60a5fa;
+}
+
+.clusterInfo {
+  display: flex;
+  gap: 2rem;
+  font-size: 0.9rem;
+  color: #94a3b8;
+}
+
+.dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.section {
+  background: #1e293b;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.section h2 {
+  margin-bottom: 1rem;
+  color: #60a5fa;
+  font-size: 1.5rem;
+}
+
+.tableContainer {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.table th {
+  text-align: left;
+  padding: 0.75rem;
+  background: #0f172a;
+  color: #94a3b8;
+  font-weight: 600;
+  border-bottom: 2px solid #334155;
+}
+
+.table td {
+  padding: 0.75rem;
+  border-bottom: 1px solid #334155;
+}
+
+.table tbody tr:hover {
+  background: #334155;
+}
+
+.status {
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: white;
+  display: inline-block;
+}
+
+.logsButton {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: background 0.2s;
+}
+
+.logsButton:hover {
+  background: #2563eb;
+}
+
+.logsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.closeButton {
+  background: #ef4444;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: background 0.2s;
+}
+
+.closeButton:hover {
+  background: #dc2626;
+}
+
+.logsContainer {
+  background: #0f172a;
+  border-radius: 4px;
+  padding: 1rem;
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.logsContainer pre {
+  font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: #d1d5db;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  font-size: 1.2rem;
+  color: #60a5fa;
+}
+
+.error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  gap: 1rem;
+  text-align: center;
+  padding: 2rem;
+}
+
+.error h2 {
+  color: #ef4444;
+  font-size: 2rem;
+}
+
+.error p {
+  color: #e2e8f0;
+  max-width: 600px;
+}
+
+.errorHint {
+  background: #1e293b;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-top: 1rem;
+}
+
+.errorHint code {
+  background: #0f172a;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-family: monospace;
+  color: #60a5fa;
+}
+
+.retryButton {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  margin-top: 1rem;
+  transition: background 0.2s;
+}
+
+.retryButton:hover {
+  background: #2563eb;
+}
+
+.resourceOverview {
+  background: #1e293b;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.resourceOverview h2 {
+  margin-bottom: 1.5rem;
+  color: #60a5fa;
+  font-size: 1.5rem;
+}
+
+.resourceGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+
+.resourceCard {
+  background: #0f172a;
+  border-radius: 8px;
+  padding: 1.5rem;
+  border: 1px solid #334155;
+}
+
+.resourceCard h3 {
+  color: #94a3b8;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-bottom: 0.75rem;
+  letter-spacing: 0.05em;
+}
+
+.resourceValue {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #e2e8f0;
+  margin-bottom: 0.75rem;
+}
+
+.progressBar {
+  width: 100%;
+  height: 8px;
+  background: #334155;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+}
+
+.progressFill {
+  height: 100%;
+  transition: width 0.3s ease;
+  border-radius: 4px;
+}
+
+.resourcePercent {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #10b981;
+  margin-bottom: 0.5rem;
+}
+
+.resourceDetail {
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+.nodeRole {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  margin-top: 0.25rem;
+}
+
+.metricCell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.smallProgressBar {
+  width: 100%;
+  height: 4px;
+  background: #334155;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.metricPercent {
+  font-size: 0.75rem;
+  color: #94a3b8;
+}
+
+.servicesContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.serviceCard {
+  background: #0f172a;
+  border-radius: 8px;
+  border: 1px solid #334155;
+  overflow: hidden;
+  transition: all 0.2s;
+}
+
+.serviceCard:hover {
+  border-color: #475569;
+}
+
+.serviceHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  cursor: pointer;
+  gap: 1.5rem;
+  background: #1e293b;
+  transition: background 0.2s;
+}
+
+.serviceHeader:hover {
+  background: #334155;
+}
+
+.serviceMainInfo {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 0 0 auto;
+}
+
+.expandIcon {
+  color: #60a5fa;
+  font-size: 0.8rem;
+  width: 20px;
+  user-select: none;
+}
+
+.serviceName {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #e2e8f0;
+}
+
+.serviceNamespace {
+  font-size: 0.85rem;
+  color: #94a3b8;
+  margin-top: 0.25rem;
+}
+
+.serviceDetails {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+  flex: 1;
+  flex-wrap: wrap;
+}
+
+.serviceType {
+  padding: 0.25rem 0.75rem;
+  background: #334155;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  color: #60a5fa;
+  font-weight: 500;
+}
+
+.servicePorts {
+  font-size: 0.85rem;
+  color: #94a3b8;
+}
+
+.serviceClusterIp {
+  font-size: 0.85rem;
+  color: #94a3b8;
+  font-family: monospace;
+}
+
+.servicePodCount {
+  padding: 0.25rem 0.75rem;
+  background: #10b981;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  color: white;
+  font-weight: 500;
+}
+
+.serviceResources {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  padding: 0.5rem 1rem;
+  background: #0f172a;
+  border-radius: 6px;
+}
+
+.resourceStat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.resourceLabel {
+  font-size: 0.75rem;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.resourceValue2 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #e2e8f0;
+}
+
+.podsTable {
+  padding: 1rem;
+  background: #0f172a;
+  border-top: 1px solid #334155;
+}
+
+.podsTable .table {
+  font-size: 0.85rem;
+}
+
+.podsTable .table th {
+  background: #1e293b;
+  padding: 0.5rem;
+  font-size: 0.8rem;
+}
+
+.podsTable .table td {
+  padding: 0.5rem;
+}
+
+.noPodsMessage {
+  padding: 2rem;
+  text-align: center;
+  color: #64748b;
+  background: #0f172a;
+  border-top: 1px solid #334155;
+  font-style: italic;
+}

@@ -12,3 +12,7 @@ spec:
           env:
             - name: NEXTAUTH_URL
               value: "https://docuralis.com"
+            - name: NEXT_PUBLIC_POSTHOG_KEY
+              value: "phc_KP277vaA1TXTuUeMzt4PJjOqVxdXjJL50iysVXdBm9m"
+            - name: NEXT_PUBLIC_POSTHOG_HOST
+              value: "https://eu.i.posthog.com"

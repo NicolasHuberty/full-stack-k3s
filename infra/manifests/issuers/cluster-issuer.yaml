@@ -29,6 +29,7 @@ spec:
         selector:
           dnsZones:
             - "huberty.pro"
+            - "docuralis.com"
 
 ---
 # Let's Encrypt Production ClusterIssuer
@@ -61,6 +62,7 @@ spec:
         selector:
           dnsZones:
             - "huberty.pro"
+            - "docuralis.com"
 
 ---
 # Self-Signed ClusterIssuer

@@ -153,7 +153,9 @@ export default function AgentDetailPage() {
     }
   }
 
-  const getIcon = (iconName?: string) => {
+  const getIcon = (
+    iconName?: string
+  ): React.ComponentType<{ className?: string }> => {
     if (!iconName) return Icons.Bot
     const Icon = Icons[iconName as keyof typeof Icons] as
       | React.ComponentType<{ className?: string }>

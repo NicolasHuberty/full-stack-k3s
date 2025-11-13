@@ -60,9 +60,13 @@ export default function AgentsMarketplacePage() {
     }
   }
 
-  const getIcon = (iconName?: string) => {
+  const getIcon = (
+    iconName?: string
+  ): React.ComponentType<{ className?: string }> => {
     if (!iconName) return Icons.Bot
-    const Icon = (Icons as Record<string, unknown>)[iconName]
+    const Icon = (Icons as Record<string, unknown>)[iconName] as
+      | React.ComponentType<{ className?: string }>
+      | undefined
     return Icon || Icons.Bot
   }
 

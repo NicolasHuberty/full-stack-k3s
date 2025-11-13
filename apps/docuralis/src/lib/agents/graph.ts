@@ -46,7 +46,7 @@ export function createAgentGraph() {
 
   // From decompose, always go to retrieve
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  workflow.addEdge('decompose' as any, 'retrieve')
+  workflow.addEdge('decompose' as any, 'retrieve' as any)
 
   // From retrieve, route to appropriate grading
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -59,9 +59,9 @@ export function createAgentGraph() {
 
   // Both grading nodes go to generate
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  workflow.addEdge('gradeClassical' as any, 'generate')
+  workflow.addEdge('gradeClassical' as any, 'generate' as any)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  workflow.addEdge('gradeReflexion' as any, 'generate')
+  workflow.addEdge('gradeReflexion' as any, 'generate' as any)
 
   // Generate goes to END
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

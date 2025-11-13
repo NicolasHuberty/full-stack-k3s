@@ -37,16 +37,6 @@ export async function getPgBoss(): Promise<PgBoss> {
   isInitializing = true
 
   try {
-    // Stop any existing instance first (in case of hot-reload)
-    if (pgBossInstance) {
-      try {
-        await pgBossInstance.stop({ timeout: 5000 })
-      } catch {
-        // Ignore errors during cleanup
-      }
-      pgBossInstance = null
-    }
-
     const databaseUrl = process.env.DATABASE_URL
     if (!databaseUrl) {
       throw new Error('DATABASE_URL environment variable is not set')

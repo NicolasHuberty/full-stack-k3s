@@ -1,6 +1,6 @@
 import { prisma } from '@/lib/prisma'
 import { createAgentGraph } from './graph'
-import type { AgentState } from './types'
+import type { AgentState, DocumentChunk } from './types'
 
 export class AgentService {
   async executeAgent(
@@ -78,7 +78,7 @@ export class AgentService {
       const result = await graph.invoke(initialState)
 
       // Build sources from relevant documents
-      const sources = result.relevantDocs.map((doc) => ({
+      const sources = result.relevantDocs.map((doc: DocumentChunk) => ({
         title: doc.metadata.title,
         pageNumber: doc.metadata.pageNumber,
         justification: doc.metadata.justification,

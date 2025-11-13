@@ -28,8 +28,9 @@ COPY . .
 # Set environment variables for build
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
-# Dummy DATABASE_URL for Prisma client during build (not used, just required to be defined)
+# Dummy environment variables for build-time validation (not used, just required to be defined)
 ENV DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy"
+ENV OPENAI_API_KEY="sk-dummy-key-for-build-only"
 
 # Build the application
 RUN bun run build

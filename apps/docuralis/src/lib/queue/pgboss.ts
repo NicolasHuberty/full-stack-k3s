@@ -41,7 +41,7 @@ export async function getPgBoss(): Promise<PgBoss> {
     if (pgBossInstance) {
       try {
         await pgBossInstance.stop({ timeout: 5000 });
-      } catch (e) {
+      } catch {
         // Ignore errors during cleanup
       }
       pgBossInstance = null;
@@ -193,7 +193,7 @@ export async function getQueueStats() {
       total: stats.totalCount,
       singletonsActive: stats.singletonsActive,
     };
-  } catch (error) {
+  } catch {
     // Queue doesn't exist yet, return zero stats
     logger.warn('Queue process-document does not exist yet, returning zero stats');
     return {

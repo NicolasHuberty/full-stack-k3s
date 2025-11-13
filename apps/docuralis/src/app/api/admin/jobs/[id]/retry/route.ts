@@ -7,7 +7,7 @@ import { getDocumentProcessor } from '@/lib/documents/processor'
  */
 export async function POST(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params: _params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth()
@@ -17,7 +17,7 @@ export async function POST(
     }
 
     // Check if user is system admin
-    if (!(session.user as any).isSystemAdmin) {
+    if (!(session.user as { isSystemAdmin?: boolean }).isSystemAdmin) {
       return NextResponse.json({ error: 'Forbidden - Admin access required' }, { status: 403 })
     }
 

@@ -14,7 +14,7 @@ interface AgentAction {
   icon: string;
   type: 'TOGGLE' | 'SELECT' | 'INPUT';
   defaultValue?: string;
-  options?: any;
+  options?: Record<string, unknown>;
   order: number;
 }
 
@@ -56,7 +56,7 @@ export default function AgentsMarketplacePage() {
 
   const getIcon = (iconName?: string) => {
     if (!iconName) return Icons.Bot;
-    const Icon = (Icons as any)[iconName];
+    const Icon = (Icons as Record<string, unknown>)[iconName];
     return Icon || Icons.Bot;
   };
 

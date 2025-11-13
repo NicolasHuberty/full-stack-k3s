@@ -1,8 +1,6 @@
 import { prisma } from '@/lib/prisma'
 import {
   CollectionPermissionLevel,
-  CollectionVisibility,
-  OrganizationRole,
 } from '@prisma/client'
 
 export type Permission = 'read' | 'write' | 'delete' | 'manage'

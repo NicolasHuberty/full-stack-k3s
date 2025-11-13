@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { prisma } from '@/lib/prisma'
 import { getQdrantClient } from '@/lib/vector/qdrant'
-import { CollectionVisibility, CollectionPermissionLevel } from '@prisma/client'
+import { CollectionVisibility } from '@prisma/client'
 import { hasCollectionAccess, canCreateOrgCollection } from './permissions'
 
 export interface CreateCollectionInput {

@@ -1,5 +1,3 @@
-import * as React from "react"
-
 type ToastProps = {
   title?: string
   description?: string

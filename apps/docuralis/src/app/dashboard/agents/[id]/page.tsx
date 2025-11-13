@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { DashboardLayout } from '@/components/dashboard/layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -18,6 +18,10 @@ import {
 import * as Icons from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
+interface AgentActionOptions {
+  [key: string]: unknown;
+}
+
 interface AgentAction {
   id: string;
   name: string;
@@ -25,7 +29,7 @@ interface AgentAction {
   icon: string;
   type: 'TOGGLE' | 'SELECT' | 'INPUT';
   defaultValue?: string;
-  options?: any;
+  options?: AgentActionOptions;
   order: number;
 }
 
@@ -55,16 +59,11 @@ export default function AgentDetailPage() {
   const [agent, setAgent] = useState<Agent | null>(null);
   const [collections, setCollections] = useState<Collection[]>([]);
   const [selectedCollectionId, setSelectedCollectionId] = useState<string>('');
-  const [actionState, setActionState] = useState<Record<string, any>>({});
+  const [actionState, setActionState] = useState<Record<string, boolean | string>>({});
   const [loading, setLoading] = useState(true);
   const [activating, setActivating] = useState(false);
 
-  useEffect(() => {
-    fetchAgent();
-    fetchCollections();
-  }, []);
-
-  const fetchAgent = async () => {
+  const fetchAgent = useCallback(async () => {
     try {
       const response = await fetch(`/api/agents/${params.id}`);
       if (response.ok) {
@@ -72,7 +71,7 @@ export default function AgentDetailPage() {
         setAgent(data);
 
         // Initialize action state with defaults
-        const initialState: Record<string, any> = {};
+        const initialState: Record<string, boolean | string> = {};
         data.actions.forEach((action: AgentAction) => {
           initialState[action.name] = action.defaultValue === 'true';
         });
@@ -83,7 +82,7 @@ export default function AgentDetailPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [params.id]);
 
   const fetchCollections = async () => {
     try {
@@ -96,6 +95,11 @@ export default function AgentDetailPage() {
       console.error('Failed to fetch collections:', error);
     }
   };
+
+  useEffect(() => {
+    fetchAgent();
+    fetchCollections();
+  }, [fetchAgent]);
 
   const handleActivate = async () => {
     if (!selectedCollectionId) {
@@ -127,7 +131,7 @@ export default function AgentDetailPage() {
       } else {
         throw new Error('Failed to activate agent');
       }
-    } catch (error) {
+    } catch {
       toast({
         title: 'Error',
         description: 'Failed to activate agent',
@@ -140,7 +144,7 @@ export default function AgentDetailPage() {
 
   const getIcon = (iconName?: string) => {
     if (!iconName) return Icons.Bot;
-    const Icon = (Icons as any)[iconName];
+    const Icon = Icons[iconName as keyof typeof Icons] as React.ComponentType<{ className?: string }> | undefined;
     return Icon || Icons.Bot;
   };
 

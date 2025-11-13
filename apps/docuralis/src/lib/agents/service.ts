@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { createAgentGraph } from "./graph";
-import type { AgentState, AgentConfig } from "./types";
+import type { AgentState } from "./types";
 
 export class AgentService {
   async executeAgent(
@@ -8,7 +8,7 @@ export class AgentService {
     query: string,
     userId: string,
     collectionId: string,
-    actionState?: Record<string, any>,
+    actionState?: Record<string, unknown>,
     sessionId?: string
   ): Promise<{
     answer: string;
@@ -46,7 +46,7 @@ export class AgentService {
 
       // Merge action state
       const finalActionState = {
-        ...(collectionAgent?.actionState as Record<string, any>),
+        ...(collectionAgent?.actionState as Record<string, unknown>),
         ...actionState,
       };
 
@@ -97,7 +97,7 @@ export class AgentService {
     }
   }
 
-  async getMarketplaceAgents(userId: string) {
+  async getMarketplaceAgents(_userId: string) {
     return prisma.agent.findMany({
       where: {
         OR: [
@@ -141,7 +141,7 @@ export class AgentService {
   async activateAgent(
     collectionId: string,
     agentId: string,
-    actionState?: Record<string, any>
+    actionState?: Record<string, unknown>
   ) {
     // Check if already activated
     const existing = await prisma.collectionAgent.findUnique({
@@ -208,7 +208,7 @@ export class AgentService {
   async updateAgentActionState(
     collectionId: string,
     agentId: string,
-    actionState: Record<string, any>
+    actionState: Record<string, unknown>
   ) {
     const collectionAgent = await prisma.collectionAgent.findUnique({
       where: {

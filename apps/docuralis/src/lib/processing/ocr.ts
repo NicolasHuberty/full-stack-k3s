@@ -69,7 +69,7 @@ export async function performPDFOCR(pdfBuffer: Buffer): Promise<PageText[]> {
     const result = await parser.getText();
     await parser.destroy();
 
-    const pageTexts: PageText[] = [];
+    const _pageTexts: PageText[] = [];
 
     // Note: pdf-parse doesn't give us page-by-page access easily
     // For a production implementation, you'd want to use a library like pdf-lib or pdf.js

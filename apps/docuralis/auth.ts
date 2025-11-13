@@ -78,7 +78,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     }),
   ],
   callbacks: {
-    async signIn({ user, account, profile }) {
+    async signIn({ user, account }) {
       // For OAuth sign-ins, link account to existing user if email matches
       if (account && account.provider !== 'credentials' && user.email) {
         const existingUser = await prisma.user.findUnique({
@@ -127,7 +127,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       }
       return true
     },
-    async jwt({ token, user, trigger }) {
+    async jwt({ token, user }) {
       if (user) {
         token.id = user.id
       }

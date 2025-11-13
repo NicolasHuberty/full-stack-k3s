@@ -1,8 +1,12 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { DashboardLayout } from '@/components/dashboard/layout'
+
+interface JobMetadata {
+  [key: string]: unknown
+}
 
 interface JobDetails {
   id: string
@@ -19,7 +23,7 @@ interface JobDetails {
   completedAt?: string
   failedAt?: string
   retryAfter?: string
-  metadata?: any
+  metadata?: JobMetadata
   document: {
     id: string
     originalName: string
@@ -56,14 +60,7 @@ export default function JobDetailsPage() {
   const [loading, setLoading] = useState(true)
   const [retrying, setRetrying] = useState(false)
 
-  useEffect(() => {
-    fetchJobDetails()
-    // Auto-refresh every 5 seconds
-    const interval = setInterval(fetchJobDetails, 5000)
-    return () => clearInterval(interval)
-  }, [jobId])
-
-  const fetchJobDetails = async () => {
+  const fetchJobDetails = useCallback(async () => {
     try {
       const response = await fetch(`/api/admin/jobs/${jobId}`)
 
@@ -89,7 +86,14 @@ export default function JobDetailsPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [jobId, router])
+
+  useEffect(() => {
+    fetchJobDetails()
+    // Auto-refresh every 5 seconds
+    const interval = setInterval(fetchJobDetails, 5000)
+    return () => clearInterval(interval)
+  }, [fetchJobDetails])
 
   const retryJob = async () => {
     if (!job) return

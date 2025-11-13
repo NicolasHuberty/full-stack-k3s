@@ -5,7 +5,7 @@ import { getJobById } from '@/lib/admin/jobs'
 /**
  * Convert BigInt values to strings for JSON serialization
  */
-function serializeBigInt(obj: any): any {
+function serializeBigInt(obj: unknown): unknown {
   if (obj === null || obj === undefined) return obj
 
   if (typeof obj === 'bigint') {
@@ -17,9 +17,9 @@ function serializeBigInt(obj: any): any {
   }
 
   if (typeof obj === 'object') {
-    const serialized: any = {}
-    for (const key in obj) {
-      serialized[key] = serializeBigInt(obj[key])
+    const serialized: Record<string, unknown> = {}
+    for (const key in obj as Record<string, unknown>) {
+      serialized[key] = serializeBigInt((obj as Record<string, unknown>)[key])
     }
     return serialized
   }
@@ -42,7 +42,7 @@ export async function GET(
     }
 
     // Check if user is system admin
-    if (!(session.user as any).isSystemAdmin) {
+    if (!(session.user as { isSystemAdmin?: boolean }).isSystemAdmin) {
       return NextResponse.json({ error: 'Forbidden - Admin access required' }, { status: 403 })
     }
 

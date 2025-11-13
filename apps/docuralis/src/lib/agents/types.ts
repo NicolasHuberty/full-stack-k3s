@@ -51,7 +51,7 @@ export interface AgentConfig {
   temperature: number;
   embeddingModel: string;
   systemPrompt?: string;
-  graphConfig?: Record<string, any>;
+  graphConfig?: Record<string, unknown>;
 }
 
 export interface DocumentChunk {

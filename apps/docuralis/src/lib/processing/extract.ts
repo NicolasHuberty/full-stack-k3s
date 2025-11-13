@@ -64,7 +64,7 @@ export class TextExtractor {
                     const decoded = decodeURIComponent(encoded)
                     fullText += decoded + ' '
                   }
-                } catch (error) {
+                } catch {
                   // If decoding fails, use the raw text
                   decodingErrors++
                   const rawText = text.R?.[0]?.T || ''
@@ -284,7 +284,7 @@ export class TextExtractor {
           // Try to extract as plain text for unknown types
           try {
             return await this.extractFromText(buffer)
-          } catch (e) {
+          } catch {
             throw new Error(`Unsupported file type: ${mimeType}`)
           }
       }

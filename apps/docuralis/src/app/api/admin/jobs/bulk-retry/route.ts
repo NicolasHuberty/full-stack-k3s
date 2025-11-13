@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if user is system admin
-    if (!(session.user as any).isSystemAdmin) {
+    if (!(session.user as { isSystemAdmin?: boolean }).isSystemAdmin) {
       return NextResponse.json({ error: 'Forbidden - Admin access required' }, { status: 403 })
     }
 

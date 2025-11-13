@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { DashboardLayout } from '@/components/dashboard/layout'
 
@@ -38,14 +38,7 @@ export default function AdminJobsPage() {
   const [totalPages, setTotalPages] = useState(1)
   const [selectedJobs, setSelectedJobs] = useState<string[]>([])
 
-  useEffect(() => {
-    fetchJobs()
-    // Auto-refresh every 5 seconds
-    const interval = setInterval(fetchJobs, 5000)
-    return () => clearInterval(interval)
-  }, [statusFilter, searchQuery, page])
-
-  const fetchJobs = async () => {
+  const fetchJobs = useCallback(async () => {
     try {
       const params = new URLSearchParams({
         page: page.toString(),
@@ -79,7 +72,14 @@ export default function AdminJobsPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [statusFilter, searchQuery, page, router])
+
+  useEffect(() => {
+    fetchJobs()
+    // Auto-refresh every 5 seconds
+    const interval = setInterval(fetchJobs, 5000)
+    return () => clearInterval(interval)
+  }, [fetchJobs])
 
   const retryJob = async (documentId: string) => {
     try {

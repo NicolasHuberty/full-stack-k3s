@@ -44,7 +44,7 @@ interface LLMModel {
 
 interface AgentActionsProps {
   collectionId: string;
-  onAgentChange?: (agentId: string | null, actionState: Record<string, any>, model: string) => void;
+  onAgentChange?: (agentId: string | null, actionState: Record<string, unknown>, model: string) => void;
 }
 
 export function AgentActions({ collectionId, onAgentChange }: AgentActionsProps) {
@@ -52,12 +52,12 @@ export function AgentActions({ collectionId, onAgentChange }: AgentActionsProps)
     Array<{
       id: string;
       isActive: boolean;
-      actionState: Record<string, any>;
+      actionState: Record<string, unknown>;
       agent: Agent;
     }>
   >([]);
   const [selectedAgent, setSelectedAgent] = useState<string | null>(null);
-  const [actionState, setActionState] = useState<Record<string, any>>({});
+  const [actionState, setActionState] = useState<Record<string, unknown>>({});
   const [selectedModel, setSelectedModel] = useState<string>('gpt-4o-mini');
   const [models, setModels] = useState<LLMModel[]>([]);
   const [loading, setLoading] = useState(true);
@@ -88,7 +88,7 @@ export function AgentActions({ collectionId, onAgentChange }: AgentActionsProps)
       const response = await fetch(`/api/collections/${collectionId}/agents`);
       if (response.ok) {
         const data = await response.json();
-        const activeAgents = data.filter((ca: any) => ca.isActive);
+        const activeAgents = data.filter((ca: { isActive: boolean }) => ca.isActive);
         setCollectionAgents(activeAgents);
 
         // Auto-select first agent
@@ -139,7 +139,7 @@ export function AgentActions({ collectionId, onAgentChange }: AgentActionsProps)
 
   const getIcon = (iconName?: string) => {
     if (!iconName) return Icons.Bot;
-    const Icon = (Icons as any)[iconName];
+    const Icon = (Icons as Record<string, unknown>)[iconName];
     return Icon || Icons.Bot;
   };
 

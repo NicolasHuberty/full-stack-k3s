@@ -5,7 +5,7 @@ import { prisma } from '@/lib/prisma'
 /**
  * Get all organization members that the current user can share with
  */
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     const session = await auth()
 

@@ -43,11 +43,11 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 // Helper functions for structured logging
-export const logInfo = (message: string, meta?: Record<string, any>) => {
+export const logInfo = (message: string, meta?: Record<string, unknown>) => {
   logger.info(message, meta);
 };
 
-export const logError = (message: string, error?: Error | unknown, meta?: Record<string, any>) => {
+export const logError = (message: string, error?: Error | unknown, meta?: Record<string, unknown>) => {
   logger.error(message, {
     ...meta,
     error: error instanceof Error ? {
@@ -58,10 +58,10 @@ export const logError = (message: string, error?: Error | unknown, meta?: Record
   });
 };
 
-export const logWarn = (message: string, meta?: Record<string, any>) => {
+export const logWarn = (message: string, meta?: Record<string, unknown>) => {
   logger.warn(message, meta);
 };
 
-export const logDebug = (message: string, meta?: Record<string, any>) => {
+export const logDebug = (message: string, meta?: Record<string, unknown>) => {
   logger.debug(message, meta);
 };

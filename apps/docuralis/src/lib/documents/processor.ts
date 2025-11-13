@@ -6,7 +6,6 @@ import { getTextExtractor } from '@/lib/processing/extract'
 import { getChunkingService } from '@/lib/processing/chunking'
 import { getEmbeddingService } from '@/lib/processing/embeddings'
 import { sendDocumentProcessingJob } from '@/lib/queue/pgboss'
-import { DocumentStatus } from '@prisma/client'
 import { randomBytes } from 'crypto'
 import { logger } from '@/lib/logger'
 
@@ -228,7 +227,7 @@ export class DocumentProcessor {
 
       // Step 5: Store chunks in database
       const documentChunks = await Promise.all(
-        chunksWithTokens.map((chunk, index) =>
+        chunksWithTokens.map((chunk, _index) =>
           prisma.documentChunk.create({
             data: {
               documentId: document.id,
@@ -325,7 +324,7 @@ export class DocumentProcessor {
   /**
    * Delete a document and its associated data
    */
-  async deleteDocument(documentId: string, userId: string): Promise<void> {
+  async deleteDocument(documentId: string, _userId: string): Promise<void> {
     try {
       const document = await prisma.document.findUnique({
         where: { id: documentId },

@@ -15,7 +15,7 @@ const createCollectionSchema = z.object({
   chunkOverlap: z.number().min(0).max(1000).optional(),
 })
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     const session = await auth()
 

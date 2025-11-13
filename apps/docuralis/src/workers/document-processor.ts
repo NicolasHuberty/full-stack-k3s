@@ -14,7 +14,7 @@ import { getTextExtractor } from '../lib/processing/extract'
 import { getChunkingService } from '../lib/processing/chunking'
 import { getEmbeddingService } from '../lib/processing/embeddings'
 import { logger } from '../lib/logger'
-import { DocumentStatus, Prisma } from '@prisma/client'
+import { Prisma } from '@prisma/client'
 
 interface ProcessingMetadata {
   textExtracted?: boolean
@@ -29,7 +29,7 @@ interface ProcessingMetadata {
  * Process a document job with state tracking for resumability
  */
 async function processDocumentJob(job: { id: string; data: DocumentProcessingJobData }) {
-  const { documentId, collectionId, userId } = job.data
+  const { documentId, collectionId: _collectionId, userId: _userId } = job.data
   const workerId = process.pid.toString()
 
   logger.info('Processing document job', {
@@ -206,7 +206,7 @@ async function processDocumentJob(job: { id: string; data: DocumentProcessingJob
 
       const result = await embeddingService.generateBatchEmbeddings(
         chunkTexts,
-        document.collection.embeddingModel as any
+        document.collection.embeddingModel as unknown as string
       )
 
       embeddings = result.embeddings
@@ -235,7 +235,7 @@ async function processDocumentJob(job: { id: string; data: DocumentProcessingJob
 
       const result = await embeddingService.generateBatchEmbeddings(
         chunkTexts,
-        document.collection.embeddingModel as any
+        document.collection.embeddingModel as unknown as string
       )
 
       embeddings = result.embeddings
@@ -266,7 +266,7 @@ async function processDocumentJob(job: { id: string; data: DocumentProcessingJob
       await qdrant.upsertChunks(
         document.collectionId,
         vectorData,
-        document.collection.embeddingModel as any
+        document.collection.embeddingModel as unknown as string
       )
 
       // Update chunks with vector IDs

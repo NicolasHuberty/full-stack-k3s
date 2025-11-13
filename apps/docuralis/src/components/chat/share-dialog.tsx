@@ -1,8 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useTranslations } from 'next-intl'
-import { Share2, X, Loader2, UserPlus } from 'lucide-react'
+import { Share2, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -39,7 +38,6 @@ export function ShareDialog({
   currentSharedWith,
   onShareUpdate,
 }: ShareDialogProps) {
-  const t = useTranslations('chat')
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [orgMembers, setOrgMembers] = useState<User[]>([])

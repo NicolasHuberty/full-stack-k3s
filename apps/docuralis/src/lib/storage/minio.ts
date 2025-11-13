@@ -167,7 +167,7 @@ class MinIOClient {
     try {
       await this.client.statObject(this.bucketName, filename)
       return true
-    } catch (error) {
+    } catch {
       return false
     }
   }

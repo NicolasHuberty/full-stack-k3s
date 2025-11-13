@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { DashboardLayout } from '@/components/dashboard/layout'
@@ -24,14 +24,7 @@ export default function AdminDashboardPage() {
   const [stats, setStats] = useState<Statistics | null>(null)
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    fetchStats()
-    // Auto-refresh every 10 seconds
-    const interval = setInterval(fetchStats, 10000)
-    return () => clearInterval(interval)
-  }, [])
-
-  const fetchStats = async () => {
+  const fetchStats = useCallback(async () => {
     try {
       const response = await fetch('/api/admin/stats')
 
@@ -51,7 +44,14 @@ export default function AdminDashboardPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [router])
+
+  useEffect(() => {
+    fetchStats()
+    // Auto-refresh every 10 seconds
+    const interval = setInterval(fetchStats, 10000)
+    return () => clearInterval(interval)
+  }, [fetchStats])
 
   const formatDuration = (ms: number) => {
     if (ms < 1000) return `${Math.round(ms)}ms`

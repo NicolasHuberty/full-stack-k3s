@@ -12,7 +12,6 @@ import {
   TRANSLATE_QUERY_PROMPT,
 } from "./prompts";
 import { searchDocuments } from "../rag/service";
-import { getEmbedding } from "../processing/embeddings";
 
 const model = new ChatOpenAI({
   modelName: "gpt-4o-mini",

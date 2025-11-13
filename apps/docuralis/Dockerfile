@@ -87,8 +87,8 @@ RUN apk add --no-cache tesseract-ocr tesseract-ocr-data-eng
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 worker
 
-# Copy dependencies and built app from builder
-COPY --from=builder /app/node_modules ./node_modules
+# Copy dependencies from deps stage (not builder, as Next.js build may tree-shake)
+COPY --from=deps /app/node_modules ./node_modules
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/src ./src
 COPY --from=builder /app/package.json ./package.json

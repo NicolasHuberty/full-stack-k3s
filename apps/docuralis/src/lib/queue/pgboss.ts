@@ -46,14 +46,11 @@ export async function getPgBoss(): Promise<PgBoss> {
       connectionString: databaseUrl,
       // Database connection configuration
       max: parseInt(process.env.PGBOSS_MAX_CONNECTIONS || '5'),
-      connectionTimeoutMillis: 30000,
-      idleTimeoutMillis: 60000,
 
       // Disable monitoring and scheduling features to reduce DB connections
       schedule: false,
       supervise: false,
       migrate: true,
-      createSchema: true,
 
       // Schema
       schema: 'pgboss',

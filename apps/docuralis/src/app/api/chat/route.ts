@@ -10,7 +10,7 @@ const chatSchema = z.object({
   collectionId: z.string().optional(),
   sessionId: z.string().optional(),
   agentId: z.string().optional(),
-  actionState: z.record(z.any()).optional(),
+  actionState: z.record(z.string(), z.unknown()).optional(),
   model: z.string().optional(),
   maxTokens: z.number().min(1).max(4000).optional(),
 })

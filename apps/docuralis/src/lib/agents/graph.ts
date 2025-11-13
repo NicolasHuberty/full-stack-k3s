@@ -45,10 +45,12 @@ export function createAgentGraph() {
   })
 
   // From decompose, always go to retrieve
-  workflow.addEdge('decompose', 'retrieve')
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  workflow.addEdge('decompose' as any, 'retrieve')
 
   // From retrieve, route to appropriate grading
-  workflow.addConditionalEdges('retrieve', (state: AgentState) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  workflow.addConditionalEdges('retrieve' as any, (state: AgentState) => {
     if (state.smartMode || state.reflexion) {
       return 'gradeReflexion'
     }
@@ -56,11 +58,14 @@ export function createAgentGraph() {
   })
 
   // Both grading nodes go to generate
-  workflow.addEdge('gradeClassical', 'generate')
-  workflow.addEdge('gradeReflexion', 'generate')
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  workflow.addEdge('gradeClassical' as any, 'generate')
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  workflow.addEdge('gradeReflexion' as any, 'generate')
 
   // Generate goes to END
-  workflow.addEdge('generate', END)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  workflow.addEdge('generate' as any, END)
 
   return workflow.compile()
 }

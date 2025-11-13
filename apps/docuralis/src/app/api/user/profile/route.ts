@@ -30,7 +30,12 @@ export async function GET(_request: NextRequest) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
-    return NextResponse.json(user)
+    // Convert BigInt fields to strings for JSON serialization
+    return NextResponse.json({
+      ...user,
+      storageUsed: user.storageUsed.toString(),
+      storageLimit: user.storageLimit.toString(),
+    })
   } catch (error) {
     console.error('Failed to fetch user profile:', error)
     return NextResponse.json(

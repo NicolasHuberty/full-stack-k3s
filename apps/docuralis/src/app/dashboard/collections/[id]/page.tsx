@@ -226,6 +226,8 @@ export default function CollectionDetailPage() {
   useEffect(() => {
     fetchCollection()
     fetchAgents()
+    fetchDocuments()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [collectionId])
 
   // Auto-refresh every 5 seconds if there are pending/processing documents
@@ -240,6 +242,7 @@ export default function CollectionDetailPage() {
 
     const interval = setInterval(() => {
       fetchCollection(true) // Silent refresh
+      fetchDocuments(true)
     }, 5000) // Every 5 seconds
 
     return () => clearInterval(interval)
@@ -297,6 +300,20 @@ export default function CollectionDetailPage() {
       setMessage({ type: 'error', text: t('fetchError') })
     } finally {
       if (!silent) setLoading(false)
+    }
+  }
+
+  const fetchDocuments = async (silent = false) => {
+    try {
+      const res = await fetch(`/api/collections/${collectionId}/documents`)
+      if (res.ok) {
+        const data = await res.json()
+        if (collection) {
+          setCollection({ ...collection, documents: data.documents })
+        }
+      }
+    } catch (error) {
+      console.error('Failed to fetch documents:', error)
     }
   }
 
@@ -455,6 +472,7 @@ export default function CollectionDetailPage() {
 
       // Refresh silently without showing loading spinner
       await fetchCollection(true)
+      await fetchDocuments(true)
     } catch (error) {
       console.error('Failed to upload files:', error)
       setMessage({ type: 'error', text: t('uploadError') })

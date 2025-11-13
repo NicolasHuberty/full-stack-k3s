@@ -33,20 +33,10 @@ export async function GET(
 
     const collection = await getCollection(id, session.user.id)
 
-    // Fetch documents for this collection
-    const documents = await prisma.document.findMany({
-      where: { collectionId: id },
-      include: {
-        uploadedBy: {
-          select: {
-            name: true,
-            email: true,
-            image: true,
-          },
-        },
-      },
-      orderBy: { createdAt: 'desc' },
-    })
+    // Documents are now fetched via /api/collections/[id]/documents endpoint
+    // This keeps the collection metadata load fast
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const documents: any[] = []
 
     // Get additional stats
     const [

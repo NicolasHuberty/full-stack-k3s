@@ -57,7 +57,10 @@ export async function register(formData: FormData) {
     const verifyUser = await prisma.user.findUnique({
       where: { id: newUser.id },
     })
-    console.log('User verification query result:', verifyUser ? 'FOUND' : 'NOT FOUND')
+    console.log(
+      'User verification query result:',
+      verifyUser ? 'FOUND' : 'NOT FOUND'
+    )
 
     // Auto sign in after registration
     const signInResult = await signIn('credentials', {

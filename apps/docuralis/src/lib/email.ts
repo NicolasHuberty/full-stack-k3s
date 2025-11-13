@@ -4,7 +4,9 @@ import nodemailer from 'nodemailer'
 // Only create transporter if SMTP credentials are configured
 const getTransporter = () => {
   if (!process.env.SMTP_USER || !process.env.SMTP_PASSWORD) {
-    console.warn('⚠️  SMTP credentials not configured. Email sending will fail.')
+    console.warn(
+      '⚠️  SMTP credentials not configured. Email sending will fail.'
+    )
     console.warn('   Set SMTP_USER and SMTP_PASSWORD environment variables.')
     return null
   }
@@ -32,7 +34,8 @@ export interface EmailOptions {
 export async function sendEmail({ to, subject, html, text }: EmailOptions) {
   // Skip email sending if SMTP is not configured
   if (!transporter) {
-    const errorMsg = 'SMTP transporter not configured. Please set SMTP_USER and SMTP_PASSWORD environment variables.'
+    const errorMsg =
+      'SMTP transporter not configured. Please set SMTP_USER and SMTP_PASSWORD environment variables.'
     if (process.env.NODE_ENV === 'development') {
       console.warn(`⚠️  Email sending skipped (SMTP not configured):`)
       console.warn(`   To: ${to}`)

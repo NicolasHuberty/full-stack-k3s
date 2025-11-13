@@ -56,7 +56,9 @@ export async function createCollection(input: CreateCollectionInput) {
       // Use the first organization
       // TODO: In the future, allow user to select which organization
       organizationId = userOrgs[0].organizationId
-      console.log(`Auto-selected organization ${organizationId} for ORGANIZATION collection`)
+      console.log(
+        `Auto-selected organization ${organizationId} for ORGANIZATION collection`
+      )
     }
 
     // If organizationId is provided or auto-selected, check permission
@@ -208,7 +210,9 @@ export async function updateCollection(
       if (currentCollection && !currentCollection.organizationId) {
         // Check if collection has an owner
         if (!currentCollection.ownerId) {
-          throw new Error('Collection must have an owner to set visibility to ORGANIZATION')
+          throw new Error(
+            'Collection must have an owner to set visibility to ORGANIZATION'
+          )
         }
 
         // Get user's organizations
@@ -227,7 +231,9 @@ export async function updateCollection(
 
         // Auto-select the first organization
         const organizationId = userOrgs[0].organizationId
-        console.log(`Auto-setting organizationId ${organizationId} for collection ${collectionId}`)
+        console.log(
+          `Auto-setting organizationId ${organizationId} for collection ${collectionId}`
+        )
 
         // Update with organizationId
         const collection = await prisma.collection.update({

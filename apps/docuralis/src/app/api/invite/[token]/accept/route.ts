@@ -9,7 +9,10 @@ export async function POST(
   try {
     const session = await auth()
 
-    console.log('Accept invitation - Session:', JSON.stringify(session, null, 2))
+    console.log(
+      'Accept invitation - Session:',
+      JSON.stringify(session, null, 2)
+    )
 
     if (!session?.user?.id) {
       console.error('No session or user ID found')
@@ -21,7 +24,12 @@ export async function POST(
 
     const { token } = await params
 
-    console.log('Accepting invitation with userId:', session.user.id, 'token:', token)
+    console.log(
+      'Accepting invitation with userId:',
+      session.user.id,
+      'token:',
+      token
+    )
 
     const member = await acceptInvitation(token, session.user.id)
 

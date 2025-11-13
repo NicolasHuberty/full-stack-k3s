@@ -89,7 +89,12 @@ export default function RegisterPage() {
                 htmlFor="email"
                 className="block text-sm font-medium text-gray-700"
               >
-                Email{invitationEmail && <span className="text-xs text-gray-500 ml-2">(from invitation)</span>}
+                Email
+                {invitationEmail && (
+                  <span className="text-xs text-gray-500 ml-2">
+                    (from invitation)
+                  </span>
+                )}
               </label>
               <input
                 id="email"
@@ -204,7 +209,7 @@ export default function RegisterPage() {
           <Link
             href={`/login?${new URLSearchParams({
               ...(callbackUrl !== '/dashboard' && { callbackUrl }),
-              ...(invitationEmail && { email: invitationEmail })
+              ...(invitationEmail && { email: invitationEmail }),
             }).toString()}`}
             className="font-medium text-accent hover:underline"
           >

@@ -20,18 +20,23 @@ export async function GET(request: NextRequest) {
 
     // Check if user is system admin
     if (!(session.user as { isSystemAdmin?: boolean }).isSystemAdmin) {
-      return NextResponse.json({ error: 'Forbidden - Admin access required' }, { status: 403 })
+      return NextResponse.json(
+        { error: 'Forbidden - Admin access required' },
+        { status: 403 }
+      )
     }
 
     const searchParams = request.nextUrl.searchParams
     const timelineDays = parseInt(searchParams.get('timelineDays') || '7')
 
-    const [statistics, stuckJobs, recentActivity, timeline] = await Promise.all([
-      getJobStatistics(),
-      getStuckJobs(30),
-      getRecentJobActivity(20),
-      getJobProcessingTimeline(timelineDays),
-    ])
+    const [statistics, stuckJobs, recentActivity, timeline] = await Promise.all(
+      [
+        getJobStatistics(),
+        getStuckJobs(30),
+        getRecentJobActivity(20),
+        getJobProcessingTimeline(timelineDays),
+      ]
+    )
 
     return NextResponse.json({
       statistics,

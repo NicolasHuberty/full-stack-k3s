@@ -18,13 +18,17 @@ export class ChunkingService {
    * Split text into token-based chunks (matching Emate backend logic)
    * This splits by words (tokens) not characters
    */
-  chunkTextByTokens(text: string, chunkSize: number = 500, chunkOverlap: number = 0): TextChunk[] {
+  chunkTextByTokens(
+    text: string,
+    chunkSize: number = 500,
+    chunkOverlap: number = 0
+  ): TextChunk[] {
     if (!text || text.trim().length === 0) {
       return []
     }
 
     // Split text into words (tokens)
-    const tokens = text.split(/\s+/).filter(token => token.length > 0)
+    const tokens = text.split(/\s+/).filter((token) => token.length > 0)
     const chunks: TextChunk[] = []
     let start = 0
     let index = 0
@@ -58,7 +62,12 @@ export class ChunkingService {
    * Split text into overlapping chunks
    */
   chunkText(text: string, options: ChunkingOptions): TextChunk[] {
-    const { chunkSize, chunkOverlap, respectSentences = true, useTokens = false } = options
+    const {
+      chunkSize,
+      chunkOverlap,
+      respectSentences = true,
+      useTokens = false,
+    } = options
 
     // If useTokens is true, use the token-based chunking
     if (useTokens) {
@@ -163,7 +172,7 @@ export class ChunkingService {
    */
   estimateTokenCount(text: string): number {
     // Simple word-based estimation: split by whitespace
-    const words = text.split(/\s+/).filter(word => word.length > 0)
+    const words = text.split(/\s+/).filter((word) => word.length > 0)
     return words.length
   }
 

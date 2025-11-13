@@ -18,7 +18,10 @@ export async function POST(
 
     // Check if user is system admin
     if (!(session.user as { isSystemAdmin?: boolean }).isSystemAdmin) {
-      return NextResponse.json({ error: 'Forbidden - Admin access required' }, { status: 403 })
+      return NextResponse.json(
+        { error: 'Forbidden - Admin access required' },
+        { status: 403 }
+      )
     }
 
     const processor = getDocumentProcessor()
@@ -28,7 +31,10 @@ export async function POST(
     const { documentId } = await request.json()
 
     if (!documentId) {
-      return NextResponse.json({ error: 'Document ID required' }, { status: 400 })
+      return NextResponse.json(
+        { error: 'Document ID required' },
+        { status: 400 }
+      )
     }
 
     await processor.retryProcessing(documentId)
@@ -39,7 +45,7 @@ export async function POST(
     return NextResponse.json(
       {
         error: 'Failed to retry job',
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 }
     )

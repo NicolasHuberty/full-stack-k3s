@@ -1,9 +1,9 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@prisma/client'
 
-const prisma = new PrismaClient();
+const prisma = new PrismaClient()
 
 async function main() {
-  console.log('Seeding agents...');
+  console.log('Seeding agents...')
 
   // Create Lawyer Agent with Emate logic
   const lawyerAgent = await prisma.agent.upsert({
@@ -12,7 +12,8 @@ async function main() {
     create: {
       id: 'lawyer-agent-1',
       name: 'Lawyer Agent',
-      description: 'Professional legal assistant with advanced document analysis capabilities. Supports translator mode for multilingual documents and smart mode for complex legal queries.',
+      description:
+        'Professional legal assistant with advanced document analysis capabilities. Supports translator mode for multilingual documents and smart mode for complex legal queries.',
       icon: 'Scale',
       status: 'PUBLISHED',
       systemPrompt: `Vous êtes un assistant juridique qui répondez en Français avec un formatage markdown propre.
@@ -41,9 +42,9 @@ Répondez à la question en vous basant uniquement sur les documents fournis.`,
         timeout: 240,
       },
     },
-  });
+  })
 
-  console.log('Created Lawyer Agent:', lawyerAgent.id);
+  console.log('Created Lawyer Agent:', lawyerAgent.id)
 
   // Create actions for Lawyer Agent
   await prisma.agentAction.upsert({
@@ -63,7 +64,7 @@ Répondez à la question en vous basant uniquement sur les documents fournis.`,
       defaultValue: 'false',
       order: 1,
     },
-  });
+  })
 
   await prisma.agentAction.upsert({
     where: {
@@ -82,18 +83,18 @@ Répondez à la question en vous basant uniquement sur les documents fournis.`,
       defaultValue: 'false',
       order: 2,
     },
-  });
+  })
 
-  console.log('Created Lawyer Agent actions');
+  console.log('Created Lawyer Agent actions')
 
-  console.log('Agent seeding completed!');
+  console.log('Agent seeding completed!')
 }
 
 main()
   .catch((e) => {
-    console.error('Error seeding agents:', e);
-    process.exit(1);
+    console.error('Error seeding agents:', e)
+    process.exit(1)
   })
   .finally(async () => {
-    await prisma.$disconnect();
-  });
+    await prisma.$disconnect()
+  })

@@ -1,6 +1,6 @@
-import { prisma } from "@/lib/prisma";
-import { createAgentGraph } from "./graph";
-import type { AgentState } from "./types";
+import { prisma } from '@/lib/prisma'
+import { createAgentGraph } from './graph'
+import type { AgentState } from './types'
 
 export class AgentService {
   async executeAgent(
@@ -11,15 +11,15 @@ export class AgentService {
     actionState?: Record<string, unknown>,
     sessionId?: string
   ): Promise<{
-    answer: string;
+    answer: string
     sources: Array<{
-      title: string;
-      pageNumber: number;
-      justification?: string;
-      pertinenceScore?: number;
-    }>;
-    inputTokens: number;
-    outputTokens: number;
+      title: string
+      pageNumber: number
+      justification?: string
+      pertinenceScore?: number
+    }>
+    inputTokens: number
+    outputTokens: number
   }> {
     try {
       // Get agent configuration
@@ -28,10 +28,10 @@ export class AgentService {
         include: {
           actions: true,
         },
-      });
+      })
 
       if (!agent) {
-        throw new Error("Agent not found");
+        throw new Error('Agent not found')
       }
 
       // Get collection agent settings
@@ -42,19 +42,19 @@ export class AgentService {
             agentId,
           },
         },
-      });
+      })
 
       // Merge action state
       const finalActionState = {
         ...(collectionAgent?.actionState as Record<string, unknown>),
         ...actionState,
-      };
+      }
 
       // Extract modes from action state
-      const translatorMode = finalActionState.translator_mode === true;
-      const smartMode = finalActionState.smart_mode === true;
-      const multilingual = translatorMode; // For backward compatibility
-      const reflexion = smartMode; // For backward compatibility
+      const translatorMode = finalActionState.translator_mode === true
+      const smartMode = finalActionState.smart_mode === true
+      const multilingual = translatorMode // For backward compatibility
+      const reflexion = smartMode // For backward compatibility
 
       // Create initial state
       const initialState: AgentState = {
@@ -68,14 +68,14 @@ export class AgentService {
         smartMode,
         retrievedDocs: [],
         relevantDocs: [],
-        answer: "",
+        answer: '',
         inputTokens: 0,
         outputTokens: 0,
-      };
+      }
 
       // Execute LangGraph workflow
-      const graph = createAgentGraph();
-      const result = await graph.invoke(initialState);
+      const graph = createAgentGraph()
+      const result = await graph.invoke(initialState)
 
       // Build sources from relevant documents
       const sources = result.relevantDocs.map((doc) => ({
@@ -83,17 +83,17 @@ export class AgentService {
         pageNumber: doc.metadata.pageNumber,
         justification: doc.metadata.justification,
         pertinenceScore: doc.metadata.pertinenceScore,
-      }));
+      }))
 
       return {
         answer: result.answer,
         sources,
         inputTokens: result.inputTokens,
         outputTokens: result.outputTokens,
-      };
+      }
     } catch (error) {
-      console.error("Agent execution failed:", error);
-      throw error;
+      console.error('Agent execution failed:', error)
+      throw error
     }
   }
 
@@ -101,13 +101,13 @@ export class AgentService {
     return prisma.agent.findMany({
       where: {
         OR: [
-          { isPublic: true, status: "PUBLISHED" },
+          { isPublic: true, status: 'PUBLISHED' },
           // Add user-created agents if we add that feature
         ],
       },
       include: {
         actions: {
-          orderBy: { order: "asc" },
+          orderBy: { order: 'asc' },
         },
         _count: {
           select: {
@@ -116,11 +116,11 @@ export class AgentService {
         },
       },
       orderBy: [
-        { featured: "desc" },
-        { installCount: "desc" },
-        { createdAt: "desc" },
+        { featured: 'desc' },
+        { installCount: 'desc' },
+        { createdAt: 'desc' },
       ],
-    });
+    })
   }
 
   async getCollectionAgents(collectionId: string) {
@@ -130,12 +130,12 @@ export class AgentService {
         agent: {
           include: {
             actions: {
-              orderBy: { order: "asc" },
+              orderBy: { order: 'asc' },
             },
           },
         },
       },
-    });
+    })
   }
 
   async activateAgent(
@@ -151,7 +151,7 @@ export class AgentService {
           agentId,
         },
       },
-    });
+    })
 
     if (existing) {
       // Update action state
@@ -161,7 +161,7 @@ export class AgentService {
           isActive: true,
           actionState: actionState || existing.actionState,
         },
-      });
+      })
     }
 
     // Create new activation
@@ -172,7 +172,7 @@ export class AgentService {
         isActive: true,
         actionState,
       },
-    });
+    })
 
     // Increment install count
     await prisma.agent.update({
@@ -180,9 +180,9 @@ export class AgentService {
       data: {
         installCount: { increment: 1 },
       },
-    });
+    })
 
-    return collectionAgent;
+    return collectionAgent
   }
 
   async deactivateAgent(collectionId: string, agentId: string) {
@@ -193,16 +193,16 @@ export class AgentService {
           agentId,
         },
       },
-    });
+    })
 
     if (!collectionAgent) {
-      throw new Error("Agent not activated for this collection");
+      throw new Error('Agent not activated for this collection')
     }
 
     return prisma.collectionAgent.update({
       where: { id: collectionAgent.id },
       data: { isActive: false },
-    });
+    })
   }
 
   async updateAgentActionState(
@@ -217,19 +217,19 @@ export class AgentService {
           agentId,
         },
       },
-    });
+    })
 
     if (!collectionAgent) {
-      throw new Error("Agent not activated for this collection");
+      throw new Error('Agent not activated for this collection')
     }
 
     return prisma.collectionAgent.update({
       where: { id: collectionAgent.id },
       data: { actionState },
-    });
+    })
   }
 }
 
 export function getAgentService(): AgentService {
-  return new AgentService();
+  return new AgentService()
 }

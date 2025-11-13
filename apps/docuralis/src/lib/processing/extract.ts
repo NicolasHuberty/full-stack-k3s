@@ -28,7 +28,7 @@ export class TextExtractor {
         logger.info('Detected scanned PDF, using OCR')
         const pageTexts = await performPDFOCR(buffer)
 
-        const fullText = pageTexts.map(pt => pt.text).join('\n\n')
+        const fullText = pageTexts.map((pt) => pt.text).join('\n\n')
 
         return {
           text: fullText,
@@ -87,21 +87,39 @@ export class TextExtractor {
               logger.warn('PDF extraction resulted in minimal text, trying OCR')
 
               // Try OCR as fallback
-              performPDFOCR(buffer).then(pageTexts => {
-                const ocrText = pageTexts.map(pt => pt.text).join('\n\n')
+              performPDFOCR(buffer)
+                .then((pageTexts) => {
+                  const ocrText = pageTexts.map((pt) => pt.text).join('\n\n')
 
-                if (ocrText && ocrText.length > trimmedText.length) {
-                  logger.info('OCR produced better results than PDF extraction')
-                  resolve({
-                    text: ocrText,
-                    isScanned: true,
-                    metadata: {
-                      pageCount: pageTexts.length,
-                      wordCount: this.countWords(ocrText),
-                    },
-                  })
-                } else {
-                  // Use whatever we got from pdf2json
+                  if (ocrText && ocrText.length > trimmedText.length) {
+                    logger.info(
+                      'OCR produced better results than PDF extraction'
+                    )
+                    resolve({
+                      text: ocrText,
+                      isScanned: true,
+                      metadata: {
+                        pageCount: pageTexts.length,
+                        wordCount: this.countWords(ocrText),
+                      },
+                    })
+                  } else {
+                    // Use whatever we got from pdf2json
+                    const meta = pdfData.Meta || {}
+                    resolve({
+                      text: trimmedText,
+                      isScanned: false,
+                      metadata: {
+                        pageCount: pages.length,
+                        wordCount: this.countWords(trimmedText),
+                        author: meta.Author,
+                        title: meta.Title,
+                      },
+                    })
+                  }
+                })
+                .catch(() => {
+                  // If OCR fails, just use the pdf2json result
                   const meta = pdfData.Meta || {}
                   resolve({
                     text: trimmedText,
@@ -113,21 +131,7 @@ export class TextExtractor {
                       title: meta.Title,
                     },
                   })
-                }
-              }).catch(() => {
-                // If OCR fails, just use the pdf2json result
-                const meta = pdfData.Meta || {}
-                resolve({
-                  text: trimmedText,
-                  isScanned: false,
-                  metadata: {
-                    pageCount: pages.length,
-                    wordCount: this.countWords(trimmedText),
-                    author: meta.Author,
-                    title: meta.Title,
-                  },
                 })
-              })
               return
             }
 

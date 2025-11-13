@@ -16,13 +16,23 @@ export async function POST(request: NextRequest) {
 
     // Check if user is system admin
     if (!(session.user as { isSystemAdmin?: boolean }).isSystemAdmin) {
-      return NextResponse.json({ error: 'Forbidden - Admin access required' }, { status: 403 })
+      return NextResponse.json(
+        { error: 'Forbidden - Admin access required' },
+        { status: 403 }
+      )
     }
 
     const { documentIds } = await request.json()
 
-    if (!documentIds || !Array.isArray(documentIds) || documentIds.length === 0) {
-      return NextResponse.json({ error: 'Document IDs required' }, { status: 400 })
+    if (
+      !documentIds ||
+      !Array.isArray(documentIds) ||
+      documentIds.length === 0
+    ) {
+      return NextResponse.json(
+        { error: 'Document IDs required' },
+        { status: 400 }
+      )
     }
 
     // Update job statuses
@@ -30,10 +40,12 @@ export async function POST(request: NextRequest) {
 
     // Queue each job for processing
     const processor = getDocumentProcessor()
-    const promises = documentIds.map(id => processor.retryProcessing(id).catch(err => {
-      console.error(`Failed to retry document ${id}:`, err)
-      return null
-    }))
+    const promises = documentIds.map((id) =>
+      processor.retryProcessing(id).catch((err) => {
+        console.error(`Failed to retry document ${id}:`, err)
+        return null
+      })
+    )
 
     await Promise.all(promises)
 
@@ -47,7 +59,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         error: 'Failed to bulk retry jobs',
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 }
     )

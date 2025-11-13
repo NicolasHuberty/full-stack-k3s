@@ -32,7 +32,10 @@ export async function POST(
     })
 
     if (!chatSession) {
-      return NextResponse.json({ error: 'Chat session not found' }, { status: 404 })
+      return NextResponse.json(
+        { error: 'Chat session not found' },
+        { status: 404 }
+      )
     }
 
     if (chatSession.userId !== session.user.id) {
@@ -219,7 +222,10 @@ export async function DELETE(
     })
 
     if (!chatSession) {
-      return NextResponse.json({ error: 'Chat session not found' }, { status: 404 })
+      return NextResponse.json(
+        { error: 'Chat session not found' },
+        { status: 404 }
+      )
     }
 
     if (chatSession.userId !== session.user.id) {

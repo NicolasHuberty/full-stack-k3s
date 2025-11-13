@@ -333,7 +333,7 @@ export default function TeamsPage() {
                               </p>
                             </div>
                           </div>
-                          
+
                           <div className="flex items-center gap-3">
                             <span className="px-3 py-1 rounded-full text-xs font-medium bg-orange-500/10 text-orange-600">
                               {invitation.role}
@@ -341,7 +341,9 @@ export default function TeamsPage() {
                             <Button
                               size="sm"
                               variant="outline"
-                              onClick={() => handleResendInvitation(invitation.id)}
+                              onClick={() =>
+                                handleResendInvitation(invitation.id)
+                              }
                               disabled={loading}
                             >
                               <Mail className="h-3 w-3 mr-1" />

@@ -43,7 +43,10 @@ export async function GET(
 
     // Check if user is system admin
     if (!(session.user as { isSystemAdmin?: boolean }).isSystemAdmin) {
-      return NextResponse.json({ error: 'Forbidden - Admin access required' }, { status: 403 })
+      return NextResponse.json(
+        { error: 'Forbidden - Admin access required' },
+        { status: 403 }
+      )
     }
 
     const { id } = await params
@@ -59,9 +62,6 @@ export async function GET(
     return NextResponse.json(serialized)
   } catch (error) {
     console.error('Failed to get job:', error)
-    return NextResponse.json(
-      { error: 'Failed to get job' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to get job' }, { status: 500 })
   }
 }

@@ -37,7 +37,9 @@ export default function InvitePage() {
   useEffect(() => {
     // If not authenticated and we have invitation details, redirect to login with email
     if (status === 'unauthenticated' && invitation) {
-      router.push(`/login?callbackUrl=/invite/${token}&email=${encodeURIComponent(invitation.email)}`)
+      router.push(
+        `/login?callbackUrl=/invite/${token}&email=${encodeURIComponent(invitation.email)}`
+      )
     }
   }, [status, invitation, token, router])
 
@@ -69,7 +71,12 @@ export default function InvitePage() {
       return
     }
 
-    console.log('Accepting invitation for user:', session.user.email, 'ID:', session.user.id)
+    console.log(
+      'Accepting invitation for user:',
+      session.user.email,
+      'ID:',
+      session.user.id
+    )
 
     setAccepting(true)
     setError(null)
@@ -205,12 +212,15 @@ export default function InvitePage() {
             {/* Signed in as */}
             {session?.user && (
               <div className="text-center text-sm">
-                <span className="text-muted-foreground">Signed in as{' '}</span>
-                <span className="font-medium text-foreground">{session.user.email}</span>
+                <span className="text-muted-foreground">Signed in as </span>
+                <span className="font-medium text-foreground">
+                  {session.user.email}
+                </span>
                 {session.user.email !== invitation.email && (
                   <div className="mt-2 text-xs text-amber-600 bg-amber-50 p-2 rounded">
-                    ⚠️ This invitation was sent to <strong>{invitation.email}</strong>.
-                    You may need to sign in with that email instead.
+                    ⚠️ This invitation was sent to{' '}
+                    <strong>{invitation.email}</strong>. You may need to sign in
+                    with that email instead.
                   </div>
                 )}
               </div>

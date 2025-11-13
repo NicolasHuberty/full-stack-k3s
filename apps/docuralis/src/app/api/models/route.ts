@@ -1,12 +1,12 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/auth';
-import { prisma } from '@/lib/prisma';
+import { NextRequest, NextResponse } from 'next/server'
+import { auth } from '@/auth'
+import { prisma } from '@/lib/prisma'
 
 export async function GET(_request: NextRequest) {
   try {
-    const session = await auth();
+    const session = await auth()
     if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     // Get only active models for regular users
@@ -22,11 +22,11 @@ export async function GET(_request: NextRequest) {
         maxTokens: true,
         isDefault: true,
       },
-    });
+    })
 
-    return NextResponse.json(models);
+    return NextResponse.json(models)
   } catch (error) {
-    console.error('Failed to get models:', error);
-    return NextResponse.json({ error: 'Failed to get models' }, { status: 500 });
+    console.error('Failed to get models:', error)
+    return NextResponse.json({ error: 'Failed to get models' }, { status: 500 })
   }
 }

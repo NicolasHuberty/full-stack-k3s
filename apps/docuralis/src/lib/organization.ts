@@ -119,7 +119,10 @@ export async function inviteMemberToOrganization(data: {
     subject: emailContent.subject,
     html: emailContent.html,
   }).catch((error) => {
-    console.error('Failed to send invitation email (invitation still created):', error)
+    console.error(
+      'Failed to send invitation email (invitation still created):',
+      error
+    )
     // In development, you might want to log the invitation link
     if (process.env.NODE_ENV === 'development') {
       const inviteUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3001'}/invite/${token}`
@@ -182,7 +185,9 @@ export async function resendInvitationEmail(invitationId: string) {
     // In development, log the invitation link
     if (process.env.NODE_ENV === 'development') {
       const inviteUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3001'}/invite/${invitation.token}`
-      console.log(`\n📧 Resent invitation link for ${invitation.email}: ${inviteUrl}\n`)
+      console.log(
+        `\n📧 Resent invitation link for ${invitation.email}: ${inviteUrl}\n`
+      )
     }
   })
 
@@ -234,7 +239,11 @@ export async function acceptInvitation(token: string, userId: string) {
     const userByEmail = await prisma.user.findUnique({
       where: { email: invitation.email },
     })
-    console.log('User found by email:', userByEmail ? 'yes' : 'no', userByEmail?.id)
+    console.log(
+      'User found by email:',
+      userByEmail ? 'yes' : 'no',
+      userByEmail?.id
+    )
 
     if (userByEmail) {
       throw new Error(

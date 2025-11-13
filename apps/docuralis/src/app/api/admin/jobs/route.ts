@@ -41,7 +41,10 @@ export async function GET(request: NextRequest) {
 
     // Check if user is system admin
     if (!(session.user as { isSystemAdmin?: boolean }).isSystemAdmin) {
-      return NextResponse.json({ error: 'Forbidden - Admin access required' }, { status: 403 })
+      return NextResponse.json(
+        { error: 'Forbidden - Admin access required' },
+        { status: 403 }
+      )
     }
 
     const searchParams = request.nextUrl.searchParams
@@ -94,9 +97,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(serialized)
   } catch (error) {
     console.error('Failed to list jobs:', error)
-    return NextResponse.json(
-      { error: 'Failed to list jobs' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to list jobs' }, { status: 500 })
   }
 }

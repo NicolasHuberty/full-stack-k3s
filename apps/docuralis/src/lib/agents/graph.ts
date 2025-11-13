@@ -1,12 +1,12 @@
-import { StateGraph, END, START } from "@langchain/langgraph";
-import type { AgentState } from "./types";
+import { StateGraph, END, START } from '@langchain/langgraph'
+import type { AgentState } from './types'
 import {
   decomposeQuery,
   retrieveDocuments,
   gradeDocumentsClassical,
   gradeDocumentsReflexion,
   generateResponse,
-} from "./nodes";
+} from './nodes'
 
 export function createAgentGraph() {
   const workflow = new StateGraph<AgentState>({
@@ -27,40 +27,40 @@ export function createAgentGraph() {
       inputTokens: null,
       outputTokens: null,
     },
-  });
+  })
 
   // Add nodes
-  workflow.addNode("decompose", decomposeQuery);
-  workflow.addNode("retrieve", retrieveDocuments);
-  workflow.addNode("gradeClassical", gradeDocumentsClassical);
-  workflow.addNode("gradeReflexion", gradeDocumentsReflexion);
-  workflow.addNode("generate", generateResponse);
+  workflow.addNode('decompose', decomposeQuery)
+  workflow.addNode('retrieve', retrieveDocuments)
+  workflow.addNode('gradeClassical', gradeDocumentsClassical)
+  workflow.addNode('gradeReflexion', gradeDocumentsReflexion)
+  workflow.addNode('generate', generateResponse)
 
   // Add conditional edge from START
   workflow.addConditionalEdges(START, (state: AgentState) => {
     if (state.smartMode || state.reflexion) {
-      return "decompose";
+      return 'decompose'
     }
-    return "retrieve";
-  });
+    return 'retrieve'
+  })
 
   // From decompose, always go to retrieve
-  workflow.addEdge("decompose", "retrieve");
+  workflow.addEdge('decompose', 'retrieve')
 
   // From retrieve, route to appropriate grading
-  workflow.addConditionalEdges("retrieve", (state: AgentState) => {
+  workflow.addConditionalEdges('retrieve', (state: AgentState) => {
     if (state.smartMode || state.reflexion) {
-      return "gradeReflexion";
+      return 'gradeReflexion'
     }
-    return "gradeClassical";
-  });
+    return 'gradeClassical'
+  })
 
   // Both grading nodes go to generate
-  workflow.addEdge("gradeClassical", "generate");
-  workflow.addEdge("gradeReflexion", "generate");
+  workflow.addEdge('gradeClassical', 'generate')
+  workflow.addEdge('gradeReflexion', 'generate')
 
   // Generate goes to END
-  workflow.addEdge("generate", END);
+  workflow.addEdge('generate', END)
 
-  return workflow.compile();
+  return workflow.compile()
 }

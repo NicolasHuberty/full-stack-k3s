@@ -1,64 +1,70 @@
-'use client';
+'use client'
 
-import { useEffect, useState } from 'react';
-import { DashboardLayout } from '@/components/dashboard/layout';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import * as Icons from 'lucide-react';
+import { useEffect, useState } from 'react'
+import { DashboardLayout } from '@/components/dashboard/layout'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import * as Icons from 'lucide-react'
 
 interface AgentAction {
-  id: string;
-  name: string;
-  label: string;
-  icon: string;
-  type: 'TOGGLE' | 'SELECT' | 'INPUT';
-  defaultValue?: string;
-  options?: Record<string, unknown>;
-  order: number;
+  id: string
+  name: string
+  label: string
+  icon: string
+  type: 'TOGGLE' | 'SELECT' | 'INPUT'
+  defaultValue?: string
+  options?: Record<string, unknown>
+  order: number
 }
 
 interface Agent {
-  id: string;
-  name: string;
-  description: string;
-  icon?: string;
-  status: string;
-  featured: boolean;
-  installCount: number;
-  actions: AgentAction[];
+  id: string
+  name: string
+  description: string
+  icon?: string
+  status: string
+  featured: boolean
+  installCount: number
+  actions: AgentAction[]
   _count: {
-    collectionAgents: number;
-  };
+    collectionAgents: number
+  }
 }
 
 export default function AgentsMarketplacePage() {
-  const [agents, setAgents] = useState<Agent[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [agents, setAgents] = useState<Agent[]>([])
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetchAgents();
-  }, []);
+    fetchAgents()
+  }, [])
 
   const fetchAgents = async () => {
     try {
-      const response = await fetch('/api/agents');
+      const response = await fetch('/api/agents')
       if (response.ok) {
-        const data = await response.json();
-        setAgents(data);
+        const data = await response.json()
+        setAgents(data)
       }
     } catch (error) {
-      console.error('Failed to fetch agents:', error);
+      console.error('Failed to fetch agents:', error)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   const getIcon = (iconName?: string) => {
-    if (!iconName) return Icons.Bot;
-    const Icon = (Icons as Record<string, unknown>)[iconName];
-    return Icon || Icons.Bot;
-  };
+    if (!iconName) return Icons.Bot
+    const Icon = (Icons as Record<string, unknown>)[iconName]
+    return Icon || Icons.Bot
+  }
 
   if (loading) {
     return (
@@ -70,7 +76,7 @@ export default function AgentsMarketplacePage() {
           </div>
         </div>
       </DashboardLayout>
-    );
+    )
   }
 
   return (
@@ -85,7 +91,7 @@ export default function AgentsMarketplacePage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {agents.map((agent) => {
-            const IconComponent = getIcon(agent.icon);
+            const IconComponent = getIcon(agent.icon)
             return (
               <Card key={agent.id} className="relative">
                 {agent.featured && (
@@ -113,16 +119,22 @@ export default function AgentsMarketplacePage() {
 
                   {agent.actions.length > 0 && (
                     <div className="mb-4">
-                      <p className="text-xs font-medium mb-2">Available Actions:</p>
+                      <p className="text-xs font-medium mb-2">
+                        Available Actions:
+                      </p>
                       <div className="flex flex-wrap gap-2">
                         {agent.actions.map((action) => {
-                          const ActionIcon = getIcon(action.icon);
+                          const ActionIcon = getIcon(action.icon)
                           return (
-                            <Badge key={action.id} variant="outline" className="gap-1">
+                            <Badge
+                              key={action.id}
+                              variant="outline"
+                              className="gap-1"
+                            >
                               <ActionIcon className="h-3 w-3" />
                               {action.label}
                             </Badge>
-                          );
+                          )
                         })}
                       </div>
                     </div>
@@ -133,7 +145,7 @@ export default function AgentsMarketplacePage() {
                   </Button>
                 </CardContent>
               </Card>
-            );
+            )
           })}
         </div>
 
@@ -145,5 +157,5 @@ export default function AgentsMarketplacePage() {
         )}
       </div>
     </DashboardLayout>
-  );
+  )
 }

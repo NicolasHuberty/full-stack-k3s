@@ -935,7 +935,7 @@ export default function CollectionDetailPage() {
               <div className="flex items-center justify-between mb-3">
                 <h2 className="text-sm font-semibold text-foreground flex items-center gap-2">
                   <Bot className="h-4 w-4" />
-                  Connected Agents ({agents.filter(a => a.isActive).length})
+                  Connected Agents ({agents.filter((a) => a.isActive).length})
                 </h2>
                 <Button
                   size="sm"
@@ -952,7 +952,8 @@ export default function CollectionDetailPage() {
                   <Bot className="h-12 w-12 mx-auto mb-3 text-muted-foreground" />
                   <h3 className="font-medium mb-2">No agents connected</h3>
                   <p className="text-sm text-muted-foreground mb-4">
-                    Activate intelligent agents to enhance your collection with automated workflows
+                    Activate intelligent agents to enhance your collection with
+                    automated workflows
                   </p>
                   <Button
                     variant="default"
@@ -996,31 +997,35 @@ export default function CollectionDetailPage() {
                         {collectionAgent.agent.description}
                       </p>
                       {collectionAgent.actionState &&
-                       Object.keys(collectionAgent.actionState).length > 0 && (
-                        <div className="border-t pt-3">
-                          <div className="text-xs text-muted-foreground mb-2">
-                            Enabled Actions:
+                        Object.keys(collectionAgent.actionState).length > 0 && (
+                          <div className="border-t pt-3">
+                            <div className="text-xs text-muted-foreground mb-2">
+                              Enabled Actions:
+                            </div>
+                            <div className="flex flex-wrap gap-2">
+                              {Object.entries(collectionAgent.actionState)
+                                .filter(([_, enabled]) => enabled)
+                                .map(([action]) => (
+                                  <span
+                                    key={action}
+                                    className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-primary/10 text-primary"
+                                  >
+                                    {action}
+                                  </span>
+                                ))}
+                            </div>
                           </div>
-                          <div className="flex flex-wrap gap-2">
-                            {Object.entries(collectionAgent.actionState)
-                              .filter(([_, enabled]) => enabled)
-                              .map(([action]) => (
-                                <span
-                                  key={action}
-                                  className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-primary/10 text-primary"
-                                >
-                                  {action}
-                                </span>
-                              ))}
-                          </div>
-                        </div>
-                      )}
+                        )}
                       <div className="mt-3 pt-3 border-t">
                         <Button
                           size="sm"
                           variant="ghost"
                           className="w-full"
-                          onClick={() => router.push(`/dashboard/agents/${collectionAgent.agent.id}`)}
+                          onClick={() =>
+                            router.push(
+                              `/dashboard/agents/${collectionAgent.agent.id}`
+                            )
+                          }
                         >
                           View Details
                         </Button>

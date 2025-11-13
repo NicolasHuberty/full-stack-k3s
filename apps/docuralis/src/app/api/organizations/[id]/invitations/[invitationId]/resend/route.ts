@@ -1,9 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/auth'
-import {
-  resendInvitationEmail,
-  checkUserPermission,
-} from '@/lib/organization'
+import { resendInvitationEmail, checkUserPermission } from '@/lib/organization'
 
 export async function POST(
   request: NextRequest,
@@ -55,7 +52,10 @@ export async function POST(
     }
 
     return NextResponse.json(
-      { message: 'Invitation email resent successfully', invitation: serializedInvitation },
+      {
+        message: 'Invitation email resent successfully',
+        invitation: serializedInvitation,
+      },
       { status: 200 }
     )
   } catch (error) {
@@ -71,4 +71,3 @@ export async function POST(
     )
   }
 }
-

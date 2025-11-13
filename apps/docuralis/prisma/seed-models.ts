@@ -1,9 +1,9 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@prisma/client'
 
-const prisma = new PrismaClient();
+const prisma = new PrismaClient()
 
 async function main() {
-  console.log('Seeding LLM models...');
+  console.log('Seeding LLM models...')
 
   const models = [
     {
@@ -72,25 +72,25 @@ async function main() {
       isActive: true,
       isDefault: false,
     },
-  ];
+  ]
 
   for (const model of models) {
     await prisma.lLMModel.upsert({
       where: { name: model.name },
       update: model,
       create: model,
-    });
-    console.log(`✓ ${model.displayName}`);
+    })
+    console.log(`✓ ${model.displayName}`)
   }
 
-  console.log('LLM models seeded successfully!');
+  console.log('LLM models seeded successfully!')
 }
 
 main()
   .catch((e) => {
-    console.error('Error seeding LLM models:', e);
-    process.exit(1);
+    console.error('Error seeding LLM models:', e)
+    process.exit(1)
   })
   .finally(async () => {
-    await prisma.$disconnect();
-  });
+    await prisma.$disconnect()
+  })

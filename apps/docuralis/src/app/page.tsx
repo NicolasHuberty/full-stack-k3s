@@ -224,7 +224,9 @@ function DemoCard({
         {step === 1 && (
           <div className="flex items-center gap-2 px-3 py-2">
             <Search className="h-4 w-4 animate-spin text-accent" />
-            <span className="text-xs text-muted-foreground">{t('demo.searching')}</span>
+            <span className="text-xs text-muted-foreground">
+              {t('demo.searching')}
+            </span>
           </div>
         )}
 
@@ -234,7 +236,9 @@ function DemoCard({
             <div className="bg-accent/5 border border-accent/20 rounded-lg p-3">
               <div className="flex items-center gap-1.5 mb-2">
                 <Zap className="h-3.5 w-3.5 text-accent" />
-                <span className="text-xs font-semibold text-accent">{t('demo.aiAnswer')}</span>
+                <span className="text-xs font-semibold text-accent">
+                  {t('demo.aiAnswer')}
+                </span>
               </div>
               <p
                 className="text-xs text-foreground leading-relaxed"
@@ -244,23 +248,37 @@ function DemoCard({
 
             {/* Sources */}
             <div className="space-y-1.5">
-              <p className="text-xs font-semibold text-muted-foreground">{t('demo.sources')}</p>
+              <p className="text-xs font-semibold text-muted-foreground">
+                {t('demo.sources')}
+              </p>
               {example.sources.slice(0, 1).map((source: any, idx: number) => (
-                <div key={idx} className="bg-background border border-border rounded p-2">
+                <div
+                  key={idx}
+                  className="bg-background border border-border rounded p-2"
+                >
                   <div className="flex items-center justify-between mb-1">
                     <div className="flex items-center gap-1.5 min-w-0 flex-1">
                       <FileText className="h-3 w-3 text-primary flex-shrink-0" />
-                      <span className="text-xs font-medium truncate">{source.file}</span>
+                      <span className="text-xs font-medium truncate">
+                        {source.file}
+                      </span>
                     </div>
-                    <span className="text-xs text-accent ml-2">p.{source.page}</span>
+                    <span className="text-xs text-accent ml-2">
+                      p.{source.page}
+                    </span>
                   </div>
                   <p className="text-xs text-muted-foreground line-clamp-1">
-                    {source.excerpt} <span className="text-foreground bg-accent/20 px-0.5">{source.highlight}</span>
+                    {source.excerpt}{' '}
+                    <span className="text-foreground bg-accent/20 px-0.5">
+                      {source.highlight}
+                    </span>
                   </p>
                 </div>
               ))}
               {example.sources.length > 1 && (
-                <p className="text-xs text-accent">+{example.sources.length - 1} more</p>
+                <p className="text-xs text-accent">
+                  +{example.sources.length - 1} more
+                </p>
               )}
             </div>
           </div>

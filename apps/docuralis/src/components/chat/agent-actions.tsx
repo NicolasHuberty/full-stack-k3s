@@ -1,147 +1,163 @@
-'use client';
+'use client'
 
-import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import * as Icons from 'lucide-react';
+import { useState, useEffect } from 'react'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import * as Icons from 'lucide-react'
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from '@/components/ui/tooltip';
+} from '@/components/ui/tooltip'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
+} from '@/components/ui/select'
 
 interface AgentAction {
-  id: string;
-  name: string;
-  label: string;
-  icon: string;
-  type: 'TOGGLE' | 'SELECT' | 'INPUT';
-  defaultValue?: string;
+  id: string
+  name: string
+  label: string
+  icon: string
+  type: 'TOGGLE' | 'SELECT' | 'INPUT'
+  defaultValue?: string
 }
 
 interface Agent {
-  id: string;
-  name: string;
-  icon?: string;
-  actions: AgentAction[];
+  id: string
+  name: string
+  icon?: string
+  actions: AgentAction[]
 }
 
 interface LLMModel {
-  id: string;
-  name: string;
-  displayName: string;
-  provider: string;
-  isDefault: boolean;
+  id: string
+  name: string
+  displayName: string
+  provider: string
+  isDefault: boolean
 }
 
 interface AgentActionsProps {
-  collectionId: string;
-  onAgentChange?: (agentId: string | null, actionState: Record<string, unknown>, model: string) => void;
+  collectionId: string
+  onAgentChange?: (
+    agentId: string | null,
+    actionState: Record<string, unknown>,
+    model: string
+  ) => void
 }
 
-export function AgentActions({ collectionId, onAgentChange }: AgentActionsProps) {
+export function AgentActions({
+  collectionId,
+  onAgentChange,
+}: AgentActionsProps) {
   const [collectionAgents, setCollectionAgents] = useState<
     Array<{
-      id: string;
-      isActive: boolean;
-      actionState: Record<string, unknown>;
-      agent: Agent;
+      id: string
+      isActive: boolean
+      actionState: Record<string, unknown>
+      agent: Agent
     }>
-  >([]);
-  const [selectedAgent, setSelectedAgent] = useState<string | null>(null);
-  const [actionState, setActionState] = useState<Record<string, unknown>>({});
-  const [selectedModel, setSelectedModel] = useState<string>('gpt-4o-mini');
-  const [models, setModels] = useState<LLMModel[]>([]);
-  const [loading, setLoading] = useState(true);
+  >([])
+  const [selectedAgent, setSelectedAgent] = useState<string | null>(null)
+  const [actionState, setActionState] = useState<Record<string, unknown>>({})
+  const [selectedModel, setSelectedModel] = useState<string>('gpt-4o-mini')
+  const [models, setModels] = useState<LLMModel[]>([])
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetchCollectionAgents();
-    fetchModels();
-  }, [collectionId]);
+    fetchCollectionAgents()
+    fetchModels()
+  }, [collectionId])
 
   const fetchModels = async () => {
     try {
-      const response = await fetch('/api/models');
+      const response = await fetch('/api/models')
       if (response.ok) {
-        const data = await response.json();
-        setModels(data);
-        const defaultModel = data.find((m: LLMModel) => m.isDefault);
+        const data = await response.json()
+        setModels(data)
+        const defaultModel = data.find((m: LLMModel) => m.isDefault)
         if (defaultModel) {
-          setSelectedModel(defaultModel.name);
+          setSelectedModel(defaultModel.name)
         }
       }
     } catch (error) {
-      console.error('Failed to fetch models:', error);
+      console.error('Failed to fetch models:', error)
     }
-  };
+  }
 
   const fetchCollectionAgents = async () => {
     try {
-      const response = await fetch(`/api/collections/${collectionId}/agents`);
+      const response = await fetch(`/api/collections/${collectionId}/agents`)
       if (response.ok) {
-        const data = await response.json();
-        const activeAgents = data.filter((ca: { isActive: boolean }) => ca.isActive);
-        setCollectionAgents(activeAgents);
+        const data = await response.json()
+        const activeAgents = data.filter(
+          (ca: { isActive: boolean }) => ca.isActive
+        )
+        setCollectionAgents(activeAgents)
 
         // Auto-select first agent
         if (activeAgents.length > 0) {
-          const firstAgent = activeAgents[0];
-          setSelectedAgent(firstAgent.agent.id);
-          setActionState(firstAgent.actionState || {});
-          onAgentChange?.(firstAgent.agent.id, firstAgent.actionState || {}, selectedModel);
+          const firstAgent = activeAgents[0]
+          setSelectedAgent(firstAgent.agent.id)
+          setActionState(firstAgent.actionState || {})
+          onAgentChange?.(
+            firstAgent.agent.id,
+            firstAgent.actionState || {},
+            selectedModel
+          )
         }
       }
     } catch (error) {
-      console.error('Failed to fetch collection agents:', error);
+      console.error('Failed to fetch collection agents:', error)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   const handleAgentSelect = (agentId: string) => {
-    setSelectedAgent(agentId);
-    const agent = collectionAgents.find((ca) => ca.agent.id === agentId);
+    setSelectedAgent(agentId)
+    const agent = collectionAgents.find((ca) => ca.agent.id === agentId)
     if (agent) {
-      setActionState(agent.actionState || {});
-      onAgentChange?.(agentId, agent.actionState || {}, selectedModel);
+      setActionState(agent.actionState || {})
+      onAgentChange?.(agentId, agent.actionState || {}, selectedModel)
     }
-  };
+  }
 
   const handleActionToggle = async (actionName: string) => {
     const newState = {
       ...actionState,
       [actionName]: !actionState[actionName],
-    };
-    setActionState(newState);
-    onAgentChange?.(selectedAgent, newState, selectedModel);
+    }
+    setActionState(newState)
+    onAgentChange?.(selectedAgent, newState, selectedModel)
 
     // Update backend
     if (selectedAgent) {
       try {
-        await fetch(`/api/collections/${collectionId}/agents/${selectedAgent}`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ actionState: newState }),
-        });
+        await fetch(
+          `/api/collections/${collectionId}/agents/${selectedAgent}`,
+          {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ actionState: newState }),
+          }
+        )
       } catch (error) {
-        console.error('Failed to update action state:', error);
+        console.error('Failed to update action state:', error)
       }
     }
-  };
+  }
 
   const getIcon = (iconName?: string) => {
-    if (!iconName) return Icons.Bot;
-    const Icon = (Icons as Record<string, unknown>)[iconName];
-    return Icon || Icons.Bot;
-  };
+    if (!iconName) return Icons.Bot
+    const Icon = (Icons as Record<string, unknown>)[iconName]
+    return Icon || Icons.Bot
+  }
 
   if (loading) {
     return (
@@ -149,25 +165,29 @@ export function AgentActions({ collectionId, onAgentChange }: AgentActionsProps)
         <Icons.Loader2 className="h-4 w-4 animate-spin" />
         <span className="text-sm text-muted-foreground">Loading agents...</span>
       </div>
-    );
+    )
   }
 
   if (collectionAgents.length === 0) {
-    return null;
+    return null
   }
 
-  const activeAgent = collectionAgents.find((ca) => ca.agent.id === selectedAgent);
+  const activeAgent = collectionAgents.find(
+    (ca) => ca.agent.id === selectedAgent
+  )
 
   return (
     <div className="border-b bg-muted/30 px-4 py-3">
       <div className="flex items-center gap-3">
         {/* Agent Selector */}
         <div className="flex items-center gap-2">
-          <span className="text-xs font-medium text-muted-foreground">Agent:</span>
+          <span className="text-xs font-medium text-muted-foreground">
+            Agent:
+          </span>
           <div className="flex gap-1">
             {collectionAgents.map((ca) => {
-              const AgentIcon = getIcon(ca.agent.icon);
-              const isSelected = ca.agent.id === selectedAgent;
+              const AgentIcon = getIcon(ca.agent.icon)
+              const isSelected = ca.agent.id === selectedAgent
 
               return (
                 <TooltipProvider key={ca.agent.id}>
@@ -187,7 +207,7 @@ export function AgentActions({ collectionId, onAgentChange }: AgentActionsProps)
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
-              );
+              )
             })}
           </div>
         </div>
@@ -195,19 +215,32 @@ export function AgentActions({ collectionId, onAgentChange }: AgentActionsProps)
         {/* Model Selector */}
         <div className="h-4 w-px bg-border" />
         <div className="flex items-center gap-2">
-          <span className="text-xs font-medium text-muted-foreground">Model:</span>
-          <Select value={selectedModel} onValueChange={(value) => {
-            setSelectedModel(value);
-            onAgentChange?.(selectedAgent, actionState, value);
-          }}>
+          <span className="text-xs font-medium text-muted-foreground">
+            Model:
+          </span>
+          <Select
+            value={selectedModel}
+            onValueChange={(value) => {
+              setSelectedModel(value)
+              onAgentChange?.(selectedAgent, actionState, value)
+            }}
+          >
             <SelectTrigger className="h-8 w-[180px] text-xs">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
               {models.map((model) => (
-                <SelectItem key={model.id} value={model.name} className="text-xs">
+                <SelectItem
+                  key={model.id}
+                  value={model.name}
+                  className="text-xs"
+                >
                   {model.displayName}
-                  {model.isDefault && <Badge variant="outline" className="ml-2 text-[10px]">Default</Badge>}
+                  {model.isDefault && (
+                    <Badge variant="outline" className="ml-2 text-[10px]">
+                      Default
+                    </Badge>
+                  )}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -220,8 +253,8 @@ export function AgentActions({ collectionId, onAgentChange }: AgentActionsProps)
             <div className="h-4 w-px bg-border" />
             <div className="flex items-center gap-2">
               {activeAgent.agent.actions.map((action) => {
-                const ActionIcon = getIcon(action.icon);
-                const isActive = actionState[action.name] === true;
+                const ActionIcon = getIcon(action.icon)
+                const isActive = actionState[action.name] === true
 
                 return (
                   <TooltipProvider key={action.id}>
@@ -244,12 +277,12 @@ export function AgentActions({ collectionId, onAgentChange }: AgentActionsProps)
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
-                );
+                )
               })}
             </div>
           </>
         )}
       </div>
     </div>
-  );
+  )
 }

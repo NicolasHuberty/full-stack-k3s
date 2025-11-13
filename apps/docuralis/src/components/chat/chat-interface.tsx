@@ -3,7 +3,14 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { useTranslations } from 'next-intl'
-import { Send, Loader2, FileText, ExternalLink, BookOpen, Bot } from 'lucide-react'
+import {
+  Send,
+  Loader2,
+  FileText,
+  ExternalLink,
+  BookOpen,
+  Bot,
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent } from '@/components/ui/card'
@@ -57,7 +64,9 @@ export function ChatInterface({
     image: string | null
   } | null>(null)
   const [selectedAgentId, setSelectedAgentId] = useState<string | null>(null)
-  const [agentActionState, setAgentActionState] = useState<Record<string, any>>({})
+  const [agentActionState, setAgentActionState] = useState<Record<string, any>>(
+    {}
+  )
   const [selectedModel, setSelectedModel] = useState<string>('gpt-4o-mini')
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
@@ -120,7 +129,11 @@ export function ChatInterface({
     }
   }
 
-  const handleAgentChange = (agentId: string | null, actionState: Record<string, any>, model: string) => {
+  const handleAgentChange = (
+    agentId: string | null,
+    actionState: Record<string, any>,
+    model: string
+  ) => {
     setSelectedAgentId(agentId)
     setAgentActionState(actionState)
     setSelectedModel(model)
@@ -231,9 +244,7 @@ export function ChatInterface({
             <MessageSquare className="h-16 w-16 mx-auto mb-4 text-gray-300" />
             <p className="text-lg font-medium">{t('startConversation')}</p>
             <p className="text-sm mt-2">
-              {collectionId
-                ? t('askAboutDocs')
-                : t('selectOrGeneral')}
+              {collectionId ? t('askAboutDocs') : t('selectOrGeneral')}
             </p>
           </div>
         )}

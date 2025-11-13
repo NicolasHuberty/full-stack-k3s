@@ -28,7 +28,10 @@ interface ProcessingMetadata {
 /**
  * Process a document job with state tracking for resumability
  */
-async function processDocumentJob(job: { id: string; data: DocumentProcessingJobData }) {
+async function processDocumentJob(job: {
+  id: string
+  data: DocumentProcessingJobData
+}) {
   const { documentId, collectionId: _collectionId, userId: _userId } = job.data
   const workerId = process.pid.toString()
 
@@ -68,7 +71,8 @@ async function processDocumentJob(job: { id: string; data: DocumentProcessingJob
     }
 
     // Get or initialize metadata
-    const metadata: ProcessingMetadata = (document.processingJob?.metadata as ProcessingMetadata) || {}
+    const metadata: ProcessingMetadata =
+      (document.processingJob?.metadata as ProcessingMetadata) || {}
 
     // Step 1: Extract text (if not already done)
     let extractedText = document.extractedText
@@ -84,10 +88,11 @@ async function processDocumentJob(job: { id: string; data: DocumentProcessingJob
       const fileBuffer = await minio.downloadFile(document.filename)
 
       const extractor = getTextExtractor()
-      const { text, metadata: extractionMetadata, isScanned } = await extractor.extractText(
-        fileBuffer,
-        document.mimeType
-      )
+      const {
+        text,
+        metadata: extractionMetadata,
+        isScanned,
+      } = await extractor.extractText(fileBuffer, document.mimeType)
       extractedText = extractor.cleanText(text)
 
       // Check if text extraction failed
@@ -187,7 +192,7 @@ async function processDocumentJob(job: { id: string; data: DocumentProcessingJob
         orderBy: { chunkIndex: 'asc' },
       })
 
-      chunksWithTokens = dbChunks.map(chunk => ({
+      chunksWithTokens = dbChunks.map((chunk) => ({
         content: chunk.content,
         index: chunk.chunkIndex,
         startChar: chunk.startChar || 0,
@@ -227,7 +232,9 @@ async function processDocumentJob(job: { id: string; data: DocumentProcessingJob
         },
       })
     } else {
-      logger.info('Embeddings already generated, regenerating for storage', { documentId })
+      logger.info('Embeddings already generated, regenerating for storage', {
+        documentId,
+      })
 
       // Need to regenerate embeddings for storage (we don't store them in DB)
       const embeddingService = getEmbeddingService()
@@ -319,7 +326,8 @@ async function processDocumentJob(job: { id: string; data: DocumentProcessingJob
 
     logger.info('Document processing completed', { documentId, jobId: job.id })
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+    const errorMessage =
+      error instanceof Error ? error.message : 'Unknown error'
 
     logger.error('Document processing failed', error, {
       documentId,
@@ -341,7 +349,8 @@ async function processDocumentJob(job: { id: string; data: DocumentProcessingJob
     })
 
     if (jobRecord) {
-      const metadata: ProcessingMetadata = (jobRecord.metadata as ProcessingMetadata) || {}
+      const metadata: ProcessingMetadata =
+        (jobRecord.metadata as ProcessingMetadata) || {}
       metadata.lastError = errorMessage
 
       await prisma.processingJob.update({
@@ -381,7 +390,7 @@ async function startWorker() {
         for (const job of jobs) {
           await processDocumentJob({
             id: job.id,
-            data: job.data as DocumentProcessingJobData
+            data: job.data as DocumentProcessingJobData,
           })
         }
       }

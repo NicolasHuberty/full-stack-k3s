@@ -365,7 +365,9 @@ ${context}`,
 
       // Check if user is owner or has shared access
       const isOwner = session.userId === userId
-      const hasSharedAccess = session.sharedWith.some((s) => s.userId === userId)
+      const hasSharedAccess = session.sharedWith.some(
+        (s) => s.userId === userId
+      )
 
       if (!isOwner && !hasSharedAccess) {
         throw new Error('You do not have access to this session')
@@ -381,7 +383,11 @@ ${context}`,
   /**
    * Get all chat sessions for a user
    */
-  async getUserSessions(userId: string, collectionId?: string, filter?: 'owned' | 'shared' | 'all') {
+  async getUserSessions(
+    userId: string,
+    collectionId?: string,
+    filter?: 'owned' | 'shared' | 'all'
+  ) {
     try {
       const filterType = filter || 'all'
 
@@ -402,15 +408,19 @@ ${context}`,
       } else {
         // 'all' - both owned and shared
         whereClause = {
-          OR: [
-            { userId },
-            { sharedWith: { some: { userId } } },
-          ],
+          OR: [{ userId }, { sharedWith: { some: { userId } } }],
           ...(collectionId && { collectionId }),
         }
       }
 
-      console.log('getUserSessions - userId:', userId, 'filter:', filterType, 'whereClause:', JSON.stringify(whereClause, null, 2))
+      console.log(
+        'getUserSessions - userId:',
+        userId,
+        'filter:',
+        filterType,
+        'whereClause:',
+        JSON.stringify(whereClause, null, 2)
+      )
 
       const sessions = await prisma.chatSession.findMany({
         where: whereClause,
@@ -534,15 +544,17 @@ export async function searchDocuments(
   collectionId: string,
   query: string,
   limit: number = 10
-): Promise<Array<{
-  pageContent: string
-  metadata: {
-    title: string
-    source: string
-    pageNumber: number
-    similarity: number
-  }
-}>> {
+): Promise<
+  Array<{
+    pageContent: string
+    metadata: {
+      title: string
+      source: string
+      pageNumber: number
+      similarity: number
+    }
+  }>
+> {
   try {
     // Get collection
     const collection = await prisma.collection.findUnique({
@@ -578,10 +590,15 @@ export async function searchDocuments(
       select: { id: true, originalName: true, filename: true },
     })
 
-    const docMap = new Map(documents.map((d) => [d.id, {
-      title: d.originalName,
-      source: d.filename
-    }]))
+    const docMap = new Map(
+      documents.map((d) => [
+        d.id,
+        {
+          title: d.originalName,
+          source: d.filename,
+        },
+      ])
+    )
 
     // Format results to match Emate structure
     return results.map((result) => {
@@ -593,7 +610,7 @@ export async function searchDocuments(
           source: doc?.source || 'Unknown',
           pageNumber: result.payload.chunkIndex || 0,
           similarity: result.score,
-        }
+        },
       }
     })
   } catch (error) {

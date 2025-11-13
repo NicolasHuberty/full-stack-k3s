@@ -1,10 +1,10 @@
-import Tesseract from 'tesseract.js';
-import { createWorker } from 'tesseract.js';
-import { logger } from '@/lib/logger';
+import Tesseract from 'tesseract.js'
+import { createWorker } from 'tesseract.js'
+import { logger } from '@/lib/logger'
 
 export interface PageText {
-  page_number: number;
-  text: string;
+  page_number: number
+  text: string
 }
 
 /**
@@ -13,26 +13,26 @@ export interface PageText {
 export async function isScannedPDF(buffer: Buffer): Promise<boolean> {
   try {
     // Use new pdf-parse 2.x API with PDFParse class
-    const { PDFParse } = await import('pdf-parse');
+    const { PDFParse } = await import('pdf-parse')
 
-    const parser = new PDFParse({ data: buffer });
-    const result = await parser.getText({ partial: [1] });
-    await parser.destroy();
+    const parser = new PDFParse({ data: buffer })
+    const result = await parser.getText({ partial: [1] })
+    await parser.destroy()
 
-    const firstPageText = result.text.trim();
+    const firstPageText = result.text.trim()
 
     // If first page has very little or no text, it's likely scanned
     if (firstPageText.length < 50) {
-      logger.info('PDF detected as scanned (no text on first page)');
-      return true;
+      logger.info('PDF detected as scanned (no text on first page)')
+      return true
     }
 
-    logger.info('PDF detected as non-scanned (text found on first page)');
-    return false;
+    logger.info('PDF detected as non-scanned (text found on first page)')
+    return false
   } catch (error) {
-    logger.error('Error checking if PDF is scanned', error);
+    logger.error('Error checking if PDF is scanned', error)
     // If we can't determine, assume it's not scanned
-    return false;
+    return false
   }
 }
 
@@ -40,13 +40,15 @@ export async function isScannedPDF(buffer: Buffer): Promise<boolean> {
  * Perform OCR on an image buffer
  */
 export async function performOCR(imageBuffer: Buffer): Promise<string> {
-  const worker = await createWorker('eng');
+  const worker = await createWorker('eng')
 
   try {
-    const { data: { text } } = await worker.recognize(imageBuffer);
-    return text;
+    const {
+      data: { text },
+    } = await worker.recognize(imageBuffer)
+    return text
   } finally {
-    await worker.terminate();
+    await worker.terminate()
   }
 }
 
@@ -57,19 +59,19 @@ export async function performOCR(imageBuffer: Buffer): Promise<string> {
 export async function performPDFOCR(pdfBuffer: Buffer): Promise<PageText[]> {
   try {
     // Use new pdf-parse 2.x API with PDFParse class
-    const { PDFParse } = await import('pdf-parse');
+    const { PDFParse } = await import('pdf-parse')
 
-    const parser = new PDFParse({ data: pdfBuffer });
-    const info = await parser.getInfo();
-    const numPages = info.pages;
+    const parser = new PDFParse({ data: pdfBuffer })
+    const info = await parser.getInfo()
+    const numPages = info.pages
 
-    logger.info(`Performing OCR on ${numPages} pages`);
+    logger.info(`Performing OCR on ${numPages} pages`)
 
     // Get text for all pages
-    const result = await parser.getText();
-    await parser.destroy();
+    const result = await parser.getText()
+    await parser.destroy()
 
-    const _pageTexts: PageText[] = [];
+    const _pageTexts: PageText[] = []
 
     // Note: pdf-parse doesn't give us page-by-page access easily
     // For a production implementation, you'd want to use a library like pdf-lib or pdf.js
@@ -78,7 +80,7 @@ export async function performPDFOCR(pdfBuffer: Buffer): Promise<PageText[]> {
     // For now, we'll do a simple implementation that OCRs the entire PDF as one unit
     // This is a limitation that should be improved in production
 
-    const worker = await createWorker('eng');
+    const worker = await createWorker('eng')
 
     try {
       // In a real implementation, you'd render each page to an image and OCR it
@@ -90,41 +92,48 @@ export async function performPDFOCR(pdfBuffer: Buffer): Promise<PageText[]> {
 
       // Fallback: return whatever text was extracted
       if (result.text && result.text.trim().length > 0) {
-        return [{
-          page_number: 1,
-          text: result.text
-        }];
+        return [
+          {
+            page_number: 1,
+            text: result.text,
+          },
+        ]
       }
 
       // If no text, this is truly a scanned PDF
       // We need to render pages as images - this requires additional setup
-      logger.warn('PDF has no extractable text. True OCR not yet implemented.');
-      return [];
+      logger.warn('PDF has no extractable text. True OCR not yet implemented.')
+      return []
     } finally {
-      await worker.terminate();
+      await worker.terminate()
     }
   } catch (error) {
-    logger.error('Error performing PDF OCR', error);
-    return [];
+    logger.error('Error performing PDF OCR', error)
+    return []
   }
 }
 
 /**
  * Simple OCR for image files (PNG, JPG, etc.)
  */
-export async function performImageOCR(imageBuffer: Buffer, pageNumber: number = 1): Promise<PageText> {
-  const worker = await createWorker('eng');
+export async function performImageOCR(
+  imageBuffer: Buffer,
+  pageNumber: number = 1
+): Promise<PageText> {
+  const worker = await createWorker('eng')
 
   try {
-    logger.info(`Performing OCR on image (page ${pageNumber})`);
-    const { data: { text } } = await worker.recognize(imageBuffer);
+    logger.info(`Performing OCR on image (page ${pageNumber})`)
+    const {
+      data: { text },
+    } = await worker.recognize(imageBuffer)
 
     return {
       page_number: pageNumber,
       text: text,
-    };
+    }
   } finally {
-    await worker.terminate();
+    await worker.terminate()
   }
 }
 
@@ -135,30 +144,32 @@ export async function performImageOCR(imageBuffer: Buffer, pageNumber: number = 
 export async function performEnhancedOCR(
   imageBuffer: Buffer,
   options: {
-    pageNumber?: number;
-    lang?: string;
+    pageNumber?: number
+    lang?: string
   } = {}
 ): Promise<PageText> {
-  const { pageNumber = 1, lang = 'eng' } = options;
+  const { pageNumber = 1, lang = 'eng' } = options
 
-  const worker = await createWorker(lang);
+  const worker = await createWorker(lang)
 
   try {
     // Set OCR parameters for better accuracy
     await worker.setParameters({
       tessedit_pageseg_mode: Tesseract.PSM.AUTO,
-    });
+    })
 
-    logger.info(`Performing enhanced OCR on page ${pageNumber}`);
-    const { data: { text, confidence } } = await worker.recognize(imageBuffer);
+    logger.info(`Performing enhanced OCR on page ${pageNumber}`)
+    const {
+      data: { text, confidence },
+    } = await worker.recognize(imageBuffer)
 
-    logger.info(`OCR completed with confidence: ${confidence}%`);
+    logger.info(`OCR completed with confidence: ${confidence}%`)
 
     return {
       page_number: pageNumber,
       text: text,
-    };
+    }
   } finally {
-    await worker.terminate();
+    await worker.terminate()
   }
 }

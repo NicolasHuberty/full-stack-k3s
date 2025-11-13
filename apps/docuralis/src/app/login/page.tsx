@@ -50,7 +50,9 @@ export default function LoginPage() {
           <h2 className="text-center text-3xl font-bold">Sign in</h2>
           {invitationEmail ? (
             <p className="mt-2 text-center text-sm text-gray-600">
-              Sign in with <span className="font-medium">{invitationEmail}</span> to accept your invitation
+              Sign in with{' '}
+              <span className="font-medium">{invitationEmail}</span> to accept
+              your invitation
             </p>
           ) : (
             <p className="mt-2 text-center text-sm text-gray-600">
@@ -185,7 +187,7 @@ export default function LoginPage() {
           <Link
             href={`/register?${new URLSearchParams({
               ...(callbackUrl !== '/dashboard' && { callbackUrl }),
-              ...(invitationEmail && { email: invitationEmail })
+              ...(invitationEmail && { email: invitationEmail }),
             }).toString()}`}
             className="font-medium text-accent hover:underline"
           >

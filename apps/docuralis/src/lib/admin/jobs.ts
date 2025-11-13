@@ -45,7 +45,10 @@ export async function getJobStatistics(): Promise<JobStatistics> {
       acc[curr.status.toLowerCase()] = curr._count
       return acc
     },
-    { queued: 0, processing: 0, completed: 0, failed: 0 } as Record<string, number>
+    { queued: 0, processing: 0, completed: 0, failed: 0 } as Record<
+      string,
+      number
+    >
   )
 
   // Calculate average processing time
@@ -91,7 +94,10 @@ export async function getJobStatistics(): Promise<JobStatistics> {
 /**
  * List jobs with filtering and pagination
  */
-export async function listJobs(filter: JobFilter = {}, options: JobListOptions = {}) {
+export async function listJobs(
+  filter: JobFilter = {},
+  options: JobListOptions = {}
+) {
   const {
     page = 1,
     pageSize = 50,

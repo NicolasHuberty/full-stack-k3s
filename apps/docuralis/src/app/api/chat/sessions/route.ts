@@ -12,7 +12,8 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url)
     const collectionId = searchParams.get('collectionId') || undefined
-    const filter = (searchParams.get('filter') as 'owned' | 'shared' | 'all') || 'all'
+    const filter =
+      (searchParams.get('filter') as 'owned' | 'shared' | 'all') || 'all'
 
     const ragService = getRAGService()
     const sessions = await ragService.getUserSessions(

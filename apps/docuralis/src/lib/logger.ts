@@ -1,6 +1,6 @@
-import winston from 'winston';
+import winston from 'winston'
 
-const logLevel = process.env.LOG_LEVEL || 'info';
+const logLevel = process.env.LOG_LEVEL || 'info'
 
 // Create Winston logger
 export const logger = winston.createLogger({
@@ -20,7 +20,7 @@ export const logger = winston.createLogger({
       ),
     }),
   ],
-});
+})
 
 // Add file transports in production
 if (process.env.NODE_ENV === 'production') {
@@ -31,7 +31,7 @@ if (process.env.NODE_ENV === 'production') {
       maxsize: 10485760, // 10MB
       maxFiles: 5,
     })
-  );
+  )
 
   logger.add(
     new winston.transports.File({
@@ -39,29 +39,36 @@ if (process.env.NODE_ENV === 'production') {
       maxsize: 10485760, // 10MB
       maxFiles: 5,
     })
-  );
+  )
 }
 
 // Helper functions for structured logging
 export const logInfo = (message: string, meta?: Record<string, unknown>) => {
-  logger.info(message, meta);
-};
+  logger.info(message, meta)
+}
 
-export const logError = (message: string, error?: Error | unknown, meta?: Record<string, unknown>) => {
+export const logError = (
+  message: string,
+  error?: Error | unknown,
+  meta?: Record<string, unknown>
+) => {
   logger.error(message, {
     ...meta,
-    error: error instanceof Error ? {
-      message: error.message,
-      stack: error.stack,
-      name: error.name,
-    } : error,
-  });
-};
+    error:
+      error instanceof Error
+        ? {
+            message: error.message,
+            stack: error.stack,
+            name: error.name,
+          }
+        : error,
+  })
+}
 
 export const logWarn = (message: string, meta?: Record<string, unknown>) => {
-  logger.warn(message, meta);
-};
+  logger.warn(message, meta)
+}
 
 export const logDebug = (message: string, meta?: Record<string, unknown>) => {
-  logger.debug(message, meta);
-};
+  logger.debug(message, meta)
+}

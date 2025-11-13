@@ -83,19 +83,14 @@ ENV NODE_ENV=production
 # Install tesseract for OCR and dependencies for native modules
 RUN apk add --no-cache tesseract-ocr tesseract-ocr-data-eng libc6-compat python3 make g++
 
-# Copy package files and source first
-COPY package.json bun.lock* ./
-COPY prisma ./prisma/
+# Copy ALL source files first (needed for install)
+COPY . .
 
 # Install ALL dependencies fresh (don't rely on builder stage)
 RUN bun install --frozen-lockfile
 
 # Generate Prisma Client
 RUN bunx prisma generate
-
-# Now copy application source
-COPY src ./src
-COPY tsconfig.json ./tsconfig.json
 
 # Create non-root user and set permissions
 RUN addgroup --system --gid 1001 nodejs && \

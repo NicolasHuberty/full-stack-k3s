@@ -15,6 +15,7 @@ jest.mock('next/navigation', () => ({
     push: mockPush,
     refresh: mockRefresh,
   }),
+  useSearchParams: () => new URLSearchParams(),
 }))
 
 describe('LoginPage Component', () => {

@@ -132,17 +132,17 @@ Paragraph three is here.`
     })
   })
 
-  describe('countTokens', () => {
-    it('should count tokens approximately', async () => {
+  describe('estimateTokenCount', () => {
+    it('should estimate tokens approximately', () => {
       const text = 'This is a test sentence with some words.'
-      const count = await service.countTokens(text)
+      const count = service.estimateTokenCount(text)
 
       expect(count).toBeGreaterThan(0)
       expect(count).toBeLessThan(text.length) // Tokens are usually less than characters
     })
 
-    it('should handle empty text', async () => {
-      const count = await service.countTokens('')
+    it('should handle empty text', () => {
+      const count = service.estimateTokenCount('')
       expect(count).toBeGreaterThanOrEqual(0)
     })
   })

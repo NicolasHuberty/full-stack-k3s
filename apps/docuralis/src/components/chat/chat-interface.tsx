@@ -294,6 +294,7 @@ export function ChatInterface({
                           <button
                             key={i}
                             onClick={() =>
+                              chunk?.documentId &&
                               window.open(
                                 `/api/documents/${chunk.documentId}/download`,
                                 '_blank'
@@ -306,17 +307,21 @@ export function ChatInterface({
                                 <div className="flex items-center gap-2 mb-1">
                                   <FileText className="h-4 w-4 text-blue-600 flex-shrink-0" />
                                   <span className="font-medium text-sm text-gray-900 truncate">
-                                    {chunk.documentName}
+                                    {chunk?.documentName || 'Unknown Document'}
                                   </span>
                                 </div>
                                 <p className="text-xs text-gray-500 line-clamp-2 pl-6">
-                                  {chunk.content?.substring(0, 150) ||
+                                  {chunk?.content?.substring(0, 150) ||
                                     'No preview available'}
                                   ...
                                 </p>
                                 <div className="flex items-center gap-3 mt-2 pl-6">
                                   <span className="text-xs text-gray-400">
-                                    Score: {(chunk.score * 100).toFixed(1)}%
+                                    Score:{' '}
+                                    {chunk?.score
+                                      ? (chunk.score * 100).toFixed(1)
+                                      : '0.0'}
+                                    %
                                   </span>
                                 </div>
                               </div>

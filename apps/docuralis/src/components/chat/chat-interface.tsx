@@ -310,7 +310,9 @@ export function ChatInterface({
                                   </span>
                                 </div>
                                 <p className="text-xs text-gray-500 line-clamp-2 pl-6">
-                                  {chunk.content.substring(0, 150)}...
+                                  {chunk.content?.substring(0, 150) ||
+                                    'No preview available'}
+                                  ...
                                 </p>
                                 <div className="flex items-center gap-3 mt-2 pl-6">
                                   <span className="text-xs text-gray-400">

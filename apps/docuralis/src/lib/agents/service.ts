@@ -13,10 +13,11 @@ export class AgentService {
   ): Promise<{
     answer: string
     sources: Array<{
-      title: string
-      pageNumber: number
+      documentId: string
+      documentName: string
+      content: string
+      score: number
       justification?: string
-      pertinenceScore?: number
     }>
     inputTokens: number
     outputTokens: number
@@ -77,13 +78,44 @@ export class AgentService {
       const graph = createAgentGraph()
       const result = await graph.invoke(initialState)
 
-      // Build sources from relevant documents
-      const sources = result.relevantDocs.map((doc: DocumentChunk) => ({
-        title: doc.metadata.title,
-        pageNumber: doc.metadata.pageNumber,
-        justification: doc.metadata.justification,
-        pertinenceScore: doc.metadata.pertinenceScore,
-      }))
+      // Get unique document filenames from sources
+      const documentFilenames = Array.from(
+        new Set(
+          result.relevantDocs.map((doc: DocumentChunk) => doc.metadata.source)
+        )
+      )
+
+      // Lookup document IDs by filename
+      const documents = await prisma.document.findMany({
+        where: {
+          filename: { in: documentFilenames as string[] },
+          collectionId,
+        },
+        select: {
+          id: true,
+          filename: true,
+          originalName: true,
+        },
+      })
+
+      const filenameToDocMap = new Map(
+        documents.map((d) => [
+          d.filename,
+          { id: d.id, originalName: d.originalName },
+        ])
+      )
+
+      // Build sources from relevant documents with proper format for frontend
+      const sources = result.relevantDocs.map((doc: DocumentChunk) => {
+        const docInfo = filenameToDocMap.get(doc.metadata.source)
+        return {
+          documentId: docInfo?.id || '',
+          documentName: docInfo?.originalName || doc.metadata.title,
+          content: doc.pageContent,
+          score: doc.metadata.pertinenceScore || doc.metadata.similarity || 0,
+          justification: doc.metadata.justification,
+        }
+      })
 
       return {
         answer: result.answer,

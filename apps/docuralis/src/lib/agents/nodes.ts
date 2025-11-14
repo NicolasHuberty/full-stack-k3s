@@ -188,7 +188,9 @@ export async function gradeDocumentsReflexion(
         let jsonString = response.content.toString().trim()
 
         // Remove markdown code blocks (```json ... ``` or ``` ... ```)
-        const codeBlockMatch = jsonString.match(/```(?:json)?\s*([\s\S]*?)\s*```/)
+        const codeBlockMatch = jsonString.match(
+          /```(?:json)?\s*([\s\S]*?)\s*```/
+        )
         if (codeBlockMatch) {
           jsonString = codeBlockMatch[1].trim()
         }

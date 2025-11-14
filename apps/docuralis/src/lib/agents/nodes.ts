@@ -171,19 +171,18 @@ export async function gradeDocumentsReflexion(
   state: AgentState
 ): Promise<Partial<AgentState>> {
   try {
-    const scoredDocs: Array<DocumentChunk & { score: number }> = []
-
-    for (const doc of state.retrievedDocs) {
-      const prompt = REFLEXION_GRADING_PROMPT.replace(
-        '{systemMessage}',
-        REFLEXION_GRADING_SYSTEM_PROMPT
-      )
-        .replace('{content}', doc.pageContent)
-        .replace('{question}', state.query)
-
-      const response = await model.invoke([{ role: 'user', content: prompt }])
-
+    // Grade all documents in parallel for speed
+    const gradingPromises = state.retrievedDocs.map(async (doc) => {
       try {
+        const prompt = REFLEXION_GRADING_PROMPT.replace(
+          '{systemMessage}',
+          REFLEXION_GRADING_SYSTEM_PROMPT
+        )
+          .replace('{content}', doc.pageContent)
+          .replace('{question}', state.query)
+
+        const response = await model.invoke([{ role: 'user', content: prompt }])
+
         // Extract JSON from markdown code blocks if present
         let jsonString = response.content.toString().trim()
 
@@ -198,7 +197,7 @@ export async function gradeDocumentsReflexion(
         const result = JSON.parse(jsonString) as ReflexionGradingResult
 
         if (result.pertinenceScore >= 5) {
-          scoredDocs.push({
+          return {
             ...doc,
             score: result.pertinenceScore,
             metadata: {
@@ -206,12 +205,20 @@ export async function gradeDocumentsReflexion(
               pertinenceScore: result.pertinenceScore,
               justification: result.justification,
             },
-          })
+          }
         }
+        return null
       } catch (parseError) {
         console.error('Error parsing reflexion grading result:', parseError)
+        return null
       }
-    }
+    })
+
+    // Wait for all grading to complete in parallel
+    const results = await Promise.all(gradingPromises)
+    const scoredDocs = results.filter(
+      (doc): doc is DocumentChunk & { score: number } => doc !== null
+    )
 
     // Sort by score descending and take top 15
     scoredDocs.sort((a, b) => b.score - a.score)

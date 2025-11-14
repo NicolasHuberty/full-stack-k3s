@@ -85,6 +85,15 @@ export class AgentService {
         )
       )
 
+      console.log(
+        '[AgentService] Document filenames to lookup:',
+        documentFilenames
+      )
+      console.log(
+        '[AgentService] Number of relevant docs:',
+        result.relevantDocs.length
+      )
+
       // Lookup document IDs by filename
       const documents = await prisma.document.findMany({
         where: {
@@ -97,6 +106,15 @@ export class AgentService {
           originalName: true,
         },
       })
+
+      console.log('[AgentService] Found documents in DB:', documents.length)
+      console.log(
+        '[AgentService] Document map:',
+        documents.map((d) => ({
+          filename: d.filename,
+          originalName: d.originalName,
+        }))
+      )
 
       const filenameToDocMap = new Map(
         documents.map((d) => [
@@ -116,6 +134,26 @@ export class AgentService {
           justification: doc.metadata.justification,
         }
       })
+
+      console.log(
+        '[AgentService] Transformed sources:',
+        sources.map(
+          (s: {
+            documentId: string
+            documentName: string
+            content: string
+            score: number
+            justification?: string
+          }) => ({
+            documentId:
+              s.documentId.substring(0, Math.min(10, s.documentId.length)) +
+              '...',
+            documentName: s.documentName,
+            score: s.score,
+            hasContent: !!s.content,
+          })
+        )
+      )
 
       return {
         answer: result.answer,

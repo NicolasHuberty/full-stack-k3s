@@ -184,9 +184,16 @@ export async function gradeDocumentsReflexion(
       const response = await model.invoke([{ role: 'user', content: prompt }])
 
       try {
-        const result = JSON.parse(
-          response.content.toString()
-        ) as ReflexionGradingResult
+        // Extract JSON from markdown code blocks if present
+        let jsonString = response.content.toString().trim()
+
+        // Remove markdown code blocks (```json ... ``` or ``` ... ```)
+        const codeBlockMatch = jsonString.match(/```(?:json)?\s*([\s\S]*?)\s*```/)
+        if (codeBlockMatch) {
+          jsonString = codeBlockMatch[1].trim()
+        }
+
+        const result = JSON.parse(jsonString) as ReflexionGradingResult
 
         if (result.pertinenceScore >= 5) {
           scoredDocs.push({

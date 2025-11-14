@@ -216,9 +216,9 @@ export async function gradeDocumentsReflexion(
 
     // Wait for all grading to complete in parallel
     const results = await Promise.all(gradingPromises)
-    const scoredDocs = results.filter(
-      (doc): doc is DocumentChunk & { score: number } => doc !== null
-    )
+    const scoredDocs = results.filter((doc) => doc !== null) as Array<
+      DocumentChunk & { score: number }
+    >
 
     // Sort by score descending and take top 15
     scoredDocs.sort((a, b) => b.score - a.score)

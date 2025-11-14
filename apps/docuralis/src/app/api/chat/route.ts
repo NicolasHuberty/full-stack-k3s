@@ -5,6 +5,9 @@ import { getAgentService } from '@/lib/agents/service'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
 
+// Increase timeout to 180 seconds for complex agent workflows
+export const maxDuration = 180
+
 const chatSchema = z.object({
   message: z.string().min(1, 'Message is required'),
   collectionId: z.string().optional(),

@@ -344,9 +344,6 @@ ${context}`,
         include: {
           messages: {
             orderBy: { createdAt: 'asc' },
-            include: {
-              documentChunks: true, // Include sources/chunks
-            },
           },
           collection: {
             select: {

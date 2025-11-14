@@ -63,7 +63,7 @@ export async function retrieveDocuments(
     const queriesToSearch = state.subQueries || [state.query]
 
     // Determine number of docs per query based on mode
-    const docsPerQuery = state.smartMode || state.reflexion ? 5 : 10
+    const docsPerQuery = state.smartMode || state.reflexion ? 30 : 10
 
     for (const query of queriesToSearch) {
       // Retrieve French documents
@@ -83,7 +83,7 @@ export async function retrieveDocuments(
         const dutchDocs = await searchDocuments(
           state.collectionId,
           translatedQuery,
-          state.smartMode || state.reflexion ? 3 : 10
+          state.smartMode || state.reflexion ? 20 : 10
         )
         allDocs.push(...dutchDocs)
       }
@@ -196,7 +196,7 @@ export async function gradeDocumentsReflexion(
 
         const result = JSON.parse(jsonString) as ReflexionGradingResult
 
-        if (result.pertinenceScore >= 5) {
+        if (result.pertinenceScore >= 3) {
           return {
             ...doc,
             score: result.pertinenceScore,
@@ -220,9 +220,9 @@ export async function gradeDocumentsReflexion(
       DocumentChunk & { score: number }
     >
 
-    // Sort by score descending and take top 15
+    // Sort by score descending and take top 30
     scoredDocs.sort((a, b) => b.score - a.score)
-    const relevantDocs = scoredDocs.slice(0, 15)
+    const relevantDocs = scoredDocs.slice(0, 30)
 
     // Fallback: if no relevant docs, use first document
     if (relevantDocs.length === 0 && state.retrievedDocs.length > 0) {

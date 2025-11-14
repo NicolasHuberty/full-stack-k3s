@@ -105,6 +105,9 @@ export async function retrieveDocuments(
       }
     }
 
+    console.log(
+      `[Retrieve] Retrieved ${uniqueDocs.length} unique documents after deduplication`
+    )
     return {
       retrievedDocs: uniqueDocs,
     }
@@ -171,6 +174,10 @@ export async function gradeDocumentsReflexion(
   state: AgentState
 ): Promise<Partial<AgentState>> {
   try {
+    console.log(
+      `[Grading] Starting reflexion grading for ${state.retrievedDocs.length} documents`
+    )
+
     // Grade all documents in parallel for speed
     const gradingPromises = state.retrievedDocs.map(async (doc) => {
       try {
@@ -220,9 +227,20 @@ export async function gradeDocumentsReflexion(
       DocumentChunk & { score: number }
     >
 
+    console.log(
+      `[Grading] ${scoredDocs.length} documents passed threshold (>= 3/10)`
+    )
+    console.log(
+      `[Grading] Scores: ${scoredDocs.map((d) => d.score).join(', ')}`
+    )
+
     // Sort by score descending and take top 30
     scoredDocs.sort((a, b) => b.score - a.score)
     const relevantDocs = scoredDocs.slice(0, 30)
+
+    console.log(
+      `[Grading] Returning top ${relevantDocs.length} documents after filtering`
+    )
 
     // Fallback: if no relevant docs, use first document
     if (relevantDocs.length === 0 && state.retrievedDocs.length > 0) {

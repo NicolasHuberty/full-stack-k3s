@@ -106,12 +106,7 @@ export default function ChatPage() {
               </Select>
             </div>
 
-            <Button
-              onClick={handleNewChat}
-              className="w-full"
-              size="sm"
-              disabled={!selectedCollectionId}
-            >
+            <Button onClick={handleNewChat} className="w-full" size="sm">
               <Plus className="h-4 w-4 mr-2" />
               {t('newChat')}
             </Button>

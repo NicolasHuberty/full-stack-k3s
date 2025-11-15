@@ -90,7 +90,7 @@ jobs:
             type=sha,prefix={{branch}}-
             type=raw,value=latest,enable={{is_default_branch}}
 
-      - name: Build and push
+      - name: Build and push runner
         uses: docker/build-push-action@v5
         with:
           context: ./apps/docuralis
@@ -101,10 +101,33 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+      - name: Extract worker metadata
+        id: meta-worker
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-worker
+          tags: |
+            type=ref,event=branch
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push worker
+        uses: docker/build-push-action@v5
+        with:
+          context: ./apps/docuralis
+          target: worker
+          push: true
+          tags: ${{ steps.meta-worker.outputs.tags }}
+          labels: ${{ steps.meta-worker.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
       - name: Update deployment version
         run: |
-          echo "Image built and pushed successfully"
-          echo "Tags: ${{ steps.meta.outputs.tags }}"
+          echo "Runner image built and pushed successfully"
+          echo "Runner tags: ${{ steps.meta.outputs.tags }}"
+          echo "Worker image built and pushed successfully"
+          echo "Worker tags: ${{ steps.meta-worker.outputs.tags }}"
 
   deploy-dev:
     needs: build-and-push

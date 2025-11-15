@@ -17,10 +17,8 @@ spec:
     spec:
       containers:
         - name: worker
-          image: ghcr.io/nicolashuberty/full-stack-k3s/docuralis:latest
+          image: ghcr.io/nicolashuberty/full-stack-k3s/docuralis-worker:latest
           imagePullPolicy: Always
-          command: ["bun"]
-          args: ["src/workers/document-processor.ts"]
           env:
             # Database
             - name: DATABASE_URL

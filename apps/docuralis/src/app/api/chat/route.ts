@@ -10,12 +10,12 @@ export const maxDuration = 180
 
 const chatSchema = z.object({
   message: z.string().min(1, 'Message is required'),
-  collectionId: z.string().optional(),
-  sessionId: z.string().optional(),
-  agentId: z.string().optional(),
-  actionState: z.record(z.string(), z.unknown()).optional(),
-  model: z.string().optional(),
-  maxTokens: z.number().min(1).max(4000).optional(),
+  collectionId: z.string().optional().nullable(),
+  sessionId: z.string().optional().nullable(),
+  agentId: z.string().optional().nullable(),
+  actionState: z.record(z.string(), z.unknown()).optional().nullable(),
+  model: z.string().optional().nullable(),
+  maxTokens: z.number().min(1).max(4000).optional().nullable(),
 })
 
 export async function POST(request: NextRequest) {

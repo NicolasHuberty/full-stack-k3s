@@ -224,9 +224,12 @@ export default function CollectionDetailPage() {
   const hasMore = allFilteredAndSorted.length > displayedCount
 
   useEffect(() => {
-    fetchCollection()
-    fetchAgents()
-    fetchDocuments()
+    const init = async () => {
+      await fetchCollection()
+      fetchAgents()
+      fetchDocuments()
+    }
+    init()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [collectionId])
 
@@ -308,9 +311,9 @@ export default function CollectionDetailPage() {
       const res = await fetch(`/api/collections/${collectionId}/documents`)
       if (res.ok) {
         const data = await res.json()
-        if (collection) {
-          setCollection({ ...collection, documents: data.documents })
-        }
+        setCollection((prev) =>
+          prev ? { ...prev, documents: data.documents } : prev
+        )
       }
     } catch (error) {
       console.error('Failed to fetch documents:', error)

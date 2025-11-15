@@ -39,8 +39,8 @@ export async function POST(request: NextRequest) {
         validatedData.message,
         session.user.id,
         validatedData.collectionId,
-        validatedData.actionState,
-        validatedData.sessionId
+        validatedData.actionState || undefined,
+        validatedData.sessionId || undefined
       )
 
       // Get or create session
@@ -108,8 +108,12 @@ export async function POST(request: NextRequest) {
     // Default: use standard RAG service
     const ragService = getRAGService()
     const response = await ragService.chat({
-      ...validatedData,
+      message: validatedData.message,
       userId: session.user.id,
+      collectionId: validatedData.collectionId || undefined,
+      sessionId: validatedData.sessionId || undefined,
+      model: validatedData.model || undefined,
+      maxTokens: validatedData.maxTokens || undefined,
     })
 
     return NextResponse.json(response)

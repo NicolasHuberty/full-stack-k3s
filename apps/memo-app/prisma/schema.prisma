@@ -8,27 +8,135 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// ============================================
+// Better Auth Models
+// ============================================
 model User {
   id String @id @default(uuid())
   email String @unique
+  emailVerified Boolean @default(false)
   name String
-  password String
+  image String?
+  language String @default("en") // User's preferred language (en, fr, nl)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  // Relations
+  accounts Account[]
+  sessions Session[]
   memos Memo[]
   memoFiles MemoFile[]
+  teamMembers TeamMember[]
+  forms Form[]
+  formSubmissions MemoFormData[]
+  notifications Notification[]
 }
 
+model Account {
+  id String @id @default(uuid())
+  userId String
+  accountId String
+  providerId String
+  accessToken String?
+  refreshToken String?
+  idToken String?
+  expiresAt DateTime?
+  password String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([providerId, accountId])
+}
+
+model Session {
+  id String @id @default(uuid())
+  userId String
+  expiresAt DateTime
+  token String @unique
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Verification {
+  id String @id @default(uuid())
+  identifier String
+  value String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([identifier, value])
+}
+
+// ============================================
+// Teams & Permissions
+// ============================================
+model Team {
+  id String @id @default(uuid())
+  name String
+  description String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  members TeamMember[]
+  memos TeamMemo[]
+  forms Form[]
+}
+
+model TeamMember {
+  id String @id @default(uuid())
+  userId String
+  teamId String
+  role TeamRole @default(MEMBER)
+  joinedAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, teamId])
+}
+
+enum TeamRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+model TeamMemo {
+  id String @id @default(uuid())
+  teamId String
+  memoId String
+
+  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  memo Memo @relation(fields: [memoId], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, memoId])
+}
+
+// ============================================
+// Memos
+// ============================================
 model Memo {
   id String @id @default(uuid())
   userId String
-  user User @relation(fields: [userId], references: [id])
   title String
   content String
+  formId String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   status MemoStatus @default(DRAFT)
+
+  user User @relation(fields: [userId], references: [id])
+  form Form? @relation(fields: [formId], references: [id])
   memoFiles MemoFile[]
+  teams TeamMemo[]
+  formData MemoFormData?
 }
 
 enum MemoStatus {
@@ -41,6 +149,9 @@ enum MemoStatus {
   ARCHIVED
 }
 
+// ============================================
+// Files
+// ============================================
 model File {
   id String @id @default(uuid())
   filename String
@@ -55,9 +166,161 @@ model File {
 model MemoFile {
   id String @id @default(uuid())
   memoId String
-  memo Memo @relation(fields: [memoId], references: [id])
   userId String
-  user User @relation(fields: [userId], references: [id])
   fileId String
+
+  memo Memo @relation(fields: [memoId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id])
   file File @relation(fields: [fileId], references: [id])
+
+  @@unique([memoId, fileId])
+}
+
+// ============================================
+// Custom Forms System
+// ============================================
+model Form {
+  id String @id @default(uuid())
+  name String
+  description String?
+  createdBy String
+  teamId String?
+  isPublic Boolean @default(false)
+  visibility FormVisibility @default(PRIVATE)
+  publishedAt DateTime?
+  category String?
+  usageCount Int @default(0)
+  rating Float @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  creator User @relation(fields: [createdBy], references: [id])
+  team Team? @relation(fields: [teamId], references: [id])
+  fields FormField[]
+  memos Memo[]
+  submissions MemoFormData[]
+  reviews FormReview[]
+
+  @@index([isPublic, publishedAt])
+  @@index([visibility])
+  @@index([category])
+}
+
+enum FormVisibility {
+  PRIVATE       // Only creator can see
+  TEAM          // Team members can see
+  ORGANIZATION  // All users in organization can see
+  PUBLIC        // Everyone can see (marketplace)
+}
+
+model FormField {
+  id String @id @default(uuid())
+  formId String
+  name String
+  label String
+  description String // AI extraction hint
+  type FieldType
+  required Boolean @default(false)
+  order Int
+  defaultValue String?
+  validationRules Json?
+  createdAt DateTime @default(now())
+
+  form Form @relation(fields: [formId], references: [id], onDelete: Cascade)
+  options FormFieldOption[]
+
+  @@index([formId, order])
+}
+
+enum FieldType {
+  TEXT
+  TEXTAREA
+  NUMBER
+  EMAIL
+  PHONE
+  DATE
+  DATETIME
+  SELECT
+  MULTISELECT
+  CHECKBOX
+  RADIO
+  FILE
+  URL
+  BOOLEAN
+  JSON
+}
+
+model FormFieldOption {
+  id String @id @default(uuid())
+  fieldId String
+  label String
+  value String
+  order Int
+
+  field FormField @relation(fields: [fieldId], references: [id], onDelete: Cascade)
+}
+
+model MemoFormData {
+  id String @id @default(uuid())
+  memoId String @unique
+  formId String
+  userId String
+  data Json // Structured extracted data
+  missingFields String[] // Array of missing required field names
+  validationStatus ValidationStatus @default(PENDING)
+  extractedAt DateTime @default(now())
+  validatedAt DateTime?
+
+  memo Memo @relation(fields: [memoId], references: [id], onDelete: Cascade)
+  form Form @relation(fields: [formId], references: [id])
+  user User @relation(fields: [userId], references: [id])
+}
+
+enum ValidationStatus {
+  PENDING
+  VALID
+  INVALID
+  PARTIAL
+}
+
+// ============================================
+// Form Marketplace
+// ============================================
+model FormReview {
+  id String @id @default(uuid())
+  formId String
+  userId String
+  rating Int // 1-5
+  comment String?
+  createdAt DateTime @default(now())
+
+  form Form @relation(fields: [formId], references: [id], onDelete: Cascade)
+
+  @@unique([formId, userId])
+}
+
+// ============================================
+// Notifications
+// ============================================
+model Notification {
+  id String @id @default(uuid())
+  userId String
+  type NotificationType
+  title String
+  message String
+  data Json?
+  read Boolean @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, read])
+}
+
+enum NotificationType {
+  MISSING_FIELD
+  MEMO_SHARED
+  TEAM_INVITE
+  FORM_PUBLISHED
+  SYSTEM
 }

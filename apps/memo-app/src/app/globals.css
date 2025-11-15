@@ -6,7 +6,7 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: Lato, ui-sans-serif, sans-serif, system-ui;
+  --font-sans: Alan Sans, ui-sans-serif, sans-serif, system-ui;
   --font-mono: Azeret Mono, ui-monospace, monospace;
   --font-serif: Merriweather, ui-serif, serif;
   --radius: 1.3rem;
@@ -76,13 +76,13 @@
   --card-foreground: oklch(0.2106 0.0166 252.5156);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.2106 0.0166 252.5156);
-  --primary: oklch(0.2916 0.0521 245.5358);
-  --primary-foreground: oklch(1 0 0);
-  --secondary: oklch(0.2106 0.0166 252.5156);
+  --primary: oklch(0.6596 0.1809 250.3369);
+  --primary-foreground: oklch(0.9761 0 0);
+  --secondary: oklch(0.413 0.0598 252.7301);
   --secondary-foreground: oklch(1 0 0);
   --muted: oklch(0.9222 0.0013 286.3737);
   --muted-foreground: oklch(0.2106 0.0166 252.5156);
-  --accent: oklch(0.9011 0.0365 255.9584);
+  --accent: oklch(0.8407 0.0704 257.1363);
   --accent-foreground: oklch(0.2468 0.0163 240.7297);
   --destructive: oklch(0.6179 0.2385 27.6812);
   --border: oklch(0.9297 0.0118 239.9129);
@@ -102,7 +102,7 @@
   --sidebar-border: oklch(0.9251 0.0104 247.9387);
   --sidebar-ring: oklch(0.657 0.1685 248.2358);
   --destructive-foreground: oklch(1 0 0);
-  --font-sans: Lato, ui-sans-serif, sans-serif, system-ui;
+  --font-sans: Alan Sans, ui-sans-serif, sans-serif, system-ui;
   --font-serif: Merriweather, ui-serif, serif;
   --font-mono: Azeret Mono, ui-monospace, monospace;
   --shadow-color: #1d96f2;
@@ -168,7 +168,7 @@
   --sidebar-ring: oklch(0.657 0.1685 248.2358);
   --destructive-foreground: oklch(1 0 0);
   --radius: 1.3rem;
-  --font-sans: Lato, ui-sans-serif, sans-serif, system-ui;
+  --font-sans: Alan Sans, ui-sans-serif, sans-serif, system-ui;
   --font-serif: Merriweather, ui-serif, serif;
   --font-mono: Azeret Mono, ui-monospace, monospace;
   --shadow-color: #1d96f2;

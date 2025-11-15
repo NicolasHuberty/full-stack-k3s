@@ -1,1 +1,1146 @@
-(globalThis.TURBOPACK||(globalThis.TURBOPACK=[])).push(["object"==typeof document?document.currentScript:void 0,33525,(e,t,r)=>{"use strict";Object.defineProperty(r,"__esModule",{value:!0}),Object.defineProperty(r,"warnOnce",{enumerable:!0,get:function(){return s}});let s=e=>{}},98183,(e,t,r)=>{"use strict";Object.defineProperty(r,"__esModule",{value:!0});var s={assign:function(){return c},searchParamsToUrlQuery:function(){return a},urlQueryToSearchParams:function(){return l}};for(var n in s)Object.defineProperty(r,n,{enumerable:!0,get:s[n]});function a(e){let t={};for(let[r,s]of e.entries()){let e=t[r];void 0===e?t[r]=s:Array.isArray(e)?e.push(s):t[r]=[e,s]}return t}function i(e){return"string"==typeof e?e:("number"!=typeof e||isNaN(e))&&"boolean"!=typeof e?"":String(e)}function l(e){let t=new URLSearchParams;for(let[r,s]of Object.entries(e))if(Array.isArray(s))for(let e of s)t.append(r,i(e));else t.set(r,i(s));return t}function c(e,...t){for(let r of t){for(let t of r.keys())e.delete(t);for(let[t,s]of r.entries())e.append(t,s)}return e}},86762,(e,t,r)=>{"use strict";Object.defineProperty(r,"__esModule",{value:!0});var s={formatUrl:function(){return l},formatWithValidation:function(){return o},urlObjectKeys:function(){return c}};for(var n in s)Object.defineProperty(r,n,{enumerable:!0,get:s[n]});let a=e.r(90809)._(e.r(98183)),i=/https?|ftp|gopher|file/;function l(e){let{auth:t,hostname:r}=e,s=e.protocol||"",n=e.pathname||"",l=e.hash||"",c=e.query||"",o=!1;t=t?encodeURIComponent(t).replace(/%3A/i,":")+"@":"",e.host?o=t+e.host:r&&(o=t+(~r.indexOf(":")?`[${r}]`:r),e.port&&(o+=":"+e.port)),c&&"object"==typeof c&&(c=String(a.urlQueryToSearchParams(c)));let u=e.search||c&&`?${c}`||"";return s&&!s.endsWith(":")&&(s+=":"),e.slashes||(!s||i.test(s))&&!1!==o?(o="//"+(o||""),n&&"/"!==n[0]&&(n="/"+n)):o||(o=""),l&&"#"!==l[0]&&(l="#"+l),u&&"?"!==u[0]&&(u="?"+u),n=n.replace(/[?#]/g,encodeURIComponent),u=u.replace("#","%23"),`${s}${o}${n}${u}${l}`}let c=["auth","hash","host","hostname","href","path","pathname","port","protocol","query","search","slashes"];function o(e){return l(e)}},18581,(e,t,r)=>{"use strict";Object.defineProperty(r,"__esModule",{value:!0}),Object.defineProperty(r,"useMergedRef",{enumerable:!0,get:function(){return n}});let s=e.r(71645);function n(e,t){let r=(0,s.useRef)(null),n=(0,s.useRef)(null);return(0,s.useCallback)(s=>{if(null===s){let e=r.current;e&&(r.current=null,e());let t=n.current;t&&(n.current=null,t())}else e&&(r.current=a(e,s)),t&&(n.current=a(t,s))},[e,t])}function a(e,t){if("function"!=typeof e)return e.current=t,()=>{e.current=null};{let r=e(t);return"function"==typeof r?r:()=>e(null)}}("function"==typeof r.default||"object"==typeof r.default&&null!==r.default)&&void 0===r.default.__esModule&&(Object.defineProperty(r.default,"__esModule",{value:!0}),Object.assign(r.default,r),t.exports=r.default)},18967,(e,t,r)=>{"use strict";Object.defineProperty(r,"__esModule",{value:!0});var s={DecodeError:function(){return j},MiddlewareNotFoundError:function(){return v},MissingStaticPage:function(){return b},NormalizeError:function(){return g},PageNotFoundError:function(){return y},SP:function(){return h},ST:function(){return x},WEB_VITALS:function(){return a},execOnce:function(){return i},getDisplayName:function(){return d},getLocationOrigin:function(){return o},getURL:function(){return u},isAbsoluteUrl:function(){return c},isResSent:function(){return f},loadGetInitialProps:function(){return p},normalizeRepeatedSlashes:function(){return m},stringifyError:function(){return N}};for(var n in s)Object.defineProperty(r,n,{enumerable:!0,get:s[n]});let a=["CLS","FCP","FID","INP","LCP","TTFB"];function i(e){let t,r=!1;return(...s)=>(r||(r=!0,t=e(...s)),t)}let l=/^[a-zA-Z][a-zA-Z\d+\-.]*?:/,c=e=>l.test(e);function o(){let{protocol:e,hostname:t,port:r}=window.location;return`${e}//${t}${r?":"+r:""}`}function u(){let{href:e}=window.location,t=o();return e.substring(t.length)}function d(e){return"string"==typeof e?e:e.displayName||e.name||"Unknown"}function f(e){return e.finished||e.headersSent}function m(e){let t=e.split("?");return t[0].replace(/\\/g,"/").replace(/\/\/+/g,"/")+(t[1]?`?${t.slice(1).join("?")}`:"")}async function p(e,t){let r=t.res||t.ctx&&t.ctx.res;if(!e.getInitialProps)return t.ctx&&t.Component?{pageProps:await p(t.Component,t.ctx)}:{};let s=await e.getInitialProps(t);if(r&&f(r))return s;if(!s)throw Object.defineProperty(Error(`"${d(e)}.getInitialProps()" should resolve to an object. But found "${s}" instead.`),"__NEXT_ERROR_CODE",{value:"E394",enumerable:!1,configurable:!0});return s}let h="undefined"!=typeof performance,x=h&&["mark","measure","getEntriesByName"].every(e=>"function"==typeof performance[e]);class j extends Error{}class g extends Error{}class y extends Error{constructor(e){super(),this.code="ENOENT",this.name="PageNotFoundError",this.message=`Cannot find module for page: ${e}`}}class b extends Error{constructor(e,t){super(),this.message=`Failed to load static file for page: ${e} ${t}`}}class v extends Error{constructor(){super(),this.code="ENOENT",this.message="Cannot find the middleware module"}}function N(e){return JSON.stringify({message:e.message,stack:e.stack})}},73668,(e,t,r)=>{"use strict";Object.defineProperty(r,"__esModule",{value:!0}),Object.defineProperty(r,"isLocalURL",{enumerable:!0,get:function(){return a}});let s=e.r(18967),n=e.r(52817);function a(e){if(!(0,s.isAbsoluteUrl)(e))return!0;try{let t=(0,s.getLocationOrigin)(),r=new URL(e,t);return r.origin===t&&(0,n.hasBasePath)(r.pathname)}catch(e){return!1}}},84508,(e,t,r)=>{"use strict";Object.defineProperty(r,"__esModule",{value:!0}),Object.defineProperty(r,"errorOnce",{enumerable:!0,get:function(){return s}});let s=e=>{}},22016,(e,t,r)=>{"use strict";Object.defineProperty(r,"__esModule",{value:!0});var s={default:function(){return j},useLinkStatus:function(){return y}};for(var n in s)Object.defineProperty(r,n,{enumerable:!0,get:s[n]});let a=e.r(90809),i=e.r(43476),l=a._(e.r(71645)),c=e.r(86762),o=e.r(8372),u=e.r(18581),d=e.r(18967),f=e.r(5550);e.r(33525);let m=e.r(91949),p=e.r(73668),h=e.r(65165);function x(e){return"string"==typeof e?e:(0,c.formatUrl)(e)}function j(t){var r;let s,n,a,[c,j]=(0,l.useOptimistic)(m.IDLE_LINK_STATUS),y=(0,l.useRef)(null),{href:b,as:v,children:N,prefetch:C=null,passHref:w,replace:P,shallow:k,scroll:O,onClick:_,onMouseEnter:E,onTouchStart:T,legacyBehavior:S=!1,onNavigate:M,ref:R,unstable_dynamicOnHover:U,...z}=t;s=N,S&&("string"==typeof s||"number"==typeof s)&&(s=(0,i.jsx)("a",{children:s}));let A=l.default.useContext(o.AppRouterContext),L=!1!==C,q=!1!==C?null===(r=C)||"auto"===r?h.FetchStrategy.PPR:h.FetchStrategy.Full:h.FetchStrategy.PPR,{href:I,as:F}=l.default.useMemo(()=>{let e=x(b);return{href:e,as:v?x(v):e}},[b,v]);if(S){if(s?.$$typeof===Symbol.for("react.lazy"))throw Object.defineProperty(Error("`<Link legacyBehavior>` received a direct child that is either a Server Component, or JSX that was loaded with React.lazy(). This is not supported. Either remove legacyBehavior, or make the direct child a Client Component that renders the Link's `<a>` tag."),"__NEXT_ERROR_CODE",{value:"E863",enumerable:!1,configurable:!0});n=l.default.Children.only(s)}let D=S?n&&"object"==typeof n&&n.ref:R,$=l.default.useCallback(e=>(null!==A&&(y.current=(0,m.mountLinkInstance)(e,I,A,q,L,j)),()=>{y.current&&((0,m.unmountLinkForCurrentNavigation)(y.current),y.current=null),(0,m.unmountPrefetchableInstance)(e)}),[L,I,A,q,j]),B={ref:(0,u.useMergedRef)($,D),onClick(t){S||"function"!=typeof _||_(t),S&&n.props&&"function"==typeof n.props.onClick&&n.props.onClick(t),!A||t.defaultPrevented||function(t,r,s,n,a,i,c){if("undefined"!=typeof window){let o,{nodeName:u}=t.currentTarget;if("A"===u.toUpperCase()&&((o=t.currentTarget.getAttribute("target"))&&"_self"!==o||t.metaKey||t.ctrlKey||t.shiftKey||t.altKey||t.nativeEvent&&2===t.nativeEvent.which)||t.currentTarget.hasAttribute("download"))return;if(!(0,p.isLocalURL)(r)){a&&(t.preventDefault(),location.replace(r));return}if(t.preventDefault(),c){let e=!1;if(c({preventDefault:()=>{e=!0}}),e)return}let{dispatchNavigateAction:d}=e.r(99781);l.default.startTransition(()=>{d(s||r,a?"replace":"push",i??!0,n.current)})}}(t,I,F,y,P,O,M)},onMouseEnter(e){S||"function"!=typeof E||E(e),S&&n.props&&"function"==typeof n.props.onMouseEnter&&n.props.onMouseEnter(e),A&&L&&(0,m.onNavigationIntent)(e.currentTarget,!0===U)},onTouchStart:function(e){S||"function"!=typeof T||T(e),S&&n.props&&"function"==typeof n.props.onTouchStart&&n.props.onTouchStart(e),A&&L&&(0,m.onNavigationIntent)(e.currentTarget,!0===U)}};return(0,d.isAbsoluteUrl)(F)?B.href=F:S&&!w&&("a"!==n.type||"href"in n.props)||(B.href=(0,f.addBasePath)(F)),a=S?l.default.cloneElement(n,B):(0,i.jsx)("a",{...z,...B,children:s}),(0,i.jsx)(g.Provider,{value:c,children:a})}e.r(84508);let g=(0,l.createContext)(m.IDLE_LINK_STATUS),y=()=>(0,l.useContext)(g);("function"==typeof r.default||"object"==typeof r.default&&null!==r.default)&&void 0===r.default.__esModule&&(Object.defineProperty(r.default,"__esModule",{value:!0}),Object.assign(r.default,r),t.exports=r.default)},87486,e=>{"use strict";var t=e.i(43476),r=e.i(91918),s=e.i(25913),n=e.i(75157);let a=(0,s.cva)("inline-flex items-center justify-center rounded-full border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&>svg]:size-3 gap-1 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden",{variants:{variant:{default:"border-transparent bg-primary text-primary-foreground [a&]:hover:bg-primary/90",secondary:"border-transparent bg-secondary text-secondary-foreground [a&]:hover:bg-secondary/90",destructive:"border-transparent bg-destructive text-white [a&]:hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",outline:"text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground"}},defaultVariants:{variant:"default"}});function i({className:e,variant:s,asChild:i=!1,...l}){let c=i?r.Slot:"span";return(0,t.jsx)(c,{"data-slot":"badge",className:(0,n.cn)(a({variant:s}),e),...l})}e.s(["Badge",()=>i])},4e4,e=>{"use strict";var t=e.i(43476),r=e.i(75254);let s=(0,r.default)("activity",[["path",{d:"M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2",key:"169zse"}]]);var n=e.i(71689);let a=(0,r.default)("circle-check-big",[["path",{d:"M21.801 10A10 10 0 1 1 17 3.335",key:"yps3ct"}],["path",{d:"m9 11 3 3L22 4",key:"1pflzl"}]]),i=(0,r.default)("clock",[["path",{d:"M12 6v6l4 2",key:"mmk7yg"}],["circle",{cx:"12",cy:"12",r:"10",key:"1mglay"}]]),l=(0,r.default)("loader",[["path",{d:"M12 2v4",key:"3427ic"}],["path",{d:"m16.2 7.8 2.9-2.9",key:"r700ao"}],["path",{d:"M18 12h4",key:"wj9ykh"}],["path",{d:"m16.2 16.2 2.9 2.9",key:"1bxg5t"}],["path",{d:"M12 18v4",key:"jadmvz"}],["path",{d:"m4.9 19.1 2.9-2.9",key:"bwix9q"}],["path",{d:"M2 12h4",key:"j09sii"}],["path",{d:"m4.9 4.9 2.9 2.9",key:"giyufr"}]]),c=(0,r.default)("circle-x",[["circle",{cx:"12",cy:"12",r:"10",key:"1mglay"}],["path",{d:"m15 9-6 6",key:"1uzhvr"}],["path",{d:"m9 9 6 6",key:"z0biqf"}]]);var o=e.i(22016),u=e.i(71645),d=e.i(87486),f=e.i(19455),m=e.i(15288);function p(){let[e,r]=(0,u.useState)(null),[p,h]=(0,u.useState)(!0),x=(0,u.useCallback)(async()=>{try{let e=await fetch("/api/queue/health"),t=await e.json();r(t)}catch(e){console.error("Failed to fetch queue health:",e)}finally{h(!1)}},[]);return(0,u.useEffect)(()=>{x();let e=setInterval(x,5e3);return()=>clearInterval(e)},[x]),(0,t.jsx)("div",{className:"min-h-screen bg-background",children:(0,t.jsx)("div",{className:"container mx-auto px-4 py-8",children:(0,t.jsxs)("div",{className:"max-w-6xl mx-auto space-y-6",children:[(0,t.jsxs)("div",{className:"flex items-center gap-2",children:[(0,t.jsx)(o.default,{href:"/",children:(0,t.jsx)(f.Button,{variant:"ghost",size:"icon-sm",children:(0,t.jsx)(n.ArrowLeft,{className:"size-4"})})}),(0,t.jsxs)("div",{children:[(0,t.jsxs)("h1",{className:"text-3xl font-bold tracking-tight flex items-center gap-2",children:[(0,t.jsx)(s,{className:"size-8"}),"Queue Dashboard"]}),(0,t.jsx)("p",{className:"text-muted-foreground",children:"Monitor background jobs and task queues"})]})]}),p?(0,t.jsx)(m.Card,{children:(0,t.jsxs)(m.CardContent,{className:"py-12 text-center",children:[(0,t.jsx)(l,{className:"size-8 animate-spin mx-auto text-muted-foreground"}),(0,t.jsx)("p",{className:"mt-4 text-muted-foreground",children:"Loading queue status..."})]})}):(0,t.jsxs)(t.Fragment,{children:[(0,t.jsxs)(m.Card,{children:[(0,t.jsx)(m.CardHeader,{children:(0,t.jsxs)("div",{className:"flex items-center justify-between",children:[(0,t.jsx)(m.CardTitle,{children:"Redis Connection"}),(0,t.jsx)(d.Badge,{className:(e=>{switch(e){case"connected":return"bg-green-500";case"disconnected":return"bg-red-500";default:return"bg-gray-500"}})(e?.redis||"disconnected"),children:e?.redis||"Unknown"})]})}),e?.error&&(0,t.jsx)(m.CardContent,{children:(0,t.jsx)("p",{className:"text-sm text-destructive",children:e.error})})]}),e?.queues&&(0,t.jsxs)("div",{className:"grid gap-6 md:grid-cols-3",children:[(0,t.jsxs)(m.Card,{children:[(0,t.jsxs)(m.CardHeader,{children:[(0,t.jsx)(m.CardTitle,{className:"text-base",children:"File Upload Queue"}),(0,t.jsx)(m.CardDescription,{children:"Async file uploads to MinIO"})]}),(0,t.jsxs)(m.CardContent,{className:"space-y-3",children:[(0,t.jsxs)("div",{className:"flex items-center justify-between text-sm",children:[(0,t.jsxs)("span",{className:"flex items-center gap-2",children:[(0,t.jsx)(i,{className:"size-4 text-yellow-500"}),"Waiting"]}),(0,t.jsx)("span",{className:"font-mono",children:e.queues.fileUpload.waiting||0})]}),(0,t.jsxs)("div",{className:"flex items-center justify-between text-sm",children:[(0,t.jsxs)("span",{className:"flex items-center gap-2",children:[(0,t.jsx)(l,{className:"size-4 text-blue-500 animate-spin"}),"Active"]}),(0,t.jsx)("span",{className:"font-mono",children:e.queues.fileUpload.active||0})]}),(0,t.jsxs)("div",{className:"flex items-center justify-between text-sm",children:[(0,t.jsxs)("span",{className:"flex items-center gap-2",children:[(0,t.jsx)(a,{className:"size-4 text-green-500"}),"Completed"]}),(0,t.jsx)("span",{className:"font-mono",children:e.queues.fileUpload.completed||0})]}),(0,t.jsxs)("div",{className:"flex items-center justify-between text-sm",children:[(0,t.jsxs)("span",{className:"flex items-center gap-2",children:[(0,t.jsx)(c,{className:"size-4 text-red-500"}),"Failed"]}),(0,t.jsx)("span",{className:"font-mono",children:e.queues.fileUpload.failed||0})]})]})]}),(0,t.jsxs)(m.Card,{children:[(0,t.jsxs)(m.CardHeader,{children:[(0,t.jsx)(m.CardTitle,{className:"text-base",children:"File Process Queue"}),(0,t.jsx)(m.CardDescription,{children:"Audio transcription & analysis"})]}),(0,t.jsxs)(m.CardContent,{className:"space-y-3",children:[(0,t.jsxs)("div",{className:"flex items-center justify-between text-sm",children:[(0,t.jsxs)("span",{className:"flex items-center gap-2",children:[(0,t.jsx)(i,{className:"size-4 text-yellow-500"}),"Waiting"]}),(0,t.jsx)("span",{className:"font-mono",children:e.queues.fileProcess.waiting||0})]}),(0,t.jsxs)("div",{className:"flex items-center justify-between text-sm",children:[(0,t.jsxs)("span",{className:"flex items-center gap-2",children:[(0,t.jsx)(l,{className:"size-4 text-blue-500 animate-spin"}),"Active"]}),(0,t.jsx)("span",{className:"font-mono",children:e.queues.fileProcess.active||0})]}),(0,t.jsxs)("div",{className:"flex items-center justify-between text-sm",children:[(0,t.jsxs)("span",{className:"flex items-center gap-2",children:[(0,t.jsx)(a,{className:"size-4 text-green-500"}),"Completed"]}),(0,t.jsx)("span",{className:"font-mono",children:e.queues.fileProcess.completed||0})]}),(0,t.jsxs)("div",{className:"flex items-center justify-between text-sm",children:[(0,t.jsxs)("span",{className:"flex items-center gap-2",children:[(0,t.jsx)(c,{className:"size-4 text-red-500"}),"Failed"]}),(0,t.jsx)("span",{className:"font-mono",children:e.queues.fileProcess.failed||0})]})]})]}),(0,t.jsxs)(m.Card,{children:[(0,t.jsxs)(m.CardHeader,{children:[(0,t.jsx)(m.CardTitle,{className:"text-base",children:"File Delete Queue"}),(0,t.jsx)(m.CardDescription,{children:"Cleanup & file deletion"})]}),(0,t.jsxs)(m.CardContent,{className:"space-y-3",children:[(0,t.jsxs)("div",{className:"flex items-center justify-between text-sm",children:[(0,t.jsxs)("span",{className:"flex items-center gap-2",children:[(0,t.jsx)(i,{className:"size-4 text-yellow-500"}),"Waiting"]}),(0,t.jsx)("span",{className:"font-mono",children:e.queues.fileDelete.waiting||0})]}),(0,t.jsxs)("div",{className:"flex items-center justify-between text-sm",children:[(0,t.jsxs)("span",{className:"flex items-center gap-2",children:[(0,t.jsx)(l,{className:"size-4 text-blue-500 animate-spin"}),"Active"]}),(0,t.jsx)("span",{className:"font-mono",children:e.queues.fileDelete.active||0})]}),(0,t.jsxs)("div",{className:"flex items-center justify-between text-sm",children:[(0,t.jsxs)("span",{className:"flex items-center gap-2",children:[(0,t.jsx)(a,{className:"size-4 text-green-500"}),"Completed"]}),(0,t.jsx)("span",{className:"font-mono",children:e.queues.fileDelete.completed||0})]}),(0,t.jsxs)("div",{className:"flex items-center justify-between text-sm",children:[(0,t.jsxs)("span",{className:"flex items-center gap-2",children:[(0,t.jsx)(c,{className:"size-4 text-red-500"}),"Failed"]}),(0,t.jsx)("span",{className:"font-mono",children:e.queues.fileDelete.failed||0})]})]})]})]}),(0,t.jsxs)(m.Card,{children:[(0,t.jsx)(m.CardHeader,{children:(0,t.jsx)(m.CardTitle,{children:"How to Use"})}),(0,t.jsxs)(m.CardContent,{className:"space-y-4",children:[(0,t.jsxs)("div",{children:[(0,t.jsx)("h3",{className:"font-medium mb-2",children:"Async File Upload"}),(0,t.jsxs)("p",{className:"text-sm text-muted-foreground",children:["Use"," ",(0,t.jsx)("code",{className:"bg-muted px-1 py-0.5 rounded",children:"POST /api/files/upload-async"})," ","instead of the synchronous endpoint. Returns a job ID immediately, processing happens in background."]})]}),(0,t.jsxs)("div",{children:[(0,t.jsx)("h3",{className:"font-medium mb-2",children:"Check Job Status"}),(0,t.jsxs)("p",{className:"text-sm text-muted-foreground",children:["Use"," ",(0,t.jsx)("code",{className:"bg-muted px-1 py-0.5 rounded",children:"GET /api/queue/job/[jobId]"})," ","to check the status and progress of any job."]})]}),(0,t.jsxs)("div",{children:[(0,t.jsx)("h3",{className:"font-medium mb-2",children:"Start Workers"}),(0,t.jsxs)("p",{className:"text-sm text-muted-foreground",children:["Run"," ",(0,t.jsx)("code",{className:"bg-muted px-1 py-0.5 rounded",children:"bun src/workers/index.ts"})," ","to start processing background jobs."]})]})]})]})]})]})})})}e.s(["default",()=>p],4e4)}]);
+(globalThis.TURBOPACK || (globalThis.TURBOPACK = [])).push([
+  "object" == typeof document ? document.currentScript : void 0,
+  33525,
+  (e, t, r) => {
+    "use strict";
+    Object.defineProperty(r, "__esModule", { value: !0 }),
+      Object.defineProperty(r, "warnOnce", {
+        enumerable: !0,
+        get: function () {
+          return s;
+        },
+      });
+    let s = (e) => {};
+  },
+  98183,
+  (e, t, r) => {
+    "use strict";
+    Object.defineProperty(r, "__esModule", { value: !0 });
+    var s = {
+      assign: function () {
+        return c;
+      },
+      searchParamsToUrlQuery: function () {
+        return a;
+      },
+      urlQueryToSearchParams: function () {
+        return l;
+      },
+    };
+    for (var n in s) Object.defineProperty(r, n, { enumerable: !0, get: s[n] });
+    function a(e) {
+      let t = {};
+      for (let [r, s] of e.entries()) {
+        let e = t[r];
+        void 0 === e
+          ? (t[r] = s)
+          : Array.isArray(e)
+            ? e.push(s)
+            : (t[r] = [e, s]);
+      }
+      return t;
+    }
+    function i(e) {
+      return "string" == typeof e
+        ? e
+        : ("number" != typeof e || isNaN(e)) && "boolean" != typeof e
+          ? ""
+          : String(e);
+    }
+    function l(e) {
+      let t = new URLSearchParams();
+      for (let [r, s] of Object.entries(e))
+        if (Array.isArray(s)) for (let e of s) t.append(r, i(e));
+        else t.set(r, i(s));
+      return t;
+    }
+    function c(e, ...t) {
+      for (let r of t) {
+        for (let t of r.keys()) e.delete(t);
+        for (let [t, s] of r.entries()) e.append(t, s);
+      }
+      return e;
+    }
+  },
+  86762,
+  (e, t, r) => {
+    "use strict";
+    Object.defineProperty(r, "__esModule", { value: !0 });
+    var s = {
+      formatUrl: function () {
+        return l;
+      },
+      formatWithValidation: function () {
+        return o;
+      },
+      urlObjectKeys: function () {
+        return c;
+      },
+    };
+    for (var n in s) Object.defineProperty(r, n, { enumerable: !0, get: s[n] });
+    let a = e.r(90809)._(e.r(98183)),
+      i = /https?|ftp|gopher|file/;
+    function l(e) {
+      let { auth: t, hostname: r } = e,
+        s = e.protocol || "",
+        n = e.pathname || "",
+        l = e.hash || "",
+        c = e.query || "",
+        o = !1;
+      (t = t ? encodeURIComponent(t).replace(/%3A/i, ":") + "@" : ""),
+        e.host
+          ? (o = t + e.host)
+          : r &&
+            ((o = t + (~r.indexOf(":") ? `[${r}]` : r)),
+            e.port && (o += ":" + e.port)),
+        c && "object" == typeof c && (c = String(a.urlQueryToSearchParams(c)));
+      let u = e.search || (c && `?${c}`) || "";
+      return (
+        s && !s.endsWith(":") && (s += ":"),
+        e.slashes || ((!s || i.test(s)) && !1 !== o)
+          ? ((o = "//" + (o || "")), n && "/" !== n[0] && (n = "/" + n))
+          : o || (o = ""),
+        l && "#" !== l[0] && (l = "#" + l),
+        u && "?" !== u[0] && (u = "?" + u),
+        (n = n.replace(/[?#]/g, encodeURIComponent)),
+        (u = u.replace("#", "%23")),
+        `${s}${o}${n}${u}${l}`
+      );
+    }
+    let c = [
+      "auth",
+      "hash",
+      "host",
+      "hostname",
+      "href",
+      "path",
+      "pathname",
+      "port",
+      "protocol",
+      "query",
+      "search",
+      "slashes",
+    ];
+    function o(e) {
+      return l(e);
+    }
+  },
+  18581,
+  (e, t, r) => {
+    "use strict";
+    Object.defineProperty(r, "__esModule", { value: !0 }),
+      Object.defineProperty(r, "useMergedRef", {
+        enumerable: !0,
+        get: function () {
+          return n;
+        },
+      });
+    let s = e.r(71645);
+    function n(e, t) {
+      let r = (0, s.useRef)(null),
+        n = (0, s.useRef)(null);
+      return (0, s.useCallback)(
+        (s) => {
+          if (null === s) {
+            let e = r.current;
+            e && ((r.current = null), e());
+            let t = n.current;
+            t && ((n.current = null), t());
+          } else e && (r.current = a(e, s)), t && (n.current = a(t, s));
+        },
+        [e, t],
+      );
+    }
+    function a(e, t) {
+      if ("function" != typeof e)
+        return (
+          (e.current = t),
+          () => {
+            e.current = null;
+          }
+        );
+      {
+        let r = e(t);
+        return "function" == typeof r ? r : () => e(null);
+      }
+    }
+    ("function" == typeof r.default ||
+      ("object" == typeof r.default && null !== r.default)) &&
+      void 0 === r.default.__esModule &&
+      (Object.defineProperty(r.default, "__esModule", { value: !0 }),
+      Object.assign(r.default, r),
+      (t.exports = r.default));
+  },
+  18967,
+  (e, t, r) => {
+    "use strict";
+    Object.defineProperty(r, "__esModule", { value: !0 });
+    var s = {
+      DecodeError: function () {
+        return j;
+      },
+      MiddlewareNotFoundError: function () {
+        return v;
+      },
+      MissingStaticPage: function () {
+        return b;
+      },
+      NormalizeError: function () {
+        return g;
+      },
+      PageNotFoundError: function () {
+        return y;
+      },
+      SP: function () {
+        return h;
+      },
+      ST: function () {
+        return x;
+      },
+      WEB_VITALS: function () {
+        return a;
+      },
+      execOnce: function () {
+        return i;
+      },
+      getDisplayName: function () {
+        return d;
+      },
+      getLocationOrigin: function () {
+        return o;
+      },
+      getURL: function () {
+        return u;
+      },
+      isAbsoluteUrl: function () {
+        return c;
+      },
+      isResSent: function () {
+        return f;
+      },
+      loadGetInitialProps: function () {
+        return p;
+      },
+      normalizeRepeatedSlashes: function () {
+        return m;
+      },
+      stringifyError: function () {
+        return N;
+      },
+    };
+    for (var n in s) Object.defineProperty(r, n, { enumerable: !0, get: s[n] });
+    let a = ["CLS", "FCP", "FID", "INP", "LCP", "TTFB"];
+    function i(e) {
+      let t,
+        r = !1;
+      return (...s) => (r || ((r = !0), (t = e(...s))), t);
+    }
+    let l = /^[a-zA-Z][a-zA-Z\d+\-.]*?:/,
+      c = (e) => l.test(e);
+    function o() {
+      let { protocol: e, hostname: t, port: r } = window.location;
+      return `${e}//${t}${r ? ":" + r : ""}`;
+    }
+    function u() {
+      let { href: e } = window.location,
+        t = o();
+      return e.substring(t.length);
+    }
+    function d(e) {
+      return "string" == typeof e ? e : e.displayName || e.name || "Unknown";
+    }
+    function f(e) {
+      return e.finished || e.headersSent;
+    }
+    function m(e) {
+      let t = e.split("?");
+      return (
+        t[0].replace(/\\/g, "/").replace(/\/\/+/g, "/") +
+        (t[1] ? `?${t.slice(1).join("?")}` : "")
+      );
+    }
+    async function p(e, t) {
+      let r = t.res || (t.ctx && t.ctx.res);
+      if (!e.getInitialProps)
+        return t.ctx && t.Component
+          ? { pageProps: await p(t.Component, t.ctx) }
+          : {};
+      let s = await e.getInitialProps(t);
+      if (r && f(r)) return s;
+      if (!s)
+        throw Object.defineProperty(
+          Error(
+            `"${d(e)}.getInitialProps()" should resolve to an object. But found "${s}" instead.`,
+          ),
+          "__NEXT_ERROR_CODE",
+          { value: "E394", enumerable: !1, configurable: !0 },
+        );
+      return s;
+    }
+    let h = "undefined" != typeof performance,
+      x =
+        h &&
+        ["mark", "measure", "getEntriesByName"].every(
+          (e) => "function" == typeof performance[e],
+        );
+    class j extends Error {}
+    class g extends Error {}
+    class y extends Error {
+      constructor(e) {
+        super(),
+          (this.code = "ENOENT"),
+          (this.name = "PageNotFoundError"),
+          (this.message = `Cannot find module for page: ${e}`);
+      }
+    }
+    class b extends Error {
+      constructor(e, t) {
+        super(),
+          (this.message = `Failed to load static file for page: ${e} ${t}`);
+      }
+    }
+    class v extends Error {
+      constructor() {
+        super(),
+          (this.code = "ENOENT"),
+          (this.message = "Cannot find the middleware module");
+      }
+    }
+    function N(e) {
+      return JSON.stringify({ message: e.message, stack: e.stack });
+    }
+  },
+  73668,
+  (e, t, r) => {
+    "use strict";
+    Object.defineProperty(r, "__esModule", { value: !0 }),
+      Object.defineProperty(r, "isLocalURL", {
+        enumerable: !0,
+        get: function () {
+          return a;
+        },
+      });
+    let s = e.r(18967),
+      n = e.r(52817);
+    function a(e) {
+      if (!(0, s.isAbsoluteUrl)(e)) return !0;
+      try {
+        let t = (0, s.getLocationOrigin)(),
+          r = new URL(e, t);
+        return r.origin === t && (0, n.hasBasePath)(r.pathname);
+      } catch (e) {
+        return !1;
+      }
+    }
+  },
+  84508,
+  (e, t, r) => {
+    "use strict";
+    Object.defineProperty(r, "__esModule", { value: !0 }),
+      Object.defineProperty(r, "errorOnce", {
+        enumerable: !0,
+        get: function () {
+          return s;
+        },
+      });
+    let s = (e) => {};
+  },
+  22016,
+  (e, t, r) => {
+    "use strict";
+    Object.defineProperty(r, "__esModule", { value: !0 });
+    var s = {
+      default: function () {
+        return j;
+      },
+      useLinkStatus: function () {
+        return y;
+      },
+    };
+    for (var n in s) Object.defineProperty(r, n, { enumerable: !0, get: s[n] });
+    let a = e.r(90809),
+      i = e.r(43476),
+      l = a._(e.r(71645)),
+      c = e.r(86762),
+      o = e.r(8372),
+      u = e.r(18581),
+      d = e.r(18967),
+      f = e.r(5550);
+    e.r(33525);
+    let m = e.r(91949),
+      p = e.r(73668),
+      h = e.r(65165);
+    function x(e) {
+      return "string" == typeof e ? e : (0, c.formatUrl)(e);
+    }
+    function j(t) {
+      var r;
+      let s,
+        n,
+        a,
+        [c, j] = (0, l.useOptimistic)(m.IDLE_LINK_STATUS),
+        y = (0, l.useRef)(null),
+        {
+          href: b,
+          as: v,
+          children: N,
+          prefetch: C = null,
+          passHref: w,
+          replace: P,
+          shallow: k,
+          scroll: O,
+          onClick: _,
+          onMouseEnter: E,
+          onTouchStart: T,
+          legacyBehavior: S = !1,
+          onNavigate: M,
+          ref: R,
+          unstable_dynamicOnHover: U,
+          ...z
+        } = t;
+      (s = N),
+        S &&
+          ("string" == typeof s || "number" == typeof s) &&
+          (s = (0, i.jsx)("a", { children: s }));
+      let A = l.default.useContext(o.AppRouterContext),
+        L = !1 !== C,
+        q =
+          !1 !== C
+            ? null === (r = C) || "auto" === r
+              ? h.FetchStrategy.PPR
+              : h.FetchStrategy.Full
+            : h.FetchStrategy.PPR,
+        { href: I, as: F } = l.default.useMemo(() => {
+          let e = x(b);
+          return { href: e, as: v ? x(v) : e };
+        }, [b, v]);
+      if (S) {
+        if (s?.$$typeof === Symbol.for("react.lazy"))
+          throw Object.defineProperty(
+            Error(
+              "`<Link legacyBehavior>` received a direct child that is either a Server Component, or JSX that was loaded with React.lazy(). This is not supported. Either remove legacyBehavior, or make the direct child a Client Component that renders the Link's `<a>` tag.",
+            ),
+            "__NEXT_ERROR_CODE",
+            { value: "E863", enumerable: !1, configurable: !0 },
+          );
+        n = l.default.Children.only(s);
+      }
+      let D = S ? n && "object" == typeof n && n.ref : R,
+        $ = l.default.useCallback(
+          (e) => (
+            null !== A &&
+              (y.current = (0, m.mountLinkInstance)(e, I, A, q, L, j)),
+            () => {
+              y.current &&
+                ((0, m.unmountLinkForCurrentNavigation)(y.current),
+                (y.current = null)),
+                (0, m.unmountPrefetchableInstance)(e);
+            }
+          ),
+          [L, I, A, q, j],
+        ),
+        B = {
+          ref: (0, u.useMergedRef)($, D),
+          onClick(t) {
+            S || "function" != typeof _ || _(t),
+              S &&
+                n.props &&
+                "function" == typeof n.props.onClick &&
+                n.props.onClick(t),
+              !A ||
+                t.defaultPrevented ||
+                (function (t, r, s, n, a, i, c) {
+                  if ("undefined" != typeof window) {
+                    let o,
+                      { nodeName: u } = t.currentTarget;
+                    if (
+                      ("A" === u.toUpperCase() &&
+                        (((o = t.currentTarget.getAttribute("target")) &&
+                          "_self" !== o) ||
+                          t.metaKey ||
+                          t.ctrlKey ||
+                          t.shiftKey ||
+                          t.altKey ||
+                          (t.nativeEvent && 2 === t.nativeEvent.which))) ||
+                      t.currentTarget.hasAttribute("download")
+                    )
+                      return;
+                    if (!(0, p.isLocalURL)(r)) {
+                      a && (t.preventDefault(), location.replace(r));
+                      return;
+                    }
+                    if ((t.preventDefault(), c)) {
+                      let e = !1;
+                      if (
+                        (c({
+                          preventDefault: () => {
+                            e = !0;
+                          },
+                        }),
+                        e)
+                      )
+                        return;
+                    }
+                    let { dispatchNavigateAction: d } = e.r(99781);
+                    l.default.startTransition(() => {
+                      d(s || r, a ? "replace" : "push", i ?? !0, n.current);
+                    });
+                  }
+                })(t, I, F, y, P, O, M);
+          },
+          onMouseEnter(e) {
+            S || "function" != typeof E || E(e),
+              S &&
+                n.props &&
+                "function" == typeof n.props.onMouseEnter &&
+                n.props.onMouseEnter(e),
+              A && L && (0, m.onNavigationIntent)(e.currentTarget, !0 === U);
+          },
+          onTouchStart: function (e) {
+            S || "function" != typeof T || T(e),
+              S &&
+                n.props &&
+                "function" == typeof n.props.onTouchStart &&
+                n.props.onTouchStart(e),
+              A && L && (0, m.onNavigationIntent)(e.currentTarget, !0 === U);
+          },
+        };
+      return (
+        (0, d.isAbsoluteUrl)(F)
+          ? (B.href = F)
+          : (S && !w && ("a" !== n.type || "href" in n.props)) ||
+            (B.href = (0, f.addBasePath)(F)),
+        (a = S
+          ? l.default.cloneElement(n, B)
+          : (0, i.jsx)("a", { ...z, ...B, children: s })),
+        (0, i.jsx)(g.Provider, { value: c, children: a })
+      );
+    }
+    e.r(84508);
+    let g = (0, l.createContext)(m.IDLE_LINK_STATUS),
+      y = () => (0, l.useContext)(g);
+    ("function" == typeof r.default ||
+      ("object" == typeof r.default && null !== r.default)) &&
+      void 0 === r.default.__esModule &&
+      (Object.defineProperty(r.default, "__esModule", { value: !0 }),
+      Object.assign(r.default, r),
+      (t.exports = r.default));
+  },
+  87486,
+  (e) => {
+    "use strict";
+    var t = e.i(43476),
+      r = e.i(91918),
+      s = e.i(25913),
+      n = e.i(75157);
+    let a = (0, s.cva)(
+      "inline-flex items-center justify-center rounded-full border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&>svg]:size-3 gap-1 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden",
+      {
+        variants: {
+          variant: {
+            default:
+              "border-transparent bg-primary text-primary-foreground [a&]:hover:bg-primary/90",
+            secondary:
+              "border-transparent bg-secondary text-secondary-foreground [a&]:hover:bg-secondary/90",
+            destructive:
+              "border-transparent bg-destructive text-white [a&]:hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
+            outline:
+              "text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground",
+          },
+        },
+        defaultVariants: { variant: "default" },
+      },
+    );
+    function i({ className: e, variant: s, asChild: i = !1, ...l }) {
+      let c = i ? r.Slot : "span";
+      return (0, t.jsx)(c, {
+        "data-slot": "badge",
+        className: (0, n.cn)(a({ variant: s }), e),
+        ...l,
+      });
+    }
+    e.s(["Badge", () => i]);
+  },
+  4e4,
+  (e) => {
+    "use strict";
+    var t = e.i(43476),
+      r = e.i(75254);
+    let s = (0, r.default)("activity", [
+      [
+        "path",
+        {
+          d: "M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2",
+          key: "169zse",
+        },
+      ],
+    ]);
+    var n = e.i(71689);
+    let a = (0, r.default)("circle-check-big", [
+        ["path", { d: "M21.801 10A10 10 0 1 1 17 3.335", key: "yps3ct" }],
+        ["path", { d: "m9 11 3 3L22 4", key: "1pflzl" }],
+      ]),
+      i = (0, r.default)("clock", [
+        ["path", { d: "M12 6v6l4 2", key: "mmk7yg" }],
+        ["circle", { cx: "12", cy: "12", r: "10", key: "1mglay" }],
+      ]),
+      l = (0, r.default)("loader", [
+        ["path", { d: "M12 2v4", key: "3427ic" }],
+        ["path", { d: "m16.2 7.8 2.9-2.9", key: "r700ao" }],
+        ["path", { d: "M18 12h4", key: "wj9ykh" }],
+        ["path", { d: "m16.2 16.2 2.9 2.9", key: "1bxg5t" }],
+        ["path", { d: "M12 18v4", key: "jadmvz" }],
+        ["path", { d: "m4.9 19.1 2.9-2.9", key: "bwix9q" }],
+        ["path", { d: "M2 12h4", key: "j09sii" }],
+        ["path", { d: "m4.9 4.9 2.9 2.9", key: "giyufr" }],
+      ]),
+      c = (0, r.default)("circle-x", [
+        ["circle", { cx: "12", cy: "12", r: "10", key: "1mglay" }],
+        ["path", { d: "m15 9-6 6", key: "1uzhvr" }],
+        ["path", { d: "m9 9 6 6", key: "z0biqf" }],
+      ]);
+    var o = e.i(22016),
+      u = e.i(71645),
+      d = e.i(87486),
+      f = e.i(19455),
+      m = e.i(15288);
+    function p() {
+      let [e, r] = (0, u.useState)(null),
+        [p, h] = (0, u.useState)(!0),
+        x = (0, u.useCallback)(async () => {
+          try {
+            let e = await fetch("/api/queue/health"),
+              t = await e.json();
+            r(t);
+          } catch (e) {
+            console.error("Failed to fetch queue health:", e);
+          } finally {
+            h(!1);
+          }
+        }, []);
+      return (
+        (0, u.useEffect)(() => {
+          x();
+          let e = setInterval(x, 5e3);
+          return () => clearInterval(e);
+        }, [x]),
+        (0, t.jsx)("div", {
+          className: "min-h-screen bg-background",
+          children: (0, t.jsx)("div", {
+            className: "container mx-auto px-4 py-8",
+            children: (0, t.jsxs)("div", {
+              className: "max-w-6xl mx-auto space-y-6",
+              children: [
+                (0, t.jsxs)("div", {
+                  className: "flex items-center gap-2",
+                  children: [
+                    (0, t.jsx)(o.default, {
+                      href: "/",
+                      children: (0, t.jsx)(f.Button, {
+                        variant: "ghost",
+                        size: "icon-sm",
+                        children: (0, t.jsx)(n.ArrowLeft, {
+                          className: "size-4",
+                        }),
+                      }),
+                    }),
+                    (0, t.jsxs)("div", {
+                      children: [
+                        (0, t.jsxs)("h1", {
+                          className:
+                            "text-3xl font-bold tracking-tight flex items-center gap-2",
+                          children: [
+                            (0, t.jsx)(s, { className: "size-8" }),
+                            "Queue Dashboard",
+                          ],
+                        }),
+                        (0, t.jsx)("p", {
+                          className: "text-muted-foreground",
+                          children: "Monitor background jobs and task queues",
+                        }),
+                      ],
+                    }),
+                  ],
+                }),
+                p
+                  ? (0, t.jsx)(m.Card, {
+                      children: (0, t.jsxs)(m.CardContent, {
+                        className: "py-12 text-center",
+                        children: [
+                          (0, t.jsx)(l, {
+                            className:
+                              "size-8 animate-spin mx-auto text-muted-foreground",
+                          }),
+                          (0, t.jsx)("p", {
+                            className: "mt-4 text-muted-foreground",
+                            children: "Loading queue status...",
+                          }),
+                        ],
+                      }),
+                    })
+                  : (0, t.jsxs)(t.Fragment, {
+                      children: [
+                        (0, t.jsxs)(m.Card, {
+                          children: [
+                            (0, t.jsx)(m.CardHeader, {
+                              children: (0, t.jsxs)("div", {
+                                className: "flex items-center justify-between",
+                                children: [
+                                  (0, t.jsx)(m.CardTitle, {
+                                    children: "Redis Connection",
+                                  }),
+                                  (0, t.jsx)(d.Badge, {
+                                    className: ((e) => {
+                                      switch (e) {
+                                        case "connected":
+                                          return "bg-green-500";
+                                        case "disconnected":
+                                          return "bg-red-500";
+                                        default:
+                                          return "bg-gray-500";
+                                      }
+                                    })(e?.redis || "disconnected"),
+                                    children: e?.redis || "Unknown",
+                                  }),
+                                ],
+                              }),
+                            }),
+                            e?.error &&
+                              (0, t.jsx)(m.CardContent, {
+                                children: (0, t.jsx)("p", {
+                                  className: "text-sm text-destructive",
+                                  children: e.error,
+                                }),
+                              }),
+                          ],
+                        }),
+                        e?.queues &&
+                          (0, t.jsxs)("div", {
+                            className: "grid gap-6 md:grid-cols-3",
+                            children: [
+                              (0, t.jsxs)(m.Card, {
+                                children: [
+                                  (0, t.jsxs)(m.CardHeader, {
+                                    children: [
+                                      (0, t.jsx)(m.CardTitle, {
+                                        className: "text-base",
+                                        children: "File Upload Queue",
+                                      }),
+                                      (0, t.jsx)(m.CardDescription, {
+                                        children: "Async file uploads to MinIO",
+                                      }),
+                                    ],
+                                  }),
+                                  (0, t.jsxs)(m.CardContent, {
+                                    className: "space-y-3",
+                                    children: [
+                                      (0, t.jsxs)("div", {
+                                        className:
+                                          "flex items-center justify-between text-sm",
+                                        children: [
+                                          (0, t.jsxs)("span", {
+                                            className:
+                                              "flex items-center gap-2",
+                                            children: [
+                                              (0, t.jsx)(i, {
+                                                className:
+                                                  "size-4 text-yellow-500",
+                                              }),
+                                              "Waiting",
+                                            ],
+                                          }),
+                                          (0, t.jsx)("span", {
+                                            className: "font-mono",
+                                            children:
+                                              e.queues.fileUpload.waiting || 0,
+                                          }),
+                                        ],
+                                      }),
+                                      (0, t.jsxs)("div", {
+                                        className:
+                                          "flex items-center justify-between text-sm",
+                                        children: [
+                                          (0, t.jsxs)("span", {
+                                            className:
+                                              "flex items-center gap-2",
+                                            children: [
+                                              (0, t.jsx)(l, {
+                                                className:
+                                                  "size-4 text-blue-500 animate-spin",
+                                              }),
+                                              "Active",
+                                            ],
+                                          }),
+                                          (0, t.jsx)("span", {
+                                            className: "font-mono",
+                                            children:
+                                              e.queues.fileUpload.active || 0,
+                                          }),
+                                        ],
+                                      }),
+                                      (0, t.jsxs)("div", {
+                                        className:
+                                          "flex items-center justify-between text-sm",
+                                        children: [
+                                          (0, t.jsxs)("span", {
+                                            className:
+                                              "flex items-center gap-2",
+                                            children: [
+                                              (0, t.jsx)(a, {
+                                                className:
+                                                  "size-4 text-green-500",
+                                              }),
+                                              "Completed",
+                                            ],
+                                          }),
+                                          (0, t.jsx)("span", {
+                                            className: "font-mono",
+                                            children:
+                                              e.queues.fileUpload.completed ||
+                                              0,
+                                          }),
+                                        ],
+                                      }),
+                                      (0, t.jsxs)("div", {
+                                        className:
+                                          "flex items-center justify-between text-sm",
+                                        children: [
+                                          (0, t.jsxs)("span", {
+                                            className:
+                                              "flex items-center gap-2",
+                                            children: [
+                                              (0, t.jsx)(c, {
+                                                className:
+                                                  "size-4 text-red-500",
+                                              }),
+                                              "Failed",
+                                            ],
+                                          }),
+                                          (0, t.jsx)("span", {
+                                            className: "font-mono",
+                                            children:
+                                              e.queues.fileUpload.failed || 0,
+                                          }),
+                                        ],
+                                      }),
+                                    ],
+                                  }),
+                                ],
+                              }),
+                              (0, t.jsxs)(m.Card, {
+                                children: [
+                                  (0, t.jsxs)(m.CardHeader, {
+                                    children: [
+                                      (0, t.jsx)(m.CardTitle, {
+                                        className: "text-base",
+                                        children: "File Process Queue",
+                                      }),
+                                      (0, t.jsx)(m.CardDescription, {
+                                        children:
+                                          "Audio transcription & analysis",
+                                      }),
+                                    ],
+                                  }),
+                                  (0, t.jsxs)(m.CardContent, {
+                                    className: "space-y-3",
+                                    children: [
+                                      (0, t.jsxs)("div", {
+                                        className:
+                                          "flex items-center justify-between text-sm",
+                                        children: [
+                                          (0, t.jsxs)("span", {
+                                            className:
+                                              "flex items-center gap-2",
+                                            children: [
+                                              (0, t.jsx)(i, {
+                                                className:
+                                                  "size-4 text-yellow-500",
+                                              }),
+                                              "Waiting",
+                                            ],
+                                          }),
+                                          (0, t.jsx)("span", {
+                                            className: "font-mono",
+                                            children:
+                                              e.queues.fileProcess.waiting || 0,
+                                          }),
+                                        ],
+                                      }),
+                                      (0, t.jsxs)("div", {
+                                        className:
+                                          "flex items-center justify-between text-sm",
+                                        children: [
+                                          (0, t.jsxs)("span", {
+                                            className:
+                                              "flex items-center gap-2",
+                                            children: [
+                                              (0, t.jsx)(l, {
+                                                className:
+                                                  "size-4 text-blue-500 animate-spin",
+                                              }),
+                                              "Active",
+                                            ],
+                                          }),
+                                          (0, t.jsx)("span", {
+                                            className: "font-mono",
+                                            children:
+                                              e.queues.fileProcess.active || 0,
+                                          }),
+                                        ],
+                                      }),
+                                      (0, t.jsxs)("div", {
+                                        className:
+                                          "flex items-center justify-between text-sm",
+                                        children: [
+                                          (0, t.jsxs)("span", {
+                                            className:
+                                              "flex items-center gap-2",
+                                            children: [
+                                              (0, t.jsx)(a, {
+                                                className:
+                                                  "size-4 text-green-500",
+                                              }),
+                                              "Completed",
+                                            ],
+                                          }),
+                                          (0, t.jsx)("span", {
+                                            className: "font-mono",
+                                            children:
+                                              e.queues.fileProcess.completed ||
+                                              0,
+                                          }),
+                                        ],
+                                      }),
+                                      (0, t.jsxs)("div", {
+                                        className:
+                                          "flex items-center justify-between text-sm",
+                                        children: [
+                                          (0, t.jsxs)("span", {
+                                            className:
+                                              "flex items-center gap-2",
+                                            children: [
+                                              (0, t.jsx)(c, {
+                                                className:
+                                                  "size-4 text-red-500",
+                                              }),
+                                              "Failed",
+                                            ],
+                                          }),
+                                          (0, t.jsx)("span", {
+                                            className: "font-mono",
+                                            children:
+                                              e.queues.fileProcess.failed || 0,
+                                          }),
+                                        ],
+                                      }),
+                                    ],
+                                  }),
+                                ],
+                              }),
+                              (0, t.jsxs)(m.Card, {
+                                children: [
+                                  (0, t.jsxs)(m.CardHeader, {
+                                    children: [
+                                      (0, t.jsx)(m.CardTitle, {
+                                        className: "text-base",
+                                        children: "File Delete Queue",
+                                      }),
+                                      (0, t.jsx)(m.CardDescription, {
+                                        children: "Cleanup & file deletion",
+                                      }),
+                                    ],
+                                  }),
+                                  (0, t.jsxs)(m.CardContent, {
+                                    className: "space-y-3",
+                                    children: [
+                                      (0, t.jsxs)("div", {
+                                        className:
+                                          "flex items-center justify-between text-sm",
+                                        children: [
+                                          (0, t.jsxs)("span", {
+                                            className:
+                                              "flex items-center gap-2",
+                                            children: [
+                                              (0, t.jsx)(i, {
+                                                className:
+                                                  "size-4 text-yellow-500",
+                                              }),
+                                              "Waiting",
+                                            ],
+                                          }),
+                                          (0, t.jsx)("span", {
+                                            className: "font-mono",
+                                            children:
+                                              e.queues.fileDelete.waiting || 0,
+                                          }),
+                                        ],
+                                      }),
+                                      (0, t.jsxs)("div", {
+                                        className:
+                                          "flex items-center justify-between text-sm",
+                                        children: [
+                                          (0, t.jsxs)("span", {
+                                            className:
+                                              "flex items-center gap-2",
+                                            children: [
+                                              (0, t.jsx)(l, {
+                                                className:
+                                                  "size-4 text-blue-500 animate-spin",
+                                              }),
+                                              "Active",
+                                            ],
+                                          }),
+                                          (0, t.jsx)("span", {
+                                            className: "font-mono",
+                                            children:
+                                              e.queues.fileDelete.active || 0,
+                                          }),
+                                        ],
+                                      }),
+                                      (0, t.jsxs)("div", {
+                                        className:
+                                          "flex items-center justify-between text-sm",
+                                        children: [
+                                          (0, t.jsxs)("span", {
+                                            className:
+                                              "flex items-center gap-2",
+                                            children: [
+                                              (0, t.jsx)(a, {
+                                                className:
+                                                  "size-4 text-green-500",
+                                              }),
+                                              "Completed",
+                                            ],
+                                          }),
+                                          (0, t.jsx)("span", {
+                                            className: "font-mono",
+                                            children:
+                                              e.queues.fileDelete.completed ||
+                                              0,
+                                          }),
+                                        ],
+                                      }),
+                                      (0, t.jsxs)("div", {
+                                        className:
+                                          "flex items-center justify-between text-sm",
+                                        children: [
+                                          (0, t.jsxs)("span", {
+                                            className:
+                                              "flex items-center gap-2",
+                                            children: [
+                                              (0, t.jsx)(c, {
+                                                className:
+                                                  "size-4 text-red-500",
+                                              }),
+                                              "Failed",
+                                            ],
+                                          }),
+                                          (0, t.jsx)("span", {
+                                            className: "font-mono",
+                                            children:
+                                              e.queues.fileDelete.failed || 0,
+                                          }),
+                                        ],
+                                      }),
+                                    ],
+                                  }),
+                                ],
+                              }),
+                            ],
+                          }),
+                        (0, t.jsxs)(m.Card, {
+                          children: [
+                            (0, t.jsx)(m.CardHeader, {
+                              children: (0, t.jsx)(m.CardTitle, {
+                                children: "How to Use",
+                              }),
+                            }),
+                            (0, t.jsxs)(m.CardContent, {
+                              className: "space-y-4",
+                              children: [
+                                (0, t.jsxs)("div", {
+                                  children: [
+                                    (0, t.jsx)("h3", {
+                                      className: "font-medium mb-2",
+                                      children: "Async File Upload",
+                                    }),
+                                    (0, t.jsxs)("p", {
+                                      className:
+                                        "text-sm text-muted-foreground",
+                                      children: [
+                                        "Use",
+                                        " ",
+                                        (0, t.jsx)("code", {
+                                          className:
+                                            "bg-muted px-1 py-0.5 rounded",
+                                          children:
+                                            "POST /api/files/upload-async",
+                                        }),
+                                        " ",
+                                        "instead of the synchronous endpoint. Returns a job ID immediately, processing happens in background.",
+                                      ],
+                                    }),
+                                  ],
+                                }),
+                                (0, t.jsxs)("div", {
+                                  children: [
+                                    (0, t.jsx)("h3", {
+                                      className: "font-medium mb-2",
+                                      children: "Check Job Status",
+                                    }),
+                                    (0, t.jsxs)("p", {
+                                      className:
+                                        "text-sm text-muted-foreground",
+                                      children: [
+                                        "Use",
+                                        " ",
+                                        (0, t.jsx)("code", {
+                                          className:
+                                            "bg-muted px-1 py-0.5 rounded",
+                                          children:
+                                            "GET /api/queue/job/[jobId]",
+                                        }),
+                                        " ",
+                                        "to check the status and progress of any job.",
+                                      ],
+                                    }),
+                                  ],
+                                }),
+                                (0, t.jsxs)("div", {
+                                  children: [
+                                    (0, t.jsx)("h3", {
+                                      className: "font-medium mb-2",
+                                      children: "Start Workers",
+                                    }),
+                                    (0, t.jsxs)("p", {
+                                      className:
+                                        "text-sm text-muted-foreground",
+                                      children: [
+                                        "Run",
+                                        " ",
+                                        (0, t.jsx)("code", {
+                                          className:
+                                            "bg-muted px-1 py-0.5 rounded",
+                                          children: "bun src/workers/index.ts",
+                                        }),
+                                        " ",
+                                        "to start processing background jobs.",
+                                      ],
+                                    }),
+                                  ],
+                                }),
+                              ],
+                            }),
+                          ],
+                        }),
+                      ],
+                    }),
+              ],
+            }),
+          }),
+        })
+      );
+    }
+    e.s(["default", () => p], 4e4);
+  },
+]);

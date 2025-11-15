@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
+import { AppLayout } from "@/components/app-layout";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -64,7 +65,7 @@ export default function QueueDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <AppLayout>
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto space-y-6">
           <div className="flex items-center gap-2">
@@ -311,6 +312,6 @@ export default function QueueDashboard() {
           )}
         </div>
       </div>
-    </div>
+    </AppLayout>
   );
 }

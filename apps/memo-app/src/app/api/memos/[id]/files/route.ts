@@ -1,14 +1,31 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { attachFilesSchema } from "@/dto";
+import { auth } from "@/lib/auth";
 import { fileService, memoService } from "@/services";
 
 // GET /api/memos/[id]/files - Get files attached to memo
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    // Get authenticated user
+    const session = await auth.api.getSession({ headers: request.headers });
+    if (!session?.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { id } = await params;
+
+    // Check ownership
+    const memo = await memoService.getMemoById(id);
+    if (!memo) {
+      return NextResponse.json({ error: "Memo not found" }, { status: 404 });
+    }
+    if (memo.userId !== session.user.id) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
     const files = await fileService.getFilesByMemoId(id);
 
     return NextResponse.json({ data: files });
@@ -29,7 +46,23 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    // Get authenticated user
+    const session = await auth.api.getSession({ headers: request.headers });
+    if (!session?.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { id } = await params;
+
+    // Check ownership
+    const memo = await memoService.getMemoById(id);
+    if (!memo) {
+      return NextResponse.json({ error: "Memo not found" }, { status: 404 });
+    }
+    if (memo.userId !== session.user.id) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
     const body = await request.json();
     const data = attachFilesSchema.parse(body);
 

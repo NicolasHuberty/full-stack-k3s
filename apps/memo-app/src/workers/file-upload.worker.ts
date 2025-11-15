@@ -13,7 +13,7 @@ const connection = new IORedis(
 export const fileUploadWorker = new Worker<FileUploadJob>(
   QUEUE_NAMES.FILE_UPLOAD,
   async (job: Job<FileUploadJob>) => {
-    const { fileBuffer, filename, mimeType, size, userId, memoId } = job.data;
+    const { fileBuffer, filename, mimeType, size, memoId } = job.data;
 
     console.log(`[Worker] Processing file upload: ${filename} (Job ${job.id})`);
 

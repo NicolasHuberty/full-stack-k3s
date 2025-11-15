@@ -1,3 +1,4 @@
+import { prisma } from "@/lib/prisma";
 import { addFileProcessJob } from "@/lib/queue";
 import { fileService } from "./file.service";
 
@@ -6,6 +7,17 @@ import { fileService } from "./file.service";
  */
 export async function triggerMemoTranscription(memoId: string) {
   console.log(`[Transcription] Triggering transcription for memo: ${memoId}`);
+
+  // Get memo to retrieve userId
+  const memo = await prisma.memo.findUnique({
+    where: { id: memoId },
+    select: { userId: true },
+  });
+
+  if (!memo) {
+    console.log(`[Transcription] Memo not found: ${memoId}`);
+    return { success: false, message: "Memo not found", jobs: [] };
+  }
 
   // Get all files attached to memo
   const files = await fileService.getFilesByMemoId(memoId);
@@ -37,7 +49,7 @@ export async function triggerMemoTranscription(memoId: string) {
         mimeType: file.mimeType,
         operation: "transcribe",
         memoId: memoId,
-        userId: file.userId,
+        userId: memo.userId,
       });
       jobs.push({ fileId: file.id, jobId: job.id, filename: file.filename });
       console.log(

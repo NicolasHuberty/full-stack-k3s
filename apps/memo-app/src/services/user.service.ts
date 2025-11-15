@@ -4,8 +4,8 @@ import type { SafeUser, User, UserWithStats } from "@/types";
 
 export class UserService {
   /**
-   * Create a new user
-   * Note: In production, hash the password with bcrypt!
+   * Create a new user with better-auth
+   * Note: This is handled by better-auth, this method is for admin purposes only
    */
   async createUser(data: CreateUserInput): Promise<SafeUser> {
     // Check if user already exists
@@ -17,16 +17,29 @@ export class UserService {
       throw new Error("User with this email already exists");
     }
 
-    // TODO: Hash password with bcrypt in production
-    // const hashedPassword = await bcrypt.hash(data.password, 10);
-
+    // Create user (better-auth handles account/password separately)
     const user = await prisma.user.create({
       data: {
         email: data.email,
         name: data.name,
-        password: data.password, // In production: use hashedPassword
+        emailVerified: false,
       },
     });
+
+    // Create password account if password provided
+    if (data.password) {
+      const bcrypt = await import("bcrypt");
+      const hashedPassword = await bcrypt.hash(data.password, 10);
+
+      await prisma.account.create({
+        data: {
+          userId: user.id,
+          accountId: user.id,
+          providerId: "credential",
+          password: hashedPassword,
+        },
+      });
+    }
 
     return this.toSafeUser(user);
   }
@@ -90,7 +103,8 @@ export class UserService {
 
   /**
    * Login / authenticate user
-   * Note: In production, use bcrypt.compare!
+   * Note: Authentication is now handled by better-auth
+   * This method is deprecated - use better-auth signIn instead
    */
   async login(data: LoginInput): Promise<SafeUser> {
     const user = await this.getUserByEmail(data.email);
@@ -99,9 +113,21 @@ export class UserService {
       throw new Error("Invalid credentials");
     }
 
-    // TODO: In production, use bcrypt.compare
-    // const isValid = await bcrypt.compare(data.password, user.password);
-    const isValid = data.password === user.password;
+    // Get account with password
+    const account = await prisma.account.findFirst({
+      where: {
+        userId: user.id,
+        providerId: "credential",
+      },
+    });
+
+    if (!account || !account.password) {
+      throw new Error("Invalid credentials");
+    }
+
+    // Verify password
+    const bcrypt = await import("bcrypt");
+    const isValid = await bcrypt.compare(data.password, account.password);
 
     if (!isValid) {
       throw new Error("Invalid credentials");

@@ -1,13 +1,20 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { updateMemoSchema } from "@/dto";
+import { auth } from "@/lib/auth";
 import { memoService } from "@/services";
 
-// GET /api/memos/[id] - Get memo by ID
+// GET /api/memos/[id] - Get memo by ID (only if user owns it or it's shared via team)
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    // Get authenticated user
+    const session = await auth.api.getSession({ headers: request.headers });
+    if (!session?.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { id } = await params;
     const searchParams = request.nextUrl.searchParams;
     const includeFiles = searchParams.get("includeFiles") === "true";
@@ -16,6 +23,12 @@ export async function GET(
 
     if (!memo) {
       return NextResponse.json({ error: "Memo not found" }, { status: 404 });
+    }
+
+    // Check if user owns the memo or has access through team
+    if (memo.userId !== session.user.id) {
+      // TODO: Check if user has access through team
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     return NextResponse.json({ data: memo });
@@ -30,13 +43,29 @@ export async function GET(
   }
 }
 
-// PATCH /api/memos/[id] - Update memo
+// PATCH /api/memos/[id] - Update memo (only if user owns it)
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    // Get authenticated user
+    const session = await auth.api.getSession({ headers: request.headers });
+    if (!session?.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { id } = await params;
+
+    // Check ownership before updating
+    const existingMemo = await memoService.getMemoById(id);
+    if (!existingMemo) {
+      return NextResponse.json({ error: "Memo not found" }, { status: 404 });
+    }
+    if (existingMemo.userId !== session.user.id) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
     const body = await request.json();
     const data = updateMemoSchema.parse(body);
 
@@ -60,13 +89,29 @@ export async function PATCH(
   }
 }
 
-// DELETE /api/memos/[id] - Delete memo (soft delete)
+// DELETE /api/memos/[id] - Delete memo (only if user owns it)
 export async function DELETE(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    // Get authenticated user
+    const session = await auth.api.getSession({ headers: request.headers });
+    if (!session?.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { id } = await params;
+
+    // Check ownership before deleting
+    const existingMemo = await memoService.getMemoById(id);
+    if (!existingMemo) {
+      return NextResponse.json({ error: "Memo not found" }, { status: 404 });
+    }
+    if (existingMemo.userId !== session.user.id) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
     await memoService.deleteMemo(id);
 
     return NextResponse.json({ message: "Memo deleted" });

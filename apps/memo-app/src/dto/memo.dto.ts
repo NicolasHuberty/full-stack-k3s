@@ -5,6 +5,7 @@ export const createMemoSchema = z.object({
   title: z.string().min(1, "Title is required").max(255, "Title too long"),
   content: z.string().min(1, "Content is required"),
   userId: z.string().uuid("Invalid user ID").optional(),
+  formId: z.string().uuid().optional(),
 });
 
 export const updateMemoSchema = z.object({

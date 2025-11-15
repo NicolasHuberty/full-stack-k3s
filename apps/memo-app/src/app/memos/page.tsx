@@ -3,6 +3,7 @@
 import { ArrowLeft, Plus, Search } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
+import { AppLayout } from "@/components/app-layout";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -79,7 +80,7 @@ export default function MemosPage() {
   );
 
   return (
-    <div className="min-h-screen bg-background">
+    <AppLayout>
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto space-y-6">
           <div className="flex items-center justify-between">
@@ -187,6 +188,6 @@ export default function MemosPage() {
           )}
         </div>
       </div>
-    </div>
+    </AppLayout>
   );
 }

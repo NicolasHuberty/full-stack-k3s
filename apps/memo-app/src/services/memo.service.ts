@@ -13,12 +13,15 @@ export class MemoService {
   /**
    * Create a new memo
    */
-  async createMemo(data: CreateMemoInput): Promise<Memo> {
+  async createMemo(
+    data: CreateMemoInput & { userId: string },
+  ): Promise<Memo> {
     const memo = await prisma.memo.create({
       data: {
         title: data.title,
         content: data.content,
         userId: data.userId,
+        formId: data.formId,
         status: MemoStatus.DRAFT,
       },
     });
@@ -35,34 +38,40 @@ export class MemoService {
   ): Promise<Memo | MemoWithFiles | null> {
     const memo = await prisma.memo.findUnique({
       where: { id },
-      include: includeFiles
-        ? {
-            memoFiles: {
+      include: {
+        memoFiles: includeFiles
+          ? {
               include: {
                 file: true,
               },
+            }
+          : undefined,
+        formData: {
+          include: {
+            form: {
+              include: {
+                fields: {
+                  include: {
+                    options: true,
+                  },
+                  orderBy: {
+                    order: "asc",
+                  },
+                },
+              },
             },
-          }
-        : undefined,
+          },
+        },
+      },
     });
 
     if (!memo) return null;
 
-    if (includeFiles) {
-      const memoWithFiles = memo as typeof memo & {
-        memoFiles: Array<{
-          file: {
-            id: string;
-            filename: string;
-            mimeType: string;
-            size: number;
-            s3Key: string;
-          };
-        }>;
-      };
+    if (includeFiles && memo.memoFiles) {
+      const memoWithFiles = memo as any;
       return {
         ...memo,
-        files: memoWithFiles.memoFiles.map((mf) => mf.file),
+        files: memoWithFiles.memoFiles.map((mf: any) => mf.file),
       } as MemoWithFiles;
     }
 
@@ -230,6 +239,21 @@ export class MemoService {
   ): Promise<number> {
     return await prisma.memo.count({
       where: { userId, status },
+    });
+  }
+
+  /**
+   * Get user by ID
+   */
+  async getUserById(userId: string) {
+    return await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        emailVerified: true,
+      },
     });
   }
 }

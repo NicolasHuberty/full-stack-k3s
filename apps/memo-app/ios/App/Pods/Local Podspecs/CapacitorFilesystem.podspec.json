@@ -15,9 +15,7 @@
   },
   "dependencies": {
     "Capacitor": [],
-    "IONFilesystemLib": [
-      "~> 1.0.1"
-    ]
+    "IONFilesystemLib": ["~> 1.0.1"]
   },
   "swift_versions": "5.1",
   "swift_version": "5.1"

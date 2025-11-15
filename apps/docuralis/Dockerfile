@@ -78,19 +78,25 @@ CMD ["bun", "run", "server.js"]
 FROM oven/bun:1-alpine AS worker
 WORKDIR /app
 
-ENV NODE_ENV=production
-
 # Install tesseract for OCR and dependencies for native modules
 RUN apk add --no-cache tesseract-ocr tesseract-ocr-data-eng libc6-compat python3 make g++
 
-# Copy ALL source files first (needed for install)
-COPY . .
+# Copy package files first
+COPY package.json bun.lock* ./
+COPY prisma ./prisma/
 
-# Install ALL dependencies fresh (don't rely on builder stage)
+# Install ALL dependencies (including production deps)
+ENV NODE_ENV=development
 RUN bun install --frozen-lockfile
 
 # Generate Prisma Client
 RUN bunx prisma generate
+
+# Now copy the rest of the source code
+COPY . .
+
+# Set production environment for runtime
+ENV NODE_ENV=production
 
 # Create non-root user and set permissions
 RUN addgroup --system --gid 1001 nodejs && \

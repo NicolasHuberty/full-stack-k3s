@@ -4,11 +4,11 @@ kind: Kustomization
 namespace: dev
 
 resources:
-  - ../../base/memo
-  - memo-ingress.yaml
+  - ../../../base/memo
+  - ingress.yaml
 
 patchesStrategicMerge:
-  - memo-patch.yaml
+  - patch.yaml
 
 namePrefix: dev-
 

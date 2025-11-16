@@ -10,9 +10,7 @@ spec:
   source:
     repoURL: https://github.com/NicolasHuberty/full-stack-k3s.git
     targetRevision: main
-    path: infra/environments/dev
-    kustomize:
-      kustomization: memo-kustomization.yaml
+    path: infra/environments/dev/memo
   destination:
     server: https://kubernetes.default.svc
     namespace: dev

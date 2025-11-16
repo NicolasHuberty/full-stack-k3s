@@ -157,8 +157,7 @@ ${content}`,
       ],
     });
 
-    const processedText =
-      response.choices?.[0]?.message?.content || content;
+    const processedText = response.choices?.[0]?.message?.content || content;
     return typeof processedText === "string" ? processedText : content;
   } catch (error) {
     console.error("Mistral AI processing error:", error);

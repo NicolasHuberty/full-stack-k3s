@@ -1,6 +1,14 @@
 "use client";
 
-import { ArrowLeft, Copy, Edit, Globe, Plus, Trash2, Upload } from "lucide-react";
+import {
+  ArrowLeft,
+  Copy,
+  Edit,
+  Globe,
+  Plus,
+  Trash2,
+  Upload,
+} from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -76,7 +84,9 @@ export default function FormDetailPage({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [publishDialogOpen, setPublishDialogOpen] = useState(false);
-  const [visibility, setVisibility] = useState<"PRIVATE" | "TEAM" | "ORGANIZATION" | "PUBLIC">("PRIVATE");
+  const [visibility, setVisibility] = useState<
+    "PRIVATE" | "TEAM" | "ORGANIZATION" | "PUBLIC"
+  >("PRIVATE");
   const [category, setCategory] = useState("");
   const [publishing, setPublishing] = useState(false);
   const [editMode, setEditMode] = useState(false);
@@ -417,17 +427,25 @@ export default function FormDetailPage({
                     <Button variant="outline" onClick={cancelEdit}>
                       Cancel
                     </Button>
-                    <Button onClick={saveEdit} disabled={saving || !editName.trim()}>
+                    <Button
+                      onClick={saveEdit}
+                      disabled={saving || !editName.trim()}
+                    >
                       {saving ? "Saving..." : "Save Changes"}
                     </Button>
                   </DialogFooter>
                 </DialogContent>
               </Dialog>
-              <Dialog open={publishDialogOpen} onOpenChange={setPublishDialogOpen}>
+              <Dialog
+                open={publishDialogOpen}
+                onOpenChange={setPublishDialogOpen}
+              >
                 <DialogTrigger asChild>
                   <Button size="sm">
                     <Upload className="size-4 mr-2" />
-                    {form.visibility === "PUBLIC" ? "Update Visibility" : "Publish"}
+                    {form.visibility === "PUBLIC"
+                      ? "Update Visibility"
+                      : "Publish"}
                   </Button>
                 </DialogTrigger>
                 <DialogContent>
@@ -440,7 +458,10 @@ export default function FormDetailPage({
                   <div className="space-y-4 py-4">
                     <div className="space-y-2">
                       <Label htmlFor="visibility">Visibility</Label>
-                      <Select value={visibility} onValueChange={(v: any) => setVisibility(v)}>
+                      <Select
+                        value={visibility}
+                        onValueChange={(v: any) => setVisibility(v)}
+                      >
                         <SelectTrigger id="visibility">
                           <SelectValue placeholder="Select visibility" />
                         </SelectTrigger>
@@ -448,25 +469,33 @@ export default function FormDetailPage({
                           <SelectItem value="PRIVATE">
                             <div>
                               <div className="font-medium">Private</div>
-                              <div className="text-xs text-muted-foreground">Only you can see this</div>
+                              <div className="text-xs text-muted-foreground">
+                                Only you can see this
+                              </div>
                             </div>
                           </SelectItem>
                           <SelectItem value="TEAM">
                             <div>
                               <div className="font-medium">Team</div>
-                              <div className="text-xs text-muted-foreground">Team members can see this</div>
+                              <div className="text-xs text-muted-foreground">
+                                Team members can see this
+                              </div>
                             </div>
                           </SelectItem>
                           <SelectItem value="ORGANIZATION">
                             <div>
                               <div className="font-medium">Organization</div>
-                              <div className="text-xs text-muted-foreground">All users can see this</div>
+                              <div className="text-xs text-muted-foreground">
+                                All users can see this
+                              </div>
                             </div>
                           </SelectItem>
                           <SelectItem value="PUBLIC">
                             <div>
                               <div className="font-medium">Public</div>
-                              <div className="text-xs text-muted-foreground">Everyone can see (marketplace)</div>
+                              <div className="text-xs text-muted-foreground">
+                                Everyone can see (marketplace)
+                              </div>
                             </div>
                           </SelectItem>
                         </SelectContent>
@@ -483,7 +512,10 @@ export default function FormDetailPage({
                     </div>
                   </div>
                   <DialogFooter>
-                    <Button variant="outline" onClick={() => setPublishDialogOpen(false)}>
+                    <Button
+                      variant="outline"
+                      onClick={() => setPublishDialogOpen(false)}
+                    >
                       Cancel
                     </Button>
                     <Button onClick={publishForm} disabled={publishing}>
@@ -496,7 +528,11 @@ export default function FormDetailPage({
                 <Copy className="size-4 mr-2" />
                 Duplicate
               </Button>
-              <Button variant="outline" size="sm" onClick={() => setEditMode(true)}>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setEditMode(true)}
+              >
                 <Edit className="size-4 mr-2" />
                 Edit
               </Button>
@@ -591,7 +627,10 @@ export default function FormDetailPage({
                           {field.description}
                         </p>
                         <div className="text-xs text-muted-foreground">
-                          Field name: <code className="bg-muted px-1 py-0.5 rounded">{field.name}</code>
+                          Field name:{" "}
+                          <code className="bg-muted px-1 py-0.5 rounded">
+                            {field.name}
+                          </code>
                         </div>
                         {field.options && field.options.length > 0 && (
                           <div className="mt-2 flex flex-wrap gap-1">

@@ -1,0 +1,29 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: staging
+
+resources:
+  - ../../../base/memo
+  - ingress.yaml
+
+patchesStrategicMerge:
+  - patch.yaml
+
+namePrefix: staging-
+
+commonLabels:
+  environment: staging
+  managed-by: argocd
+
+images:
+  - name: ghcr.io/nicolashuberty/full-stack-k3s/memo-app
+    newTag: staging
+  - name: ghcr.io/nicolashuberty/full-stack-k3s/memo-worker
+    newTag: staging
+
+configMapGenerator:
+  - name: env-config
+    literals:
+      - ENVIRONMENT=staging
+      - LOG_LEVEL=info

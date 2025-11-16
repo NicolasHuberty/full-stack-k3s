@@ -129,7 +129,13 @@ export function VoiceInput({ onTranscript }: VoiceInputProps) {
       )}
 
       {isProcessing && (
-        <Button type="button" variant="outline" size="sm" disabled className="gap-2">
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          disabled
+          className="gap-2"
+        >
           <Loader2 className="size-4 animate-spin" />
           Transcribing...
         </Button>

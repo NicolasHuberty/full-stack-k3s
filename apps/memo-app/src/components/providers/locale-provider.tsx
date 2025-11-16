@@ -27,7 +27,9 @@ export function LocaleProvider({
         const userLocale = user.language as Locale;
         if (userLocale !== locale) {
           setLocale(userLocale);
-          const newMessages = await import(`../../../messages/${userLocale}.json`);
+          const newMessages = await import(
+            `../../../messages/${userLocale}.json`
+          );
           setMessages(newMessages.default);
 
           // Set cookie for future requests

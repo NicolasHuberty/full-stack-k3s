@@ -125,7 +125,7 @@ export async function inviteMemberToOrganization(data: {
     )
     // In development, you might want to log the invitation link
     if (process.env.NODE_ENV === 'development') {
-      const inviteUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3001'}/invite/${token}`
+      const inviteUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://docuralis.com'}/invite/${token}`
       console.log(`\n📧 Invitation link for ${data.email}: ${inviteUrl}\n`)
     }
   })
@@ -184,7 +184,7 @@ export async function resendInvitationEmail(invitationId: string) {
     console.error('Failed to resend invitation email:', error)
     // In development, log the invitation link
     if (process.env.NODE_ENV === 'development') {
-      const inviteUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3001'}/invite/${invitation.token}`
+      const inviteUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://docuralis.com'}/invite/${invitation.token}`
       console.log(
         `\n📧 Resent invitation link for ${invitation.email}: ${inviteUrl}\n`
       )

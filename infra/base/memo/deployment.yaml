@@ -1,0 +1,88 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: memo
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: memo
+  template:
+    metadata:
+      labels:
+        app: memo
+    spec:
+      initContainers:
+      - name: migrate
+        image: ghcr.io/nicolashuberty/full-stack-k3s/memo-app:latest
+        command:
+        - /bin/sh
+        - -c
+        - |
+          echo "Running database migrations..."
+          npx prisma migrate deploy
+          echo "Migrations completed successfully"
+        env:
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: memo-secrets
+              key: database-url
+      containers:
+      - name: frontend
+        image: ghcr.io/nicolashuberty/full-stack-k3s/memo-app:latest
+        ports:
+        - containerPort: 3000
+          name: http
+        env:
+        - name: NODE_ENV
+          value: production
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: memo-secrets
+              key: database-url
+        - name: REDIS_URL
+          value: redis://redis.database.svc.cluster.local:6379
+        - name: MISTRAL_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: memo-secrets
+              key: mistral-api-key
+        - name: MINIO_ENDPOINT
+          value: minio.storage.svc.cluster.local
+        - name: MINIO_PORT
+          value: "9000"
+        - name: MINIO_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: memo-secrets
+              key: minio-access-key
+        - name: MINIO_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: memo-secrets
+              key: minio-secret-key
+        - name: MINIO_USE_SSL
+          value: "false"
+        - name: MINIO_BUCKET_NAME
+          value: memo
+        livenessProbe:
+          httpGet:
+            path: /api/queue/health
+            port: 3000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /api/queue/health
+            port: 3000
+          initialDelaySeconds: 10
+          periodSeconds: 5
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"

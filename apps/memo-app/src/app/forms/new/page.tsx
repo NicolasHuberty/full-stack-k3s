@@ -67,7 +67,9 @@ export default function NewFormPage() {
   const [formName, setFormName] = useState("");
   const [formDescription, setFormDescription] = useState("");
   const [category, setCategory] = useState("Business");
-  const [visibility, setVisibility] = useState<"PRIVATE" | "TEAM" | "ORGANIZATION" | "PUBLIC">("PRIVATE");
+  const [visibility, setVisibility] = useState<
+    "PRIVATE" | "TEAM" | "ORGANIZATION" | "PUBLIC"
+  >("PRIVATE");
 
   // Step 2: Fields
   const [fields, setFields] = useState<FormField[]>([]);
@@ -276,7 +278,10 @@ export default function NewFormPage() {
 
               <div className="space-y-2">
                 <Label htmlFor="visibility">Visibility</Label>
-                <Select value={visibility} onValueChange={(v: any) => setVisibility(v)}>
+                <Select
+                  value={visibility}
+                  onValueChange={(v: any) => setVisibility(v)}
+                >
                   <SelectTrigger id="visibility">
                     <SelectValue />
                   </SelectTrigger>
@@ -284,34 +289,46 @@ export default function NewFormPage() {
                     <SelectItem value="PRIVATE">
                       <div>
                         <div className="font-medium">Private</div>
-                        <div className="text-xs text-muted-foreground">Only you can see this</div>
+                        <div className="text-xs text-muted-foreground">
+                          Only you can see this
+                        </div>
                       </div>
                     </SelectItem>
                     <SelectItem value="TEAM">
                       <div>
                         <div className="font-medium">Team</div>
-                        <div className="text-xs text-muted-foreground">Team members can see this</div>
+                        <div className="text-xs text-muted-foreground">
+                          Team members can see this
+                        </div>
                       </div>
                     </SelectItem>
                     <SelectItem value="ORGANIZATION">
                       <div>
                         <div className="font-medium">Organization</div>
-                        <div className="text-xs text-muted-foreground">All users can see this</div>
+                        <div className="text-xs text-muted-foreground">
+                          All users can see this
+                        </div>
                       </div>
                     </SelectItem>
                     <SelectItem value="PUBLIC">
                       <div>
                         <div className="font-medium">Public (Marketplace)</div>
-                        <div className="text-xs text-muted-foreground">Everyone can see and import</div>
+                        <div className="text-xs text-muted-foreground">
+                          Everyone can see and import
+                        </div>
                       </div>
                     </SelectItem>
                   </SelectContent>
                 </Select>
                 <p className="text-xs text-muted-foreground">
-                  {visibility === "PUBLIC" && "✨ This form will appear in the marketplace for everyone to use"}
-                  {visibility === "ORGANIZATION" && "👥 All users in the app can see and use this form"}
-                  {visibility === "TEAM" && "👤 Only your team members can see this form"}
-                  {visibility === "PRIVATE" && "🔒 This form is only visible to you"}
+                  {visibility === "PUBLIC" &&
+                    "✨ This form will appear in the marketplace for everyone to use"}
+                  {visibility === "ORGANIZATION" &&
+                    "👥 All users in the app can see and use this form"}
+                  {visibility === "TEAM" &&
+                    "👤 Only your team members can see this form"}
+                  {visibility === "PRIVATE" &&
+                    "🔒 This form is only visible to you"}
                 </p>
               </div>
 

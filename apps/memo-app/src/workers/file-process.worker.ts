@@ -111,10 +111,12 @@ export const fileProcessWorker = new Worker<FileProcessJob>(
           const generatedDocs: Array<{ format: string; fileId: string }> = [];
 
           // Extract title from processed content (first line or first # heading)
-          const titleMatch = processedContent.match(/^#\s+(.+)$/m) ||
-                           processedContent.match(/^(.+)$/m);
-          const documentTitle = titleMatch ? titleMatch[1].trim() :
-                              `Document - ${new Date().toLocaleDateString("fr-FR")}`;
+          const titleMatch =
+            processedContent.match(/^#\s+(.+)$/m) ||
+            processedContent.match(/^(.+)$/m);
+          const documentTitle = titleMatch
+            ? titleMatch[1].trim()
+            : `Document - ${new Date().toLocaleDateString("fr-FR")}`;
 
           for (const format of formats) {
             const docBuffer = await generateDocument({
@@ -197,10 +199,12 @@ export const fileProcessWorker = new Worker<FileProcessJob>(
               data: {
                 content: processedContent, // Use AI-processed content
                 title: documentTitle,
-                status: MemoStatus.DONE
+                status: MemoStatus.DONE,
               },
             });
-            console.log(`[Worker] Updated memo with AI-processed content and status DONE: ${memoId}`);
+            console.log(
+              `[Worker] Updated memo with AI-processed content and status DONE: ${memoId}`,
+            );
 
             // Send email notification to user
             if (updatedMemo.user?.email && updatedMemo.user.emailVerified) {
@@ -215,9 +219,14 @@ export const fileProcessWorker = new Worker<FileProcessJob>(
                     path: doc.fileId,
                   })),
                 );
-                console.log(`[Worker] Sent completion email to ${updatedMemo.user.email}`);
+                console.log(
+                  `[Worker] Sent completion email to ${updatedMemo.user.email}`,
+                );
               } catch (emailError) {
-                console.error("[Worker] Failed to send email notification:", emailError);
+                console.error(
+                  "[Worker] Failed to send email notification:",
+                  emailError,
+                );
                 // Don't fail the job if email fails
               }
             }

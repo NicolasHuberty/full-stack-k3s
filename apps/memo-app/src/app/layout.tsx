@@ -14,7 +14,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Memo App - AI-Powered Document Management",
-  description: "Transform your documents into structured data with AI-powered extraction and smart forms",
+  description:
+    "Transform your documents into structured data with AI-powered extraction and smart forms",
 };
 
 export default function RootLayout({

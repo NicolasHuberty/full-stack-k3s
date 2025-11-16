@@ -210,7 +210,10 @@ export default function NewMemoPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           title: defaultTitle,
-          content: inputMode === "text" ? textContent : "Processing audio transcription...",
+          content:
+            inputMode === "text"
+              ? textContent
+              : "Processing audio transcription...",
           formId:
             selectedFormId && selectedFormId !== "none"
               ? selectedFormId
@@ -274,10 +277,14 @@ export default function NewMemoPage() {
           });
 
           if (!extractRes.ok) {
-            console.log("Extraction will be performed after processing completes");
+            console.log(
+              "Extraction will be performed after processing completes",
+            );
           }
         } catch (error) {
-          console.log("Extraction will be performed after processing completes");
+          console.log(
+            "Extraction will be performed after processing completes",
+          );
         }
       }
 
@@ -333,7 +340,10 @@ export default function NewMemoPage() {
             <CardContent>
               <div className="space-y-2">
                 <Label>Formulaire</Label>
-                <Select value={selectedFormId} onValueChange={setSelectedFormId}>
+                <Select
+                  value={selectedFormId}
+                  onValueChange={setSelectedFormId}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Aucun formulaire" />
                   </SelectTrigger>
@@ -424,124 +434,124 @@ export default function NewMemoPage() {
                   Cliquez sur le micro pour commencer l'enregistrement
                 </CardDescription>
               </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Recording Timer */}
-              {(isRecording || audioBlob) && (
-                <div className="text-center">
-                  <div className="text-5xl font-bold tabular-nums">
-                    {formatTime(recordingTime)}
+              <CardContent className="space-y-6">
+                {/* Recording Timer */}
+                {(isRecording || audioBlob) && (
+                  <div className="text-center">
+                    <div className="text-5xl font-bold tabular-nums">
+                      {formatTime(recordingTime)}
+                    </div>
+                    {isRecording && (
+                      <div className="text-sm text-muted-foreground mt-2">
+                        {isPaused ? "En pause" : "Enregistrement en cours..."}
+                      </div>
+                    )}
+                    {audioBlob && (
+                      <div className="text-sm text-muted-foreground mt-2">
+                        Enregistrement terminé
+                      </div>
+                    )}
                   </div>
-                  {isRecording && (
-                    <div className="text-sm text-muted-foreground mt-2">
-                      {isPaused ? "En pause" : "Enregistrement en cours..."}
-                    </div>
+                )}
+
+                {/* Recording Controls */}
+                <div className="flex items-center justify-center gap-4">
+                  {!isRecording && !audioBlob && (
+                    <Button
+                      size="lg"
+                      onClick={startRecording}
+                      className="size-20 rounded-full"
+                    >
+                      <Mic className="size-8" />
+                    </Button>
                   )}
-                  {audioBlob && (
-                    <div className="text-sm text-muted-foreground mt-2">
-                      Enregistrement terminé
-                    </div>
+
+                  {isRecording && (
+                    <>
+                      {!isPaused ? (
+                        <Button
+                          size="lg"
+                          variant="outline"
+                          onClick={pauseRecording}
+                          className="size-16 rounded-full"
+                        >
+                          <Pause className="size-6" />
+                        </Button>
+                      ) : (
+                        <Button
+                          size="lg"
+                          variant="outline"
+                          onClick={resumeRecording}
+                          className="size-16 rounded-full"
+                        >
+                          <Play className="size-6" />
+                        </Button>
+                      )}
+                      <Button
+                        size="lg"
+                        variant="destructive"
+                        onClick={stopRecording}
+                        className="size-16 rounded-full"
+                      >
+                        <Square className="size-6" />
+                      </Button>
+                    </>
+                  )}
+
+                  {audioBlob && !isRecording && (
+                    <>
+                      <Button
+                        size="lg"
+                        variant="outline"
+                        onClick={deleteRecording}
+                        className="size-16 rounded-full"
+                      >
+                        <Trash2 className="size-6" />
+                      </Button>
+                      <Button
+                        size="lg"
+                        variant="outline"
+                        onClick={startRecording}
+                        className="size-16 rounded-full"
+                      >
+                        <Mic className="size-6" />
+                      </Button>
+                    </>
                   )}
                 </div>
-              )}
 
-              {/* Recording Controls */}
-              <div className="flex items-center justify-center gap-4">
-                {!isRecording && !audioBlob && (
+                {/* Audio Player */}
+                {audioBlob && (
+                  <div className="border rounded-lg p-4">
+                    <audio
+                      controls
+                      className="w-full"
+                      src={URL.createObjectURL(audioBlob)}
+                    />
+                  </div>
+                )}
+
+                {error && (
+                  <div className="p-3 rounded-md bg-destructive/10 border border-destructive text-destructive text-sm">
+                    {error}
+                  </div>
+                )}
+
+                {/* Save Button */}
+                {audioBlob && (
                   <Button
+                    onClick={handleSave}
+                    disabled={isProcessing}
+                    className="w-full"
                     size="lg"
-                    onClick={startRecording}
-                    className="size-20 rounded-full"
                   >
-                    <Mic className="size-8" />
+                    {isProcessing
+                      ? "Traitement en cours..."
+                      : "Enregistrer le mémo"}
                   </Button>
                 )}
-
-                {isRecording && (
-                  <>
-                    {!isPaused ? (
-                      <Button
-                        size="lg"
-                        variant="outline"
-                        onClick={pauseRecording}
-                        className="size-16 rounded-full"
-                      >
-                        <Pause className="size-6" />
-                      </Button>
-                    ) : (
-                      <Button
-                        size="lg"
-                        variant="outline"
-                        onClick={resumeRecording}
-                        className="size-16 rounded-full"
-                      >
-                        <Play className="size-6" />
-                      </Button>
-                    )}
-                    <Button
-                      size="lg"
-                      variant="destructive"
-                      onClick={stopRecording}
-                      className="size-16 rounded-full"
-                    >
-                      <Square className="size-6" />
-                    </Button>
-                  </>
-                )}
-
-                {audioBlob && !isRecording && (
-                  <>
-                    <Button
-                      size="lg"
-                      variant="outline"
-                      onClick={deleteRecording}
-                      className="size-16 rounded-full"
-                    >
-                      <Trash2 className="size-6" />
-                    </Button>
-                    <Button
-                      size="lg"
-                      variant="outline"
-                      onClick={startRecording}
-                      className="size-16 rounded-full"
-                    >
-                      <Mic className="size-6" />
-                    </Button>
-                  </>
-                )}
-              </div>
-
-              {/* Audio Player */}
-              {audioBlob && (
-                <div className="border rounded-lg p-4">
-                  <audio
-                    controls
-                    className="w-full"
-                    src={URL.createObjectURL(audioBlob)}
-                  />
-                </div>
-              )}
-
-              {error && (
-                <div className="p-3 rounded-md bg-destructive/10 border border-destructive text-destructive text-sm">
-                  {error}
-                </div>
-              )}
-
-              {/* Save Button */}
-              {audioBlob && (
-                <Button
-                  onClick={handleSave}
-                  disabled={isProcessing}
-                  className="w-full"
-                  size="lg"
-                >
-                  {isProcessing
-                    ? "Traitement en cours..."
-                    : "Enregistrer le mémo"}
-                </Button>
-              )}
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
           )}
         </div>
       </div>

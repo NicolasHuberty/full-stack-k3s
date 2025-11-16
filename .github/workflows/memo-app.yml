@@ -7,7 +7,8 @@ on:
       - main
     paths:
       - 'apps/memo-app/**'
-      - 'k8s/memo-app/**'
+      - 'infra/base/memo/**'
+      - 'infra/environments/**/memo/**'
       - '.github/workflows/memo-app.yml'
   pull_request:
     branches:
@@ -15,12 +16,13 @@ on:
       - main
     paths:
       - 'apps/memo-app/**'
-      - 'k8s/memo-app/**'
+      - 'infra/base/memo/**'
+      - 'infra/environments/**/memo/**'
 
 env:
   REGISTRY: ghcr.io
-  FRONTEND_IMAGE_NAME: nicolashuberty/memo-app
-  WORKER_IMAGE_NAME: nicolashuberty/memo-worker
+  FRONTEND_IMAGE_NAME: nicolashuberty/full-stack-k3s/memo-app
+  WORKER_IMAGE_NAME: nicolashuberty/full-stack-k3s/memo-worker
 
 jobs:
   build-and-push-frontend:

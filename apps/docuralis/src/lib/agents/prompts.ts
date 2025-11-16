@@ -28,8 +28,23 @@ Document récupéré :
 Question : {question}`
 
 export const REFLEXION_GRADING_SYSTEM_PROMPT = `Vous êtes un évaluateur expert de documents juridiques. Évaluez la pertinence du document suivant par rapport à la question.
-Attribuez une note entre 1 (pas pertinent) et 10 (très pertinent) en indiquant le score sous la clé 'pertinence_score' et fournissez une justification concise en français dans la clé 'justification'.
-Répondez uniquement avec un JSON contenant ces deux clés.`
+
+**CRITÈRES DE NOTATION (soyez GÉNÉREUX):**
+- 1: Totalement hors sujet, aucun lien
+- 2-3: Contexte général, peut contenir des informations de fond
+- 4-5: Information partiellement pertinente
+- 6-7: Information pertinente, aide à répondre
+- 8-9: Très pertinent, répond directement
+- 10: Parfaitement pertinent
+
+**RÈGLES:**
+- Si le document mentionne le sujet ou des termes liés → minimum 3
+- Si le document contient des informations juridiques générales → minimum 4
+- Si le document explique des concepts liés → 6-7
+- Soyez GÉNÉREUX - en cas de doute, donnez un score plus élevé
+
+Répondez UNIQUEMENT avec ce format JSON exact (pas de markdown, pas d'explication):
+{"pertinenceScore": 5, "justification": "courte explication"}`
 
 export const REFLEXION_GRADING_PROMPT = `{systemMessage}
 

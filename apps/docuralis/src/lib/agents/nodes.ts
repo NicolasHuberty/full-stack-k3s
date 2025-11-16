@@ -27,6 +27,9 @@ export async function decomposeQuery(
   state: AgentState
 ): Promise<Partial<AgentState>> {
   try {
+    console.log('\n🔍 [AGENT STEP 1/4] DECOMPOSE QUERY')
+    console.log(`📝 Original query: "${state.query}"`)
+
     const prompt = DECOMPOSE_QUERY_PROMPT.replace('{query}', state.query)
 
     const response = await model.invoke([
@@ -42,6 +45,9 @@ export async function decomposeQuery(
       .split('\n')
       .map((line) => line.trim())
       .filter((line) => line.length > 0)
+
+    console.log(`✅ Generated ${subQueries.length} sub-queries:`)
+    subQueries.forEach((q, i) => console.log(`   ${i + 1}. "${q}"`))
 
     return {
       subQueries,
@@ -59,20 +65,26 @@ export async function retrieveDocuments(
   state: AgentState
 ): Promise<Partial<AgentState>> {
   try {
+    console.log('\n📚 [AGENT STEP 2/4] RETRIEVE DOCUMENTS')
     const allDocs: DocumentChunk[] = []
     const queriesToSearch = state.subQueries || [state.query]
 
     // Determine number of docs per query based on mode
     const docsPerQuery = state.smartMode || state.reflexion ? 30 : 10
+    console.log(
+      `🔎 Searching ${queriesToSearch.length} queries, ${docsPerQuery} docs per query`
+    )
 
     for (const query of queriesToSearch) {
       // Retrieve French documents
+      console.log(`   Searching: "${query.substring(0, 60)}..."`)
       const frenchDocs = await searchDocuments(
         state.collectionId,
         query,
         docsPerQuery
       )
       allDocs.push(...frenchDocs)
+      console.log(`   ✓ Found ${frenchDocs.length} French documents`)
 
       // If multilingual or translator mode, retrieve Dutch documents
       if (state.multilingual || state.translatorMode) {
@@ -86,6 +98,7 @@ export async function retrieveDocuments(
           state.smartMode || state.reflexion ? 20 : 10
         )
         allDocs.push(...dutchDocs)
+        console.log(`   ✓ Found ${dutchDocs.length} Dutch documents`)
       }
     }
 
@@ -106,7 +119,7 @@ export async function retrieveDocuments(
     }
 
     console.log(
-      `[Retrieve] Retrieved ${uniqueDocs.length} unique documents after deduplication`
+      `✅ Retrieved ${uniqueDocs.length} unique documents after deduplication (from ${allDocs.length} total)\n`
     )
     return {
       retrievedDocs: uniqueDocs,
@@ -174,8 +187,9 @@ export async function gradeDocumentsReflexion(
   state: AgentState
 ): Promise<Partial<AgentState>> {
   try {
+    console.log('\n⭐ [AGENT STEP 3/4] GRADE DOCUMENTS (REFLEXION MODE)')
     console.log(
-      `[Grading] Starting reflexion grading for ${state.retrievedDocs.length} documents`
+      `📊 Evaluating ${state.retrievedDocs.length} documents in parallel...`
     )
 
     // Grade all documents in parallel for speed
@@ -203,20 +217,36 @@ export async function gradeDocumentsReflexion(
 
         const result = JSON.parse(jsonString) as ReflexionGradingResult
 
-        if (result.pertinenceScore >= 3) {
-          return {
-            ...doc,
-            score: result.pertinenceScore,
-            metadata: {
-              ...doc.metadata,
-              pertinenceScore: result.pertinenceScore,
-              justification: result.justification,
-            },
-          }
+        // Validate score is a number between 1-10
+        if (
+          typeof result.pertinenceScore !== 'number' ||
+          result.pertinenceScore < 1 ||
+          result.pertinenceScore > 10
+        ) {
+          console.warn(
+            `Invalid pertinence score: ${result.pertinenceScore} for doc`
+          )
+          return null
         }
-        return null
+
+        // Accept any score >= 1 (very inclusive)
+        // We'll filter and sort later
+        return {
+          ...doc,
+          score: result.pertinenceScore,
+          metadata: {
+            ...doc.metadata,
+            pertinenceScore: result.pertinenceScore,
+            justification: result.justification,
+          },
+        }
       } catch (parseError) {
-        console.error('Error parsing reflexion grading result:', parseError)
+        console.error(
+          'Error parsing reflexion grading result:',
+          parseError,
+          'Response:',
+          jsonString?.substring(0, 200)
+        )
         return null
       }
     })
@@ -228,29 +258,79 @@ export async function gradeDocumentsReflexion(
     >
 
     console.log(
-      `[Grading] ${scoredDocs.length} documents passed threshold (>= 3/10)`
-    )
-    console.log(
-      `[Grading] Scores: ${scoredDocs.map((d) => d.score).join(', ')}`
+      `✅ Graded ${scoredDocs.length}/${state.retrievedDocs.length} documents successfully`
     )
 
-    // Sort by score descending and take top 30
-    scoredDocs.sort((a, b) => b.score - a.score)
-    const relevantDocs = scoredDocs.slice(0, 30)
+    if (scoredDocs.length > 0) {
+      const scores = scoredDocs.map((d) => d.score)
+      console.log(
+        `📈 Score distribution: min=${Math.min(...scores)}, max=${Math.max(...scores)}, avg=${(scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(1)}`
+      )
+      console.log(
+        `📊 All scores: ${scores.slice(0, 20).join(', ')}${scores.length > 20 ? '...' : ''}`
+      )
 
-    console.log(
-      `[Grading] Returning top ${relevantDocs.length} documents after filtering`
-    )
+      // Filter by threshold >= 2
+      const passedThreshold = scoredDocs.filter((d) => d.score >= 2)
+      console.log(
+        `✓ ${passedThreshold.length} documents passed threshold (>= 2/10)`
+      )
 
-    // Fallback: if no relevant docs, use first document
-    if (relevantDocs.length === 0 && state.retrievedDocs.length > 0) {
-      return {
-        relevantDocs: [state.retrievedDocs[0]],
+      // If enough docs passed threshold, use them
+      if (passedThreshold.length >= 10) {
+        // Sort by score descending and take top 30
+        passedThreshold.sort((a, b) => b.score - a.score)
+        const relevantDocs = passedThreshold.slice(0, 30)
+
+        console.log(
+          `📑 Using ${relevantDocs.length} threshold-passing documents`
+        )
+        console.log(
+          `   Top 5 scores: ${relevantDocs.slice(0, 5).map((d) => d.score).join(', ')}\n`
+        )
+
+        return {
+          relevantDocs,
+        }
+      } else {
+        // Fallback: If not enough passed threshold, take top 30 by score regardless
+        console.log(
+          `⚠️  Only ${passedThreshold.length} passed threshold - using top 30 by score instead`
+        )
+        scoredDocs.sort((a, b) => b.score - a.score)
+        const relevantDocs = scoredDocs.slice(0, 30)
+
+        console.log(
+          `📑 Returning top ${relevantDocs.length} documents by score`
+        )
+        console.log(
+          `   Top 5 scores: ${relevantDocs.slice(0, 5).map((d) => d.score).join(', ')}\n`
+        )
+
+        return {
+          relevantDocs,
+        }
       }
     }
 
+    // Final fallback: use vector similarity scores if grading completely failed
+    console.log(
+      '⚠️  All grading failed - falling back to vector similarity scores'
+    )
+    const docsWithSimilarity = state.retrievedDocs
+      .map((doc) => ({
+        ...doc,
+        score: doc.metadata.similarity || 0,
+      }))
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 30)
+
+    console.log(
+      `📑 Using top ${docsWithSimilarity.length} documents by similarity\n`
+    )
+
     return {
-      relevantDocs,
+      relevantDocs: docsWithSimilarity,
     }
   } catch (error) {
     console.error('Error grading documents (reflexion):', error)
@@ -265,6 +345,11 @@ export async function generateResponse(
   state: AgentState
 ): Promise<Partial<AgentState>> {
   try {
+    console.log('\n✍️  [AGENT STEP 4/4] GENERATE FINAL ANSWER')
+    console.log(
+      `📄 Using ${state.relevantDocs.length} documents to generate response...`
+    )
+
     // Format documents
     const formattedDocs = state.relevantDocs
       .map((doc, idx) => {
@@ -297,6 +382,8 @@ export async function generateResponse(
         .replace(/```/g, '')
         .trim()
     }
+
+    console.log(`✅ Answer generated (${answer.length} characters)\n`)
 
     return {
       answer,

@@ -31,6 +31,13 @@ export async function GET(
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
+    // Debug: log form data structure
+    if ('formData' in memo && memo.formData) {
+      console.log("[Memo API] FormData keys:", Object.keys(memo.formData.data || {}));
+      console.log("[Memo API] Missing fields:", memo.formData.missingFields);
+      console.log("[Memo API] Form field names:", memo.formData.form?.fields?.map((f: any) => f.name));
+    }
+
     return NextResponse.json({ data: memo });
   } catch (error) {
     if (error instanceof Error) {

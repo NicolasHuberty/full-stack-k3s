@@ -38,14 +38,30 @@ export async function POST(
       );
     }
 
-    // Filter audio files only
-    const audioFiles = files.filter((file) =>
-      file.mimeType.startsWith("audio/"),
-    );
+    // Filter audio files (including video/webm which browsers use for audio-only recordings)
+    const audioFiles = files.filter((file) => {
+      // Accept audio/* MIME types
+      if (file.mimeType.startsWith("audio/")) return true;
+      // Accept video/webm as it's commonly used for audio-only recordings
+      if (file.mimeType === "video/webm") return true;
+      // Accept files with audio-related extensions
+      if (file.filename.match(/\.(webm|ogg|mp3|m4a|wav|opus)$/i)) return true;
+      return false;
+    });
 
     if (audioFiles.length === 0) {
+      console.error(
+        `No audio files found for memo ${id}. Available files:`,
+        files.map((f) => ({ id: f.id, filename: f.filename, mimeType: f.mimeType })),
+      );
       return NextResponse.json(
-        { error: "No audio files found" },
+        {
+          error: "No audio files found",
+          details: {
+            totalFiles: files.length,
+            fileTypes: files.map((f) => f.mimeType),
+          }
+        },
         { status: 400 },
       );
     }

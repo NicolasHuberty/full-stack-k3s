@@ -45,12 +45,16 @@ export class ExtractionService {
     }
 
     // Build JSON schema for the form
-    const _schema = this.buildJsonSchema(form);
+    const schema = this.buildJsonSchema(form);
 
-    // Create extraction prompt
-    const prompt = this.buildExtractionPrompt(memo.content, form);
+    // Create extraction prompt with JSON schema
+    const prompt = this.buildExtractionPrompt(memo.content, form, schema);
 
-    // Call Mistral AI for extraction
+    console.log("[Extraction] Memo content:", memo.content);
+    console.log("[Extraction] Form fields:", form.fields.map((f: any) => ({ name: f.name, type: f.type, required: f.required })));
+    console.log("[Extraction] JSON Schema:", JSON.stringify(schema, null, 2));
+
+    // Call Mistral AI for extraction with JSON schema
     const completion = await mistral.chat.complete({
       model: "mistral-large-latest",
       messages: [
@@ -61,6 +65,7 @@ export class ExtractionService {
       ],
       responseFormat: {
         type: "json_object",
+        schema: schema,
       },
     });
 
@@ -75,6 +80,8 @@ export class ExtractionService {
         ? responseContent
         : JSON.stringify(responseContent);
     const extractedData = JSON.parse(contentString);
+
+    console.log("[Extraction] AI extracted data:", extractedData);
 
     // Validate and identify missing required fields
     const missingFields = this.identifyMissingFields(form, extractedData);
@@ -135,40 +142,28 @@ export class ExtractionService {
   /**
    * Build extraction prompt for AI
    */
-  private buildExtractionPrompt(content: string, form: any): string {
+  private buildExtractionPrompt(content: string, form: any, schema: any): string {
     const fieldsDescription = form.fields
       .map(
         (field: any) =>
-          `- ${field.label} (${field.name}): ${field.description}${field.required ? " [REQUIRED]" : " [OPTIONAL]"}
-  Type: ${field.type}${field.options && field.options.length > 0 ? `\n  Options: ${field.options.map((o: any) => o.label).join(", ")}` : ""}`,
+          `- "${field.name}": ${field.description}${field.required ? " [REQUIRED]" : ""}${field.options && field.options.length > 0 ? `\n  Valid options: ${field.options.map((o: any) => `"${o.value}"`).join(", ")}` : ""}`,
       )
-      .join("\n\n");
+      .join("\n");
 
-    return `You are a data extraction assistant. Extract structured information from the following text based on the specified fields.
-
-FORM: ${form.name}
-${form.description ? `DESCRIPTION: ${form.description}\n` : ""}
-FIELDS TO EXTRACT:
+    return `Extract structured information from the following text to fill out this form: "${form.name}".
+${form.description ? `Form description: ${form.description}\n` : ""}
+Fields to extract:
 ${fieldsDescription}
 
+IMPORTANT INSTRUCTIONS:
+- Extract the semantic content regardless of the language used in the text
+- For REQUIRED fields, extract the best matching information. If truly not found, use null
+- For optional fields, only include if clearly present in the text
+- For SELECT fields, use only the valid option values provided
+- The JSON schema will enforce the correct field names and types
+
 TEXT TO ANALYZE:
-${content}
-
-INSTRUCTIONS:
-1. Extract the requested information from the text above
-2. For REQUIRED fields, try your best to find the information
-3. If a REQUIRED field cannot be found, set it to null
-4. For OPTIONAL fields, only include them if the information is clearly present
-5. Follow the specified field types and options
-6. Return ONLY a valid JSON object with the extracted data
-7. Use the exact field names (name property) as JSON keys
-
-Return the data in this JSON format:
-{
-  "field_name_1": "extracted value",
-  "field_name_2": "extracted value",
-  ...
-}`;
+${content}`;
   }
 
   /**

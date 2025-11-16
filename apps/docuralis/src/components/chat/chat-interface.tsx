@@ -17,6 +17,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import ReactMarkdown from 'react-markdown'
 import { AgentActions } from './agent-actions'
+import { PDFViewer } from '@/components/pdf-viewer'
 
 interface Message {
   id: string
@@ -68,6 +69,11 @@ export function ChatInterface({
     {}
   )
   const [selectedModel, setSelectedModel] = useState<string>('gpt-4o-mini')
+  const [pdfViewer, setPdfViewer] = useState<{
+    documentId: string
+    documentName: string
+    collectionId?: string
+  } | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -293,13 +299,15 @@ export function ChatInterface({
                         {msg.documentChunks.map((chunk: any, i: number) => (
                           <button
                             key={i}
-                            onClick={() =>
-                              chunk?.documentId &&
-                              window.open(
-                                `/api/documents/${chunk.documentId}/download`,
-                                '_blank'
-                              )
-                            }
+                            onClick={() => {
+                              if (chunk?.documentId && chunk?.documentName) {
+                                setPdfViewer({
+                                  documentId: chunk.documentId,
+                                  documentName: chunk.documentName,
+                                  collectionId: chunk.collectionId,
+                                })
+                              }
+                            }}
                             className="w-full text-left p-3 rounded-lg border border-gray-200 hover:border-blue-400 hover:bg-blue-50 transition-all group"
                           >
                             <div className="flex items-start justify-between gap-2">
@@ -409,6 +417,16 @@ export function ChatInterface({
           </Button>
         </div>
       </div>
+
+      {/* PDF Viewer Modal */}
+      {pdfViewer && (
+        <PDFViewer
+          documentId={pdfViewer.documentId}
+          documentName={pdfViewer.documentName}
+          collectionId={pdfViewer.collectionId}
+          onClose={() => setPdfViewer(null)}
+        />
+      )}
     </div>
   )
 }

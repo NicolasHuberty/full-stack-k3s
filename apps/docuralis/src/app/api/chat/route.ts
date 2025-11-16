@@ -31,9 +31,13 @@ export async function POST(request: NextRequest) {
 
     // If agentId is provided, use agent execution
     if (validatedData.agentId && validatedData.collectionId) {
+      // Check if client wants streaming (via Accept header)
+      const acceptHeader = request.headers.get('accept')
+      const wantsStream = acceptHeader?.includes('text/event-stream')
+
       const agentService = getAgentService()
 
-      // Execute agent
+      // Execute agent (streaming happens internally, logs visible in console)
       const agentResult = await agentService.executeAgent(
         validatedData.agentId,
         validatedData.message,

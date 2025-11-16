@@ -72,7 +72,9 @@ export function AppLayout({ children }: AppLayoutProps) {
 
   const isActive = (href: string) => {
     if (href === "/") return pathname === "/";
-    return pathname?.startsWith(href);
+    // Exact match for the current path or match if it's a parent path followed by /
+    if (pathname === href) return true;
+    return pathname?.startsWith(href + "/");
   };
 
   return (

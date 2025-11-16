@@ -594,8 +594,10 @@ export async function searchDocuments(
       documents.map((d) => [
         d.id,
         {
+          id: d.id,
           title: d.originalName,
           source: d.filename,
+          originalName: d.originalName,
         },
       ])
     )
@@ -606,8 +608,9 @@ export async function searchDocuments(
       return {
         pageContent: result.payload.content,
         metadata: {
+          documentId: doc?.id || result.payload.documentId, // Include document ID
           title: doc?.title || 'Unknown',
-          source: doc?.source || 'Unknown',
+          source: doc?.originalName || doc?.source || 'Unknown', // Prefer originalName
           pageNumber: result.payload.chunkIndex || 0,
           similarity: result.score,
         },

@@ -49,10 +49,10 @@ export interface SearchResult {
 
 class QdrantService {
   private client: QdrantClient
-
   constructor() {
     this.client = new QdrantClient({
       url: process.env.QDRANT_URL || 'http://localhost:6333',
+      port: 443, // Explicitly set port to override default 6333
       apiKey: process.env.QDRANT_API_KEY,
     })
   }

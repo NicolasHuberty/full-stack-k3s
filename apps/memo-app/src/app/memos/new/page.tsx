@@ -240,14 +240,18 @@ export default function NewMemoPage() {
           );
         }
 
-        // Start transcription for audio
+        // Start transcription for audio (non-blocking, just log errors)
         const transcribeRes = await fetch(`/api/memos/${memo.id}/transcribe`, {
           method: "POST",
         });
 
         if (!transcribeRes.ok) {
-          const transcribeError = await transcribeRes.json();
-          console.error("Failed to start transcription:", transcribeError);
+          try {
+            const transcribeError = await transcribeRes.json();
+            console.error("Failed to start transcription:", transcribeError);
+          } catch (jsonError) {
+            console.error("Failed to parse transcription error response");
+          }
         }
       } else {
         // For text input, trigger AI processing directly

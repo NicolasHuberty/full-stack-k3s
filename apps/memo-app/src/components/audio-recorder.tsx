@@ -40,9 +40,26 @@ export function AudioRecorder({
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
 
-      const mediaRecorder = new MediaRecorder(stream, {
-        mimeType: "audio/webm",
-      });
+      // Check for supported MIME types, prioritizing audio formats
+      let mimeType = "audio/webm";
+      const mimeTypes = [
+        "audio/webm",
+        "audio/webm;codecs=opus",
+        "audio/ogg;codecs=opus",
+        "audio/mp4",
+        "video/webm", // Fallback - some browsers use this for audio-only
+      ];
+
+      for (const type of mimeTypes) {
+        if (MediaRecorder.isTypeSupported(type)) {
+          mimeType = type;
+          break;
+        }
+      }
+
+      console.log(`Using MIME type for recording: ${mimeType}`);
+
+      const mediaRecorder = new MediaRecorder(stream, { mimeType });
 
       mediaRecorderRef.current = mediaRecorder;
       chunksRef.current = [];
@@ -54,7 +71,9 @@ export function AudioRecorder({
       };
 
       mediaRecorder.onstop = () => {
-        const blob = new Blob(chunksRef.current, { type: "audio/webm" });
+        // Use the actual MIME type from the MediaRecorder
+        const actualMimeType = mediaRecorder.mimeType || mimeType;
+        const blob = new Blob(chunksRef.current, { type: actualMimeType });
         setAudioBlob(blob);
         const url = URL.createObjectURL(blob);
         setAudioUrl(url);
@@ -97,11 +116,21 @@ export function AudioRecorder({
     try {
       setUploading(true);
 
+      // Use the blob's type, or detect file extension from type
+      const mimeType = audioBlob.type || "audio/webm";
+      const extension = mimeType.includes("ogg") ? "ogg" :
+                       mimeType.includes("mp4") ? "mp4" : "webm";
+
       const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
-      const filename = `recording-${timestamp}.webm`;
+      const filename = `recording-${timestamp}.${extension}`;
+
+      // Create a File object preserving the blob's MIME type
+      const file = new File([audioBlob], filename, { type: mimeType });
+
+      console.log(`Uploading audio file: ${filename}, type: ${mimeType}`);
 
       const formData = new FormData();
-      formData.append("file", audioBlob, filename);
+      formData.append("file", file);
 
       const response = await fetch("/api/files/upload", {
         method: "POST",

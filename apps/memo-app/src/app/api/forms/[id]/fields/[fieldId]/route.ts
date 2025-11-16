@@ -32,7 +32,8 @@ export async function PATCH(
     console.error("Update field error:", error);
     return NextResponse.json(
       {
-        error: error instanceof Error ? error.message : "Failed to update field",
+        error:
+          error instanceof Error ? error.message : "Failed to update field",
       },
       { status: 500 },
     );
@@ -61,7 +62,8 @@ export async function DELETE(
     console.error("Delete field error:", error);
     return NextResponse.json(
       {
-        error: error instanceof Error ? error.message : "Failed to delete field",
+        error:
+          error instanceof Error ? error.message : "Failed to delete field",
       },
       { status: 500 },
     );

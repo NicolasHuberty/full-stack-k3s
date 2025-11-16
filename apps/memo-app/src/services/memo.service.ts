@@ -13,9 +13,7 @@ export class MemoService {
   /**
    * Create a new memo
    */
-  async createMemo(
-    data: CreateMemoInput & { userId: string },
-  ): Promise<Memo> {
+  async createMemo(data: CreateMemoInput & { userId: string }): Promise<Memo> {
     const memo = await prisma.memo.create({
       data: {
         title: data.title,

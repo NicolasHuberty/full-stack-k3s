@@ -79,7 +79,11 @@ export async function GET(
       }
       const stringValue = String(value);
       // Escape quotes and wrap in quotes if contains comma, quote, or newline
-      if (stringValue.includes(",") || stringValue.includes('"') || stringValue.includes("\n")) {
+      if (
+        stringValue.includes(",") ||
+        stringValue.includes('"') ||
+        stringValue.includes("\n")
+      ) {
         return `"${stringValue.replace(/"/g, '""')}"`;
       }
       return stringValue;
@@ -99,8 +103,7 @@ export async function GET(
     console.error("CSV export error:", error);
     return NextResponse.json(
       {
-        error:
-          error instanceof Error ? error.message : "Failed to export CSV",
+        error: error instanceof Error ? error.message : "Failed to export CSV",
       },
       { status: 500 },
     );

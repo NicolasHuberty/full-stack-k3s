@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: memo
+spec:
+  replicas: 1
+  template:
+    spec:
+      containers:
+        - name: frontend
+          image: ghcr.io/nicolashuberty/full-stack-k3s/memo-app:latest
+          env:
+            - name: NEXTAUTH_URL
+              value: "https://dev.memo.docuralis.com"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: memo-worker
+spec:
+  replicas: 1

@@ -79,7 +79,10 @@ export async function GET(
     if (memo.formData.form.description) {
       doc.setFontSize(11);
       doc.setTextColor(100, 100, 100);
-      const descLines = doc.splitTextToSize(memo.formData.form.description, pageWidth - 2 * margin);
+      const descLines = doc.splitTextToSize(
+        memo.formData.form.description,
+        pageWidth - 2 * margin,
+      );
       doc.text(descLines, pageWidth / 2, yPos, { align: "center" });
       yPos += descLines.length * 5 + 5;
       doc.setTextColor(0, 0, 0);
@@ -92,7 +95,7 @@ export async function GET(
       `Généré le ${new Date().toLocaleDateString("fr-FR")} à ${new Date().toLocaleTimeString("fr-FR")}`,
       pageWidth / 2,
       yPos,
-      { align: "center" }
+      { align: "center" },
     );
     yPos += 15;
     doc.setTextColor(0, 0, 0);
@@ -122,7 +125,10 @@ export async function GET(
       if (field.description) {
         doc.setFontSize(8);
         doc.setTextColor(100, 100, 100);
-        const descLines = doc.splitTextToSize(field.description, pageWidth - 2 * margin);
+        const descLines = doc.splitTextToSize(
+          field.description,
+          pageWidth - 2 * margin,
+        );
         doc.text(descLines, margin, yPos);
         yPos += descLines.length * 4 + 2;
         doc.setTextColor(0, 0, 0);
@@ -149,7 +155,10 @@ export async function GET(
         doc.setTextColor(150, 150, 150);
       } else if (Array.isArray(value)) {
         displayValue = value.join(", ");
-      } else if (field.type === FieldType.BOOLEAN || field.type === FieldType.CHECKBOX) {
+      } else if (
+        field.type === FieldType.BOOLEAN ||
+        field.type === FieldType.CHECKBOX
+      ) {
         displayValue = value ? "[X] Oui" : "[ ] Non";
       } else if (field.type === FieldType.DATE) {
         displayValue = new Date(value).toLocaleDateString("fr-FR");
@@ -162,7 +171,10 @@ export async function GET(
       }
 
       doc.setFontSize(10);
-      const valueLines = doc.splitTextToSize(displayValue, pageWidth - 2 * margin - 4);
+      const valueLines = doc.splitTextToSize(
+        displayValue,
+        pageWidth - 2 * margin - 4,
+      );
       doc.text(valueLines[0] || "", margin + 2, yPos + 7);
       doc.setTextColor(0, 0, 0);
 
@@ -183,11 +195,13 @@ export async function GET(
         `! ${missingFields.length} champ(s) requis manquant(s): ${missingFields.join(", ")}`,
         pageWidth / 2,
         yPos,
-        { align: "center", maxWidth: pageWidth - 2 * margin }
+        { align: "center", maxWidth: pageWidth - 2 * margin },
       );
     } else {
       doc.setTextColor(0, 170, 0);
-      doc.text("Tous les champs requis sont remplis", pageWidth / 2, yPos, { align: "center" });
+      doc.text("Tous les champs requis sont remplis", pageWidth / 2, yPos, {
+        align: "center",
+      });
     }
 
     // Convert to blob
@@ -204,8 +218,7 @@ export async function GET(
     console.error("PDF export error:", error);
     return NextResponse.json(
       {
-        error:
-          error instanceof Error ? error.message : "Failed to export PDF",
+        error: error instanceof Error ? error.message : "Failed to export PDF",
       },
       { status: 500 },
     );

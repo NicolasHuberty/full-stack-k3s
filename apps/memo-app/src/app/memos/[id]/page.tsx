@@ -84,7 +84,11 @@ interface AttachedFile {
 
 const statusConfig: Record<
   MemoStatus,
-  { label: string; variant: "default" | "secondary" | "destructive" | "outline"; icon: any }
+  {
+    label: string;
+    variant: "default" | "secondary" | "destructive" | "outline";
+    icon: any;
+  }
 > = {
   DRAFT: { label: "Brouillon", variant: "secondary", icon: Edit2 },
   PREPARING: { label: "Préparation", variant: "outline", icon: Clock },
@@ -149,9 +153,11 @@ export default function MemoDetailPage({
       const memoData = await memoResponse.json();
 
       // Only update if status changed or content changed
-      if (memoData.data.status !== memo?.status ||
-          memoData.data.content !== memo?.content ||
-          memoData.data.title !== memo?.title) {
+      if (
+        memoData.data.status !== memo?.status ||
+        memoData.data.content !== memo?.content ||
+        memoData.data.title !== memo?.title
+      ) {
         // Full refresh when processing completes or content updates
         await fetchMemo();
       } else {
@@ -503,10 +509,12 @@ export default function MemoDetailPage({
                   <div>
                     <CardTitle>{memo.formData.form.name}</CardTitle>
                     <CardDescription>
-                      {memo.formData.form.description || "Données extraites par l'IA"}
+                      {memo.formData.form.description ||
+                        "Données extraites par l'IA"}
                       {memo.formData.missingFields.length > 0 && (
                         <span className="text-yellow-600 ml-2">
-                          ({memo.formData.missingFields.length} champ(s) manquant(s))
+                          ({memo.formData.missingFields.length} champ(s)
+                          manquant(s))
                         </span>
                       )}
                     </CardDescription>
@@ -571,8 +579,12 @@ export default function MemoDetailPage({
               <CardContent>
                 <div className="grid gap-4">
                   {memo.formData.form.fields.map((field) => {
-                    const value = isEditingForm ? formData[field.name] : memo.formData!.data[field.name];
-                    const isMissing = memo.formData!.missingFields.includes(field.name);
+                    const value = isEditingForm
+                      ? formData[field.name]
+                      : memo.formData!.data[field.name];
+                    const isMissing = memo.formData!.missingFields.includes(
+                      field.name,
+                    );
 
                     return (
                       <div
@@ -587,7 +599,10 @@ export default function MemoDetailPage({
                                 <span className="text-destructive">*</span>
                               )}
                               {isMissing && (
-                                <Badge variant="outline" className="text-yellow-600 border-yellow-600">
+                                <Badge
+                                  variant="outline"
+                                  className="text-yellow-600 border-yellow-600"
+                                >
                                   Manquant
                                 </Badge>
                               )}
@@ -607,7 +622,12 @@ export default function MemoDetailPage({
                               {field.type === "TEXTAREA" ? (
                                 <Textarea
                                   value={value || ""}
-                                  onChange={(e) => handleFormFieldChange(field.name, e.target.value)}
+                                  onChange={(e) =>
+                                    handleFormFieldChange(
+                                      field.name,
+                                      e.target.value,
+                                    )
+                                  }
                                   rows={3}
                                   className="w-full"
                                 />
@@ -615,31 +635,60 @@ export default function MemoDetailPage({
                                 <Input
                                   type="number"
                                   value={value || ""}
-                                  onChange={(e) => handleFormFieldChange(field.name, e.target.value)}
+                                  onChange={(e) =>
+                                    handleFormFieldChange(
+                                      field.name,
+                                      e.target.value,
+                                    )
+                                  }
                                   className="w-full"
                                 />
                               ) : field.type === "DATE" ? (
                                 <Input
                                   type="date"
-                                  value={value ? new Date(value).toISOString().split('T')[0] : ""}
-                                  onChange={(e) => handleFormFieldChange(field.name, e.target.value)}
+                                  value={
+                                    value
+                                      ? new Date(value)
+                                          .toISOString()
+                                          .split("T")[0]
+                                      : ""
+                                  }
+                                  onChange={(e) =>
+                                    handleFormFieldChange(
+                                      field.name,
+                                      e.target.value,
+                                    )
+                                  }
                                   className="w-full"
                                 />
-                              ) : field.type === "BOOLEAN" || field.type === "CHECKBOX" ? (
+                              ) : field.type === "BOOLEAN" ||
+                                field.type === "CHECKBOX" ? (
                                 <div className="flex items-center gap-2">
                                   <input
                                     type="checkbox"
                                     checked={!!value}
-                                    onChange={(e) => handleFormFieldChange(field.name, e.target.checked)}
+                                    onChange={(e) =>
+                                      handleFormFieldChange(
+                                        field.name,
+                                        e.target.checked,
+                                      )
+                                    }
                                     className="w-4 h-4"
                                   />
-                                  <span className="text-sm">{value ? "Oui" : "Non"}</span>
+                                  <span className="text-sm">
+                                    {value ? "Oui" : "Non"}
+                                  </span>
                                 </div>
                               ) : (
                                 <Input
                                   type="text"
                                   value={value || ""}
-                                  onChange={(e) => handleFormFieldChange(field.name, e.target.value)}
+                                  onChange={(e) =>
+                                    handleFormFieldChange(
+                                      field.name,
+                                      e.target.value,
+                                    )
+                                  }
                                   className="w-full"
                                 />
                               )}
@@ -647,7 +696,9 @@ export default function MemoDetailPage({
                           ) : (
                             // Display value
                             <>
-                              {value === null || value === undefined || value === "" ? (
+                              {value === null ||
+                              value === undefined ||
+                              value === "" ? (
                                 <p className="text-sm text-muted-foreground italic">
                                   Non renseigné
                                 </p>
@@ -659,8 +710,11 @@ export default function MemoDetailPage({
                                     </Badge>
                                   ))}
                                 </div>
-                              ) : field.type === "BOOLEAN" || field.type === "CHECKBOX" ? (
-                                <Badge variant={value ? "default" : "secondary"}>
+                              ) : field.type === "BOOLEAN" ||
+                                field.type === "CHECKBOX" ? (
+                                <Badge
+                                  variant={value ? "default" : "secondary"}
+                                >
                                   {value ? "Oui" : "Non"}
                                 </Badge>
                               ) : field.type === "DATE" ? (

@@ -48,7 +48,7 @@ export default function Home() {
             ...prev,
             totalMemos: data.length,
             processingMemos: data.filter(
-              (m: any) => m.status === "RUNNING" || m.status === "PREPARING"
+              (m: any) => m.status === "RUNNING" || m.status === "PREPARING",
             ).length,
           }));
           setRecentMemos(data.slice(0, 5));
@@ -133,9 +133,7 @@ export default function Home() {
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">
-                Formulaires
-              </CardTitle>
+              <CardTitle className="text-sm font-medium">Formulaires</CardTitle>
               <FolderKanban className="size-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -153,9 +151,7 @@ export default function Home() {
             <div className="flex items-center justify-between">
               <div>
                 <CardTitle>Mémos Récents</CardTitle>
-                <CardDescription>
-                  Vos derniers mémos créés
-                </CardDescription>
+                <CardDescription>Vos derniers mémos créés</CardDescription>
               </div>
               <Link href="/memos">
                 <Button variant="ghost" size="sm" className="gap-2">
@@ -195,7 +191,9 @@ export default function Home() {
                         <div>
                           <p className="font-medium">{memo.title}</p>
                           <p className="text-xs text-muted-foreground">
-                            {new Date(memo.createdAt).toLocaleDateString("fr-FR")}
+                            {new Date(memo.createdAt).toLocaleDateString(
+                              "fr-FR",
+                            )}
                           </p>
                         </div>
                       </div>
@@ -252,8 +250,8 @@ export default function Home() {
                 Audio → Texte
               </CardTitle>
               <CardDescription>
-                Enregistrez des mémos vocaux et laissez l'IA les transcrire
-                et les structurer automatiquement en documents professionnels
+                Enregistrez des mémos vocaux et laissez l'IA les transcrire et
+                les structurer automatiquement en documents professionnels
               </CardDescription>
             </CardHeader>
             <CardContent>

@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: memo-worker
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: memo-worker
+  template:
+    metadata:
+      labels:
+        app: memo-worker
+    spec:
+      containers:
+      - name: worker
+        image: ghcr.io/nicolashuberty/full-stack-k3s/memo-worker:latest
+        env:
+        - name: NODE_ENV
+          value: production
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: memo-secrets
+              key: database-url
+        - name: REDIS_URL
+          value: redis://redis.database.svc.cluster.local:6379
+        - name: MISTRAL_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: memo-secrets
+              key: mistral-api-key
+        - name: MINIO_ENDPOINT
+          value: minio.storage.svc.cluster.local
+        - name: MINIO_PORT
+          value: "9000"
+        - name: MINIO_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: memo-secrets
+              key: minio-access-key
+        - name: MINIO_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: memo-secrets
+              key: minio-secret-key
+        - name: MINIO_USE_SSL
+          value: "false"
+        - name: MINIO_BUCKET_NAME
+          value: memo
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"

@@ -18,9 +18,9 @@ commonLabels:
 
 images:
   - name: ghcr.io/nicolashuberty/full-stack-k3s/memo-app
-    newTag: latest
+    newTag: dev
   - name: ghcr.io/nicolashuberty/full-stack-k3s/memo-worker
-    newTag: latest
+    newTag: dev
 
 configMapGenerator:
   - name: env-config

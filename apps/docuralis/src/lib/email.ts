@@ -158,9 +158,9 @@ export function getEmailLayout(content: string) {
         This email was sent to you because you have an account with Docuralis or were invited to join.
       </p>
       <div class="footer-links">
-        <a href="${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3001'}">Visit Website</a>
-        <a href="${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3001'}/privacy">Privacy Policy</a>
-        <a href="${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3001'}/terms">Terms of Service</a>
+        <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://docuralis.com'}">Visit Website</a>
+        <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://docuralis.com'}/privacy">Privacy Policy</a>
+        <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://docuralis.com'}/terms">Terms of Service</a>
       </div>
     </div>
   </div>

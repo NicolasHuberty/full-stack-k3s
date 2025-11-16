@@ -13,7 +13,7 @@ export function getWelcomeEmail(name: string) {
       <li>Chat with AI agents about your documents</li>
     </ul>
 
-    <a href="${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3001'}/dashboard" class="button">
+    <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://docuralis.com'}/dashboard" class="button">
       Go to Dashboard
     </a>
 
@@ -46,7 +46,7 @@ export function getLoginNotificationEmail(
     <p>If this was you, you can safely ignore this email.</p>
     <p style="color: #dc2626; font-weight: 600;">If you didn't log in, please secure your account immediately:</p>
 
-    <a href="${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3001'}/settings/security" class="button">
+    <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://docuralis.com'}/settings/security" class="button">
       Secure My Account
     </a>
 
@@ -66,7 +66,7 @@ export function getOrganizationInvitationEmail(
   inviteToken: string,
   role: string
 ) {
-  const inviteUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3001'}/invite/${inviteToken}`
+  const inviteUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://docuralis.com'}/invite/${inviteToken}`
 
   const content = `
     <h2 style="color: #0A2540; margin-bottom: 20px;">You've Been Invited! 🎉</h2>
@@ -115,7 +115,7 @@ export function getMemberAddedEmail(
       <li>Organization storage</li>
     </ul>
 
-    <a href="${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3001'}/dashboard" class="button">
+    <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://docuralis.com'}/dashboard" class="button">
       Go to Dashboard
     </a>
 
@@ -129,7 +129,7 @@ export function getMemberAddedEmail(
 }
 
 export function getPasswordResetEmail(name: string, resetToken: string) {
-  const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3001'}/reset-password/${resetToken}`
+  const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://docuralis.com'}/reset-password/${resetToken}`
 
   const content = `
     <h2 style="color: #0A2540; margin-bottom: 20px;">Reset Your Password 🔑</h2>
@@ -180,7 +180,7 @@ export function getSeatLimitEmail(
       <li>Remove inactive members</li>
     </ul>
 
-    <a href="${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3001'}/settings/billing" class="button">
+    <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://docuralis.com'}/settings/billing" class="button">
       Upgrade Plan
     </a>
 
@@ -210,7 +210,7 @@ export function getTrialEndingEmail(
       <p style="margin-bottom: 0;">Your account will be downgraded to the Free plan with limited features and storage.</p>
     </div>
 
-    <a href="${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3001'}/settings/billing" class="button">
+    <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://docuralis.com'}/settings/billing" class="button">
       Upgrade Now
     </a>
 

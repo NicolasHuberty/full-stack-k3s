@@ -73,7 +73,7 @@ export class ExtractionService {
       responseFormat: {
         type: "json_object",
         schema: schema,
-      },
+      } as any,
     });
 
     const responseContent = completion.choices?.[0]?.message?.content;

@@ -8,12 +8,17 @@ class MinIOClient {
   private bucketName: string
 
   constructor() {
+    const useSSL = process.env.MINIO_USE_SSL === 'true'
+    const port = parseInt(process.env.MINIO_PORT || (useSSL ? '443' : '9000'))
+
     this.client = new Minio.Client({
       endPoint: process.env.MINIO_ENDPOINT || 'localhost',
-      port: parseInt(process.env.MINIO_PORT || '9000'),
-      useSSL: process.env.MINIO_USE_SSL === 'true',
+      port: port,
+      useSSL: useSSL,
       accessKey: process.env.MINIO_ACCESS_KEY || 'minioadmin',
       secretKey: process.env.MINIO_SECRET_KEY || 'minioadmin',
+      // For MinIO behind reverse proxy/CDN
+      pathStyle: true,
     })
     this.bucketName = BUCKET_NAME
   }
@@ -169,6 +174,55 @@ class MinIOClient {
       return true
     } catch {
       return false
+    }
+  }
+
+  async listObjects(prefix: string = '', recursive: boolean = false) {
+    return this.client.listObjects(this.bucketName, prefix, recursive)
+  }
+
+  async findFileByName(filename: string): Promise<string | null> {
+    try {
+      const objectStream = this.client.listObjects(this.bucketName, '', true)
+
+      for await (const obj of objectStream) {
+        if (obj.name?.endsWith(filename)) {
+          return obj.name
+        }
+      }
+
+      return null
+    } catch (error) {
+      console.error('Failed to search for file:', error)
+      return null
+    }
+  }
+
+  async downloadFileByName(
+    filename: string,
+    collectionId?: string
+  ): Promise<Buffer> {
+    try {
+      // First try with collection prefix if provided
+      if (collectionId) {
+        const fullPath = `${collectionId}/${filename}`
+        if (await this.fileExists(fullPath)) {
+          return await this.downloadFile(fullPath)
+        }
+      }
+
+      // Try finding the file by searching
+      const foundPath = await this.findFileByName(filename)
+      if (!foundPath) {
+        throw new Error(`File not found: ${filename}`)
+      }
+
+      return await this.downloadFile(foundPath)
+    } catch (error) {
+      console.error('Failed to download file by name:', error)
+      throw new Error(
+        `Failed to download file by name: ${error instanceof Error ? error.message : 'Unknown error'}`
+      )
     }
   }
 }

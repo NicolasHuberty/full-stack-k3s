@@ -70,61 +70,84 @@ export function AgentActions({
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetchCollectionAgents()
-    fetchModels()
+    // Fetch models and agents, then auto-select
+    const initialize = async () => {
+      let defaultModelName = 'gpt-4o-mini'
+
+      // Fetch models first
+      try {
+        const modelsResponse = await fetch('/api/models')
+        if (modelsResponse.ok) {
+          const modelsData = await modelsResponse.json()
+          setModels(modelsData)
+          const defaultModel = modelsData.find((m: LLMModel) => m.isDefault)
+          if (defaultModel) {
+            defaultModelName = defaultModel.name
+            setSelectedModel(defaultModel.name)
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch models:', error)
+      }
+
+      // Then fetch and auto-select agents
+      try {
+        const agentsResponse = await fetch(`/api/collections/${collectionId}/agents`)
+        if (agentsResponse.ok) {
+          const agentsData = await agentsResponse.json()
+          const activeAgents = agentsData.filter(
+            (ca: { isActive: boolean }) => ca.isActive
+          )
+          setCollectionAgents(activeAgents)
+
+          // Auto-select the first active agent if available
+          if (activeAgents.length > 0) {
+            const firstAgent = activeAgents[0]
+            const initialActionState = firstAgent.actionState || {}
+
+            setSelectedAgent(firstAgent.agent.id)
+            setActionState(initialActionState)
+            onAgentChange?.(firstAgent.agent.id, initialActionState, defaultModelName)
+
+            console.log('🤖 [AgentActions] Auto-selected agent:', {
+              agentId: firstAgent.agent.id,
+              agentName: firstAgent.agent.name,
+              actionState: initialActionState,
+              model: defaultModelName
+            })
+          } else {
+            // No active agents - start with no agent (default behavior)
+            setSelectedAgent(null)
+            setActionState({})
+            onAgentChange?.(null, {}, defaultModelName)
+
+            console.log('📝 [AgentActions] No active agents found, using default chat')
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch collection agents:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    initialize()
   }, [collectionId])
 
-  const fetchModels = async () => {
-    try {
-      const response = await fetch('/api/models')
-      if (response.ok) {
-        const data = await response.json()
-        setModels(data)
-        const defaultModel = data.find((m: LLMModel) => m.isDefault)
-        if (defaultModel) {
-          setSelectedModel(defaultModel.name)
-        }
-      }
-    } catch (error) {
-      console.error('Failed to fetch models:', error)
-    }
-  }
-
-  const fetchCollectionAgents = async () => {
-    try {
-      const response = await fetch(`/api/collections/${collectionId}/agents`)
-      if (response.ok) {
-        const data = await response.json()
-        const activeAgents = data.filter(
-          (ca: { isActive: boolean }) => ca.isActive
-        )
-        setCollectionAgents(activeAgents)
-
-        // Auto-select first agent
-        if (activeAgents.length > 0) {
-          const firstAgent = activeAgents[0]
-          setSelectedAgent(firstAgent.agent.id)
-          setActionState(firstAgent.actionState || {})
-          onAgentChange?.(
-            firstAgent.agent.id,
-            firstAgent.actionState || {},
-            selectedModel
-          )
-        }
-      }
-    } catch (error) {
-      console.error('Failed to fetch collection agents:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
-
   const handleAgentSelect = (agentId: string) => {
-    setSelectedAgent(agentId)
-    const agent = collectionAgents.find((ca) => ca.agent.id === agentId)
-    if (agent) {
-      setActionState(agent.actionState || {})
-      onAgentChange?.(agentId, agent.actionState || {}, selectedModel)
+    // If clicking on the already selected agent, deselect it (use no agent)
+    if (selectedAgent === agentId) {
+      setSelectedAgent(null)
+      setActionState({})
+      onAgentChange?.(null, {}, selectedModel)  // null means no agent
+    } else {
+      // Select the new agent
+      setSelectedAgent(agentId)
+      const agent = collectionAgents.find((ca) => ca.agent.id === agentId)
+      if (agent) {
+        setActionState(agent.actionState || {})
+        onAgentChange?.(agentId, agent.actionState || {}, selectedModel)
+      }
     }
   }
 
@@ -182,13 +205,37 @@ export function AgentActions({
 
   return (
     <div className="border-b bg-muted/30 px-4 py-3">
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 flex-wrap">
         {/* Agent Selector */}
         <div className="flex items-center gap-2">
           <span className="text-xs font-medium text-muted-foreground">
             Agent:
           </span>
           <div className="flex gap-1">
+            {/* No Agent / Default option */}
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant={selectedAgent === null ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => {
+                      setSelectedAgent(null)
+                      setActionState({})
+                      onAgentChange?.(null, {}, selectedModel)
+                    }}
+                    className="h-8 px-2"
+                  >
+                    <Icons.MessageSquare className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>No Agent (Default Chat)</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+
+            {/* Agent options */}
             {collectionAgents.map((ca) => {
               const AgentIcon = getIcon(ca.agent.icon)
               const isSelected = ca.agent.id === selectedAgent
@@ -286,6 +333,16 @@ export function AgentActions({
             </div>
           </>
         )}
+
+        {/* Status indicator */}
+        <div className="ml-auto flex items-center gap-2">
+          <Badge variant={selectedAgent ? "default" : "secondary"} className="text-xs">
+            {selectedAgent
+              ? `Using: ${activeAgent?.agent.name || 'Agent'}`
+              : 'Default Chat (No Agent)'
+            }
+          </Badge>
+        </div>
       </div>
     </div>
   )

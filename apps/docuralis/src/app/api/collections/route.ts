@@ -25,10 +25,11 @@ export async function GET(_request: NextRequest) {
 
     const collections = await getUserCollections(session.user.id)
 
-    // Convert BigInt to string for JSON serialization
+    // Convert BigInt to string for JSON serialization and add documentCount
     const serializedCollections = collections.map((collection) => ({
       ...collection,
       storageUsed: collection.storageUsed.toString(),
+      documentCount: collection._count.documents,
     }))
 
     return NextResponse.json({ collections: serializedCollections })

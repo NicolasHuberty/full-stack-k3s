@@ -117,6 +117,12 @@ export class RAGService {
         documentId: result.payload.documentId,
         documentName: docMap.get(result.payload.documentId) || 'Unknown',
         chunkIndex: result.payload.chunkIndex,
+        pageNumber: result.payload.page_number || result.payload.pageNumber || null,
+        metadata: {
+          pageNumber: result.payload.page_number || result.payload.pageNumber || null,
+          title: docMap.get(result.payload.documentId) || 'Unknown',
+          source: docMap.get(result.payload.documentId) || 'Unknown',
+        },
       }))
 
       return { chunks }
@@ -166,16 +172,9 @@ export class RAGService {
       let relevantChunks: any[] = []
       let context = ''
 
-      console.log('Chat request:', {
-        hasCollectionId: !!params.collectionId,
-        hasSessionCollection: !!session.collectionId,
-        collectionId: params.collectionId || session.collectionId,
-      })
-
       if (params.collectionId || session.collectionId) {
         const collectionId = params.collectionId || session.collectionId
 
-        console.log(`Searching for documents in collection: ${collectionId}`)
 
         // Check access
         const hasAccess = await hasCollectionAccess(
@@ -196,9 +195,13 @@ export class RAGService {
           params.userId
         )
 
-        relevantChunks = searchResult.chunks
-
-        console.log(`Found ${relevantChunks.length} relevant chunks`)
+        relevantChunks = searchResult.chunks.map((chunk: any) => ({
+          ...chunk,
+          // Ensure page number is at top level for frontend compatibility
+          pageNumber: chunk.metadata?.pageNumber || chunk.pageNumber || null,
+          documentName: chunk.metadata?.title || chunk.metadata?.source || chunk.documentName || 'Unknown Document',
+          content: chunk.pageContent || chunk.content,
+        }))
 
         // Build context from chunks
         if (relevantChunks.length > 0) {
@@ -209,7 +212,6 @@ export class RAGService {
             )
             .join('\n\n')
 
-          console.log(`Built context with ${context.length} characters`)
         } else {
           console.warn('No relevant chunks found in collection!')
         }
@@ -251,23 +253,10 @@ ${context}`,
       })
 
       // Call OpenAI
-      console.log('Calling OpenAI with model:', params.model || 'gpt-4o-mini')
       const completion = await this.openai.chat.completions.create({
         model: params.model || 'gpt-4o-mini',
         messages,
         max_completion_tokens: params.maxTokens || 1000,
-      })
-
-      console.log('OpenAI response:', {
-        choices: completion.choices.length,
-        finishReason: completion.choices[0]?.finish_reason,
-        hasContent: !!completion.choices[0]?.message?.content,
-        contentPreview: completion.choices[0]?.message?.content?.substring(
-          0,
-          100
-        ),
-        contentLength: completion.choices[0]?.message?.content?.length,
-        usage: completion.usage,
       })
 
       const assistantMessage = completion.choices[0]?.message?.content || ''
@@ -302,12 +291,6 @@ ${context}`,
           promptTokens: completion.usage?.prompt_tokens || 0,
           completionTokens: completion.usage?.completion_tokens || 0,
         },
-      })
-
-      console.log('Saved assistant message:', {
-        id: assistantMsg.id,
-        content: assistantMsg.content,
-        contentLength: assistantMsg.content?.length,
       })
 
       // Update session title if first message
@@ -412,16 +395,7 @@ ${context}`,
           ...(collectionId && { collectionId }),
         }
       }
-
-      console.log(
-        'getUserSessions - userId:',
-        userId,
-        'filter:',
-        filterType,
-        'whereClause:',
-        JSON.stringify(whereClause, null, 2)
-      )
-
+      
       const sessions = await prisma.chatSession.findMany({
         where: whereClause,
         include: {
@@ -583,11 +557,18 @@ export async function searchDocuments(
       }
     )
 
-    // Get document names
+    // Get document names and chunk page information
     const documentIds = [...new Set(results.map((r) => r.payload.documentId))]
+    const chunkIds = [...new Set(results.map((r) => r.id))]
+
     const documents = await prisma.document.findMany({
       where: { id: { in: documentIds } },
       select: { id: true, originalName: true, filename: true },
+    })
+
+    const chunks = await prisma.documentChunk.findMany({
+      where: { id: { in: chunkIds } },
+      select: { id: true, startPage: true, endPage: true },
     })
 
     const docMap = new Map(
@@ -602,16 +583,32 @@ export async function searchDocuments(
       ])
     )
 
+    const chunkMap = new Map(
+      chunks.map((c) => [c.id, c])
+    )
+
     // Format results to match Emate structure
     return results.map((result) => {
       const doc = docMap.get(result.payload.documentId)
+      const chunk = chunkMap.get(result.id)
+
+      // Get page number from vector payload (direct or in metadata), then fallback to database chunk info
+      const pageNumber = result.payload.page_number ||  // Direct field (for migrated documents)
+                          result.payload.pageNumber ||   // Alternative naming
+                          result.payload.metadata?.pageNumber ||  // In metadata object (new documents)
+                          result.payload.metadata?.page_number ||  // Alternative naming in metadata
+                          chunk?.startPage ||  // Database fallback
+                          chunk?.endPage ||
+                          result.payload.chunkIndex ||
+                          0
+
       return {
         pageContent: result.payload.content,
         metadata: {
           documentId: doc?.id || result.payload.documentId, // Include document ID
           title: doc?.title || 'Unknown',
           source: doc?.originalName || doc?.source || 'Unknown', // Prefer originalName
-          pageNumber: result.payload.chunkIndex || 0,
+          pageNumber: pageNumber,
           similarity: result.score,
         },
       }

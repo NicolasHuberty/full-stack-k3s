@@ -21,6 +21,7 @@ export interface AgentState {
       similarity: number
       justification?: string
       pertinenceScore?: number
+      documentId?: string
     }
   }>
 
@@ -33,6 +34,7 @@ export interface AgentState {
       similarity: number
       justification?: string
       pertinenceScore?: number
+      documentId?: string
     }
   }>
 
@@ -63,6 +65,7 @@ export interface DocumentChunk {
     similarity: number
     justification?: string
     pertinenceScore?: number
+    documentId?: string
   }
 }
 

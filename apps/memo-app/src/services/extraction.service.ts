@@ -51,7 +51,14 @@ export class ExtractionService {
     const prompt = this.buildExtractionPrompt(memo.content, form, schema);
 
     console.log("[Extraction] Memo content:", memo.content);
-    console.log("[Extraction] Form fields:", form.fields.map((f: any) => ({ name: f.name, type: f.type, required: f.required })));
+    console.log(
+      "[Extraction] Form fields:",
+      form.fields.map((f: any) => ({
+        name: f.name,
+        type: f.type,
+        required: f.required,
+      })),
+    );
     console.log("[Extraction] JSON Schema:", JSON.stringify(schema, null, 2));
 
     // Call Mistral AI for extraction with JSON schema
@@ -142,7 +149,11 @@ export class ExtractionService {
   /**
    * Build extraction prompt for AI
    */
-  private buildExtractionPrompt(content: string, form: any, schema: any): string {
+  private buildExtractionPrompt(
+    content: string,
+    form: any,
+    schema: any,
+  ): string {
     const fieldsDescription = form.fields
       .map(
         (field: any) =>

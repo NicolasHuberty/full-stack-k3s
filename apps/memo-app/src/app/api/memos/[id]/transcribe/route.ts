@@ -52,7 +52,11 @@ export async function POST(
     if (audioFiles.length === 0) {
       console.error(
         `No audio files found for memo ${id}. Available files:`,
-        files.map((f) => ({ id: f.id, filename: f.filename, mimeType: f.mimeType })),
+        files.map((f) => ({
+          id: f.id,
+          filename: f.filename,
+          mimeType: f.mimeType,
+        })),
       );
       return NextResponse.json(
         {
@@ -60,7 +64,7 @@ export async function POST(
           details: {
             totalFiles: files.length,
             fileTypes: files.map((f) => f.mimeType),
-          }
+          },
         },
         { status: 400 },
       );

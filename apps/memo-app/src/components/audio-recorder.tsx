@@ -118,8 +118,11 @@ export function AudioRecorder({
 
       // Use the blob's type, or detect file extension from type
       const mimeType = audioBlob.type || "audio/webm";
-      const extension = mimeType.includes("ogg") ? "ogg" :
-                       mimeType.includes("mp4") ? "mp4" : "webm";
+      const extension = mimeType.includes("ogg")
+        ? "ogg"
+        : mimeType.includes("mp4")
+          ? "mp4"
+          : "webm";
 
       const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
       const filename = `recording-${timestamp}.${extension}`;

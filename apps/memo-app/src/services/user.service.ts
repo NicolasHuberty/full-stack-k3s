@@ -107,33 +107,9 @@ export class UserService {
    * This method is deprecated - use better-auth signIn instead
    */
   async login(data: LoginInput): Promise<SafeUser> {
-    const user = await this.getUserByEmail(data.email);
-
-    if (!user) {
-      throw new Error("Invalid credentials");
-    }
-
-    // Get account with password
-    const account = await prisma.account.findFirst({
-      where: {
-        userId: user.id,
-        provider: "credential",
-      },
-    });
-
-    if (!account || !account.password) {
-      throw new Error("Invalid credentials");
-    }
-
-    // Verify password
-    const bcrypt = await import("bcrypt");
-    const isValid = await bcrypt.compare(data.password, account.password);
-
-    if (!isValid) {
-      throw new Error("Invalid credentials");
-    }
-
-    return this.toSafeUser(user);
+    throw new Error(
+      "This method is deprecated. Use better-auth signIn API instead: /api/auth/sign-in/email"
+    );
   }
 
   /**

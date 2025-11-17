@@ -7,10 +7,12 @@ spec:
   selector:
     matchLabels:
       app: memo
+      component: frontend
   template:
     metadata:
       labels:
         app: memo
+        component: frontend
     spec:
       initContainers:
       - name: migrate

@@ -11,4 +11,5 @@ spec:
       name: http
   selector:
     app: memo
+    component: frontend
   type: ClusterIP

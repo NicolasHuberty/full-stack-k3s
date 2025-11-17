@@ -117,7 +117,7 @@ export class UserService {
     const account = await prisma.account.findFirst({
       where: {
         userId: user.id,
-        providerId: "credential",
+        provider: "credential",
       },
     });
 

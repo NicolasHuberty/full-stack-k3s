@@ -26,6 +26,10 @@ COPY . .
 ENV DATABASE_URL="postgresql://postgres:postgres@localhost:5432/memo"
 RUN npx prisma generate
 
+# Build-time environment variables for Next.js
+ARG NEXT_PUBLIC_APP_URL
+ENV NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL}
+
 # Build Next.js application
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN \

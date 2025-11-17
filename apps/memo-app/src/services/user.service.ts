@@ -34,9 +34,9 @@ export class UserService {
       await prisma.account.create({
         data: {
           userId: user.id,
-          accountId: user.id,
-          providerId: "credential",
-          password: hashedPassword,
+          type: "credential",
+          provider: "credential",
+          providerAccountId: user.id,
         },
       });
     }

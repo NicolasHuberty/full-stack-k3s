@@ -14,7 +14,7 @@ datasource db {
 model User {
   id String @id @default(uuid())
   email String @unique
-  emailVerified Boolean @default(false)
+  emailVerified DateTime?
   name String
   image String?
   language String @default("en") // User's preferred language (en, fr, nl)

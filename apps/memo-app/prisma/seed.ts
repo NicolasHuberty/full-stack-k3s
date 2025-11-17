@@ -13,7 +13,7 @@ async function main() {
       id: "00000000-0000-0000-0000-000000000000",
       email: "demo@memo-app.local",
       name: "Demo User",
-      emailVerified: true,
+      emailVerified: new Date(),
     },
   });
 

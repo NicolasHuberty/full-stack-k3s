@@ -22,7 +22,7 @@ export class UserService {
       data: {
         email: data.email,
         name: data.name,
-        emailVerified: false,
+        emailVerified: null,
       },
     });
 

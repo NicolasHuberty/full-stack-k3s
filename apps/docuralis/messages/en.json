@@ -378,7 +378,12 @@
     "inviteError": "Failed to send invitation",
     "resendInvitation": "Resend Invitation",
     "resendSuccess": "Invitation email resent successfully!",
-    "resendError": "Failed to resend invitation"
+    "resendError": "Failed to resend invitation",
+    "delete": "Delete",
+    "deleting": "Deleting...",
+    "confirmDeleteInvitation": "Are you sure you want to delete this invitation?",
+    "deleteInvitationSuccess": "Invitation deleted successfully",
+    "deleteInvitationError": "Failed to delete invitation"
   },
   "agents": {
     "title": "Agent Marketplace",

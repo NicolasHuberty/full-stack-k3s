@@ -19,10 +19,6 @@ async function main() {
       planStartDate: new Date(),
     },
   })
-
-  console.log('✅ Created demo user:', user.email)
-  console.log('📧 Email: demo@example.com')
-  console.log('🔑 Password: password')
 }
 
 main()

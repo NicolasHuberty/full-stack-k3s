@@ -378,7 +378,12 @@
     "inviteError": "Échec de l'envoi de l'invitation",
     "resendInvitation": "Réinviter",
     "resendSuccess": "E-mail d'invitation renvoyé avec succès !",
-    "resendError": "Échec du renvoi de l'invitation"
+    "resendError": "Échec du renvoi de l'invitation",
+    "delete": "Supprimer",
+    "deleting": "Suppression...",
+    "confirmDeleteInvitation": "Êtes-vous sûr de vouloir supprimer cette invitation ?",
+    "deleteInvitationSuccess": "Invitation supprimée avec succès",
+    "deleteInvitationError": "Échec de la suppression de l'invitation"
   },
   "agents": {
     "title": "Marketplace d'Agents",

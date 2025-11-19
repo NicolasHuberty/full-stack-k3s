@@ -228,14 +228,12 @@ export function ChatInterface({
 
                 if (eventType === 'progress') {
                   // Add thought to the list
-                  console.log('[SSE] Progress event:', data)
                   setAgentThoughts((prev) => [...prev, {
                     type: data.type,
                     message: data.data.message,
                     data: data.data,
                   }])
                 } else if (eventType === 'complete') {
-                  console.log('[SSE] Complete event:', data)
                   finalData = data
                 } else if (eventType === 'error') {
                   console.error('[SSE] Error event:', data)
@@ -261,7 +259,6 @@ export function ChatInterface({
         }
 
         // Clear loading state and agent thoughts after completion
-        console.log('[SSE] Clearing loading state and agent thoughts')
         setLoading(false)
         setAgentThoughts([])
 
@@ -332,15 +329,8 @@ export function ChatInterface({
         return
       }
 
-      console.log('🔍 [ChatInterface] Searching for PDF:', {
-        filename,
-        collectionId: collectionIdToUse
-      })
-
       // Find the document by filename in the collection
       const searchUrl = `/api/collections/${collectionIdToUse}/documents?filename=${encodeURIComponent(filename)}`
-      console.log('🔍 [ChatInterface] Search URL:', searchUrl)
-
       const response = await fetch(searchUrl)
 
       if (!response.ok) {
@@ -355,17 +345,9 @@ export function ChatInterface({
       }
 
       const data = await response.json()
-      console.log('📄 [ChatInterface] Search results:', data)
 
       if (data.documents && data.documents.length > 0) {
         const document = data.documents[0]
-
-        console.log('✅ [ChatInterface] Found document:', {
-          id: document.id,
-          originalName: document.originalName,
-          filename: document.filename,
-          fullDocument: document
-        })
 
         // Use the exact same property names as the source cards
         const pdfViewerData = {
@@ -374,9 +356,6 @@ export function ChatInterface({
           collectionId: collectionIdToUse,
           initialPage: null,
         }
-
-        console.log('🚀 [ChatInterface] Opening PDF viewer with:', pdfViewerData)
-
         setPdfViewer(pdfViewerData)
       } else {
         console.error('❌ [ChatInterface] Document not found:', filename)
@@ -455,11 +434,10 @@ export function ChatInterface({
             )}
 
             <Card
-              className={`max-w-[80%] ${
-                msg.role === 'USER'
+              className={`max-w-[80%] ${msg.role === 'USER'
                   ? 'bg-blue-500 text-white'
                   : 'bg-white border-gray-200'
-              }`}
+                }`}
             >
               <CardContent className="p-3">
                 <div className="max-w-none">
@@ -503,25 +481,6 @@ export function ChatInterface({
                                     pageNumber = null
                                   }
                                 }
-
-                                console.log(`🎯 [ChatInterface] PAGE NUMBER EXTRACTION:`, {
-                                  'chunk.pageNumber': chunk.pageNumber,
-                                  'chunk.metadata?.pageNumber': chunk.metadata?.pageNumber,
-                                  'raw pageNumber': chunk.pageNumber || chunk.metadata?.pageNumber,
-                                  'final pageNumber': pageNumber,
-                                  'pageNumber type': typeof pageNumber,
-                                  'pageNumber truthy': !!pageNumber,
-                                  'pageNumber valid': pageNumber !== null && pageNumber > 0
-                                })
-
-                                console.log('🚀 [ChatInterface] Opening PDF with data:', {
-                                  documentId: chunk.documentId,
-                                  documentName: chunk.documentName,
-                                  collectionId: effectiveCollectionId,
-                                  sessionCollectionId: session?.collection?.id,
-                                  pageNumber: pageNumber,
-                                  highlightText: chunk.content,
-                                })
                                 setPdfViewer({
                                   documentId: chunk.documentId,
                                   documentName: chunk.documentName,
@@ -645,50 +604,50 @@ export function ChatInterface({
                             <span className={`font-semibold ${isCompleted ? 'text-gray-700' : 'text-gray-900'}`}>{thought.message}</span>
                           </div>
 
-                        {thought.data?.subQueries && thought.data.subQueries.length > 0 && (
-                          <div className="mt-3 pl-4 space-y-1.5 border-l-2 border-purple-300">
-                            {thought.data.subQueries.map((q: string, i: number) => (
-                              <div key={i} className="text-xs text-gray-700 leading-relaxed">
-                                <span className="font-bold text-purple-700">{i + 1}.</span> {q}
-                              </div>
-                            ))}
-                          </div>
-                        )}
-
-                        {thought.data?.count !== undefined && (
-                          <div className="mt-2 text-xs text-gray-600 italic">
-                            {thought.data.count} documents trouvés
-                          </div>
-                        )}
-
-                        {thought.data?.documents && thought.data.documents.length > 0 && (
-                          <div className="mt-3 pl-4 border-l-2 border-purple-300">
-                            <div className="text-xs font-semibold text-gray-700 mb-2">
-                              📚 Documents analysés ({thought.data.documents.length}) :
-                            </div>
-                            <div className="space-y-1.5 max-h-48 overflow-y-auto">
-                              {thought.data.documents.map((d: any, i: number) => (
-                                <div key={i} className="flex items-start gap-2 text-xs">
-                                  <span className="text-purple-600 font-bold">•</span>
-                                  <div className="flex-1">
-                                    <div className="font-medium text-gray-800">{d.title}</div>
-                                    {d.score && (
-                                      <div className="text-gray-500 text-[10px]">
-                                        Score: {d.score.toFixed(1)}/10
-                                      </div>
-                                    )}
-                                    {d.justification && (
-                                      <div className="text-gray-600 text-[10px] mt-0.5 italic">
-                                        {d.justification.substring(0, 100)}...
-                                      </div>
-                                    )}
-                                  </div>
+                          {thought.data?.subQueries && thought.data.subQueries.length > 0 && (
+                            <div className="mt-3 pl-4 space-y-1.5 border-l-2 border-purple-300">
+                              {thought.data.subQueries.map((q: string, i: number) => (
+                                <div key={i} className="text-xs text-gray-700 leading-relaxed">
+                                  <span className="font-bold text-purple-700">{i + 1}.</span> {q}
                                 </div>
                               ))}
                             </div>
-                          </div>
-                        )}
-                      </div>
+                          )}
+
+                          {thought.data?.count !== undefined && (
+                            <div className="mt-2 text-xs text-gray-600 italic">
+                              {thought.data.count} documents trouvés
+                            </div>
+                          )}
+
+                          {thought.data?.documents && thought.data.documents.length > 0 && (
+                            <div className="mt-3 pl-4 border-l-2 border-purple-300">
+                              <div className="text-xs font-semibold text-gray-700 mb-2">
+                                📚 Documents analysés ({thought.data.documents.length}) :
+                              </div>
+                              <div className="space-y-1.5 max-h-48 overflow-y-auto">
+                                {thought.data.documents.map((d: any, i: number) => (
+                                  <div key={i} className="flex items-start gap-2 text-xs">
+                                    <span className="text-purple-600 font-bold">•</span>
+                                    <div className="flex-1">
+                                      <div className="font-medium text-gray-800">{d.title}</div>
+                                      {d.score && (
+                                        <div className="text-gray-500 text-[10px]">
+                                          Score: {d.score.toFixed(1)}/10
+                                        </div>
+                                      )}
+                                      {d.justification && (
+                                        <div className="text-gray-600 text-[10px] mt-0.5 italic">
+                                          {d.justification.substring(0, 100)}...
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
                       )
                     })}
                   </div>

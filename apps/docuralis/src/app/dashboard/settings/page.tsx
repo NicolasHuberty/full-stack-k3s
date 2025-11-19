@@ -97,12 +97,9 @@ export default function SettingsPage() {
         const res = await fetch('/api/user/profile')
         if (res.ok) {
           const data = await res.json()
-          console.log('User profile data:', data)
           if (data.language) {
-            console.log('Setting language to:', data.language)
             setLanguage(data.language)
           } else {
-            console.log('No language in profile, defaulting to en')
             setLanguage('en')
           }
         }
@@ -294,11 +291,10 @@ export default function SettingsPage() {
                   return (
                     <div
                       key={plan.type}
-                      className={`relative rounded-lg border-2 p-6 transition-all ${
-                        isCurrentPlan
+                      className={`relative rounded-lg border-2 p-6 transition-all ${isCurrentPlan
                           ? 'border-primary bg-primary/5'
                           : 'border-border hover:border-primary/50'
-                      }`}
+                        }`}
                     >
                       {isCurrentPlan && (
                         <div className="absolute top-4 right-4">

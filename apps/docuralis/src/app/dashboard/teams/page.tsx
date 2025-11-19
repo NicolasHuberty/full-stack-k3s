@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import Image from 'next/image'
-import { Plus, Users, Mail, X, Clock } from 'lucide-react'
+import { Plus, Users, Mail, X, Clock, Trash2 } from 'lucide-react'
 import {
   Select,
   SelectContent,
@@ -37,6 +37,11 @@ export default function TeamsPage() {
   const [inviteRole, setInviteRole] = useState<'ADMIN' | 'MEMBER' | 'VIEWER'>(
     'MEMBER'
   )
+
+  const [deleteConfirmation, setDeleteConfirmation] = useState<{
+    show: boolean
+    invitationId: string | null
+  }>({ show: false, invitationId: null })
 
   useEffect(() => {
     fetchOrganizations()
@@ -169,6 +174,38 @@ export default function TeamsPage() {
     }
   }
 
+  const handleDeleteInvitation = async () => {
+    if (!selectedOrg || !deleteConfirmation.invitationId) return
+
+    setLoading(true)
+    setMessage(null)
+    setDeleteConfirmation({ show: false, invitationId: null })
+
+    try {
+      const res = await fetch(
+        `/api/organizations/${selectedOrg.id}/invitations/${deleteConfirmation.invitationId}`,
+        {
+          method: 'DELETE',
+        }
+      )
+
+      if (res.ok) {
+        setMessage({ type: 'success', text: t('deleteInvitationSuccess') })
+        await fetchOrganizationDetails(selectedOrg.id)
+      } else {
+        const error = await res.json()
+        setMessage({
+          type: 'error',
+          text: error.error || t('deleteInvitationError'),
+        })
+      }
+    } catch (error) {
+      setMessage({ type: 'error', text: t('deleteInvitationError') })
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
     <DashboardLayout>
       <div className="max-w-6xl mx-auto p-8">
@@ -291,15 +328,14 @@ export default function TeamsPage() {
                         </div>
                       </div>
                       <span
-                        className={`px-3 py-1 rounded-full text-xs font-medium ${
-                          member.role === 'OWNER'
-                            ? 'bg-purple-500/10 text-purple-600'
-                            : member.role === 'ADMIN'
-                              ? 'bg-blue-500/10 text-blue-600'
-                              : member.role === 'MEMBER'
-                                ? 'bg-green-500/10 text-green-600'
-                                : 'bg-gray-500/10 text-gray-600'
-                        }`}
+                        className={`px-3 py-1 rounded-full text-xs font-medium ${member.role === 'OWNER'
+                          ? 'bg-purple-500/10 text-purple-600'
+                          : member.role === 'ADMIN'
+                            ? 'bg-blue-500/10 text-blue-600'
+                            : member.role === 'MEMBER'
+                              ? 'bg-green-500/10 text-green-600'
+                              : 'bg-gray-500/10 text-gray-600'
+                          }`}
                       >
                         {member.role}
                       </span>
@@ -348,6 +384,21 @@ export default function TeamsPage() {
                             >
                               <Mail className="h-3 w-3 mr-1" />
                               {t('resendInvitation')}
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                              onClick={() =>
+                                setDeleteConfirmation({
+                                  show: true,
+                                  invitationId: invitation.id,
+                                })
+                              }
+                              disabled={loading}
+                            >
+                              <Trash2 className="h-3 w-3 mr-1" />
+                              {t('delete')}
                             </Button>
                           </div>
                         </div>
@@ -522,6 +573,51 @@ export default function TeamsPage() {
                   </Button>
                 </div>
               </form>
+            </div>
+          </div>
+        )}
+
+        {/* Delete Invitation Confirmation Modal */}
+        {deleteConfirmation.show && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-card rounded-xl border border-border max-w-md w-full p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-semibold text-red-600">
+                  {t('delete')}
+                </h2>
+                <button
+                  onClick={() =>
+                    setDeleteConfirmation({ show: false, invitationId: null })
+                  }
+                  className="p-1 hover:bg-muted/50 rounded-lg"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+
+              <p className="text-muted-foreground mb-6">
+                {t('confirmDeleteInvitation')}
+              </p>
+
+              <div className="flex gap-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() =>
+                    setDeleteConfirmation({ show: false, invitationId: null })
+                  }
+                  className="flex-1"
+                >
+                  {t('cancel')}
+                </Button>
+                <Button
+                  onClick={handleDeleteInvitation}
+                  disabled={loading}
+                  className="flex-1 bg-red-600 hover:bg-red-700"
+                >
+                  {loading ? t('deleting') : t('delete')}
+                </Button>
+              </div>
             </div>
           </div>
         )}

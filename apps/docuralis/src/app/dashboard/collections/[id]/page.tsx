@@ -7,6 +7,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { DashboardLayout } from '@/components/dashboard/layout'
+import { PDFViewer } from '@/components/pdf-viewer'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -48,6 +49,7 @@ import {
   FolderUp,
   Bot,
   Plus,
+  Scale,
 } from 'lucide-react'
 import {
   Select,
@@ -155,8 +157,11 @@ export default function CollectionDetailPage() {
   )
   const [sortBy, setSortBy] = useState<'name' | 'date' | 'size'>('date')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
-  const [displayedCount, setDisplayedCount] = useState(20)
   const [isLoadingMore, setIsLoadingMore] = useState(false)
+  const [nextCursor, setNextCursor] = useState<string | null>(null)
+  const [hasMoreDocs, setHasMoreDocs] = useState(false)
+  const [totalDocs, setTotalDocs] = useState(0)
+  const [documentsLoading, setDocumentsLoading] = useState(false)
   const observerTarget = React.useRef<HTMLDivElement>(null)
 
   // Access management state
@@ -175,59 +180,30 @@ export default function CollectionDetailPage() {
   // Upload modal state
   const [showUploadModal, setShowUploadModal] = useState(false)
 
+  // PDF Viewer state
+  const [pdfViewer, setPdfViewer] = useState<{
+    documentId: string
+    documentName: string
+    collectionId?: string
+    initialPage?: number | null
+    highlightText?: string
+  } | null>(null)
+
   const collectionId = params.id as string
 
-  // Calculate filtered and sorted documents
-  const allFilteredAndSorted = React.useMemo(() => {
-    if (!collection) return []
-
-    let filtered = collection.documents
-
-    if (searchQuery) {
-      filtered = filtered.filter(
-        (doc) =>
-          doc.originalName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          doc.uploadedBy.name?.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-    }
-
-    if (statusFilter !== 'all') {
-      filtered = filtered.filter((doc) => doc.status === statusFilter)
-    }
-
-    const sorted = [...filtered].sort((a, b) => {
-      let comparison = 0
-
-      switch (sortBy) {
-        case 'name':
-          comparison = a.originalName.localeCompare(b.originalName)
-          break
-        case 'date':
-          comparison =
-            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-          break
-        case 'size':
-          comparison = Number(a.fileSize) - Number(b.fileSize)
-          break
-      }
-
-      return sortOrder === 'asc' ? comparison : -comparison
-    })
-
-    return sorted
-  }, [collection, searchQuery, statusFilter, sortBy, sortOrder])
-
-  const filteredAndSortedDocuments = allFilteredAndSorted.slice(
-    0,
-    displayedCount
-  )
-  const hasMore = allFilteredAndSorted.length > displayedCount
+  // Effect to handle search and filter changes
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetchDocuments(false, true)
+    }, 300)
+    return () => clearTimeout(timer)
+  }, [searchQuery, statusFilter, sortBy, sortOrder])
 
   useEffect(() => {
     const init = async () => {
       await fetchCollection()
       fetchAgents()
-      fetchDocuments()
+      fetchDocuments(false, true)
     }
     init()
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -245,7 +221,10 @@ export default function CollectionDetailPage() {
 
     const interval = setInterval(() => {
       fetchCollection(true) // Silent refresh
-      fetchDocuments(true)
+      // Only refresh documents if we are on the first page and not searching
+      if (!nextCursor && !searchQuery) {
+        fetchDocuments(true, true)
+      }
     }, 5000) // Every 5 seconds
 
     return () => clearInterval(interval)
@@ -254,26 +233,21 @@ export default function CollectionDetailPage() {
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && !isLoadingMore && hasMore) {
-          console.log('Loading more documents...')
+        if (
+          entries[0].isIntersecting &&
+          !isLoadingMore &&
+          hasMoreDocs &&
+          nextCursor
+        ) {
           setIsLoadingMore(true)
-          setTimeout(() => {
-            setDisplayedCount((prev) => prev + 20)
-            setIsLoadingMore(false)
-          }, 300)
+          fetchDocuments(true, false, nextCursor)
         }
       },
       { threshold: 0.1, root: null, rootMargin: '100px' }
     )
 
     const currentTarget = observerTarget.current
-    if (currentTarget && hasMore) {
-      console.log(
-        'Observer attached, hasMore:',
-        hasMore,
-        'displayed:',
-        displayedCount
-      )
+    if (currentTarget && hasMoreDocs) {
       observer.observe(currentTarget)
     }
 
@@ -282,11 +256,9 @@ export default function CollectionDetailPage() {
         observer.unobserve(currentTarget)
       }
     }
-  }, [isLoadingMore, hasMore, displayedCount])
+  }, [isLoadingMore, hasMoreDocs, nextCursor])
 
-  useEffect(() => {
-    setDisplayedCount(20)
-  }, [searchQuery, statusFilter, sortBy, sortOrder])
+
 
   const fetchCollection = async (silent = false) => {
     try {
@@ -294,7 +266,11 @@ export default function CollectionDetailPage() {
       const res = await fetch(`/api/collections/${collectionId}`)
       if (res.ok) {
         const data = await res.json()
-        setCollection(data.collection)
+        setCollection((prev) =>
+          prev
+            ? { ...data.collection, documents: prev.documents }
+            : data.collection
+        )
       } else {
         setMessage({ type: 'error', text: t('fetchError') })
       }
@@ -306,17 +282,57 @@ export default function CollectionDetailPage() {
     }
   }
 
-  const fetchDocuments = async (silent = false) => {
+  const fetchDocuments = async (
+    silent = false,
+    reset = false,
+    cursor?: string | null
+  ) => {
     try {
-      const res = await fetch(`/api/collections/${collectionId}/documents`)
+      if (!silent && reset) setDocumentsLoading(true)
+
+      const params = new URLSearchParams()
+      if (searchQuery) params.append('search', searchQuery)
+      if (statusFilter !== 'all') params.append('status', statusFilter)
+      params.append('sort', sortBy)
+      params.append('order', sortOrder)
+      if (cursor) params.append('cursor', cursor)
+      params.append('limit', '50')
+
+      const res = await fetch(
+        `/api/collections/${collectionId}/documents?${params.toString()}`
+      )
       if (res.ok) {
         const data = await res.json()
-        setCollection((prev) =>
-          prev ? { ...prev, documents: data.documents } : prev
-        )
+
+        setCollection((prev) => {
+          if (!prev) return prev
+
+          // If resetting, replace documents. Otherwise append.
+          // Also ensure we don't duplicate documents if strict mode causes double fetch
+          const newDocuments = reset
+            ? data.documents
+            : [...prev.documents, ...data.documents]
+
+          // Deduplicate by ID just in case
+          const uniqueDocs = Array.from(
+            new Map(newDocuments.map((d: any) => [d.id, d])).values()
+          )
+
+          return {
+            ...prev,
+            documents: uniqueDocs as Document[],
+          }
+        })
+
+        setNextCursor(data.nextCursor)
+        setHasMoreDocs(data.hasMore)
+        if (data.totalCount !== undefined) setTotalDocs(data.totalCount)
       }
     } catch (error) {
       console.error('Failed to fetch documents:', error)
+    } finally {
+      if (!silent && reset) setDocumentsLoading(false)
+      setIsLoadingMore(false)
     }
   }
 
@@ -475,7 +491,7 @@ export default function CollectionDetailPage() {
 
       // Refresh silently without showing loading spinner
       await fetchCollection(true)
-      await fetchDocuments(true)
+      await fetchDocuments(true, true)
     } catch (error) {
       console.error('Failed to upload files:', error)
       setMessage({ type: 'error', text: t('uploadError') })
@@ -673,27 +689,14 @@ export default function CollectionDetailPage() {
   }
 
   const handleViewDocument = async (documentId: string) => {
-    try {
-      const response = await fetch(`/api/documents/${documentId}/download`)
+    const doc = collection?.documents.find((d) => d.id === documentId)
+    if (!doc) return
 
-      if (!response.ok) {
-        const error = await response.json()
-        setMessage({
-          type: 'error',
-          text: error.error || 'Failed to download document',
-        })
-        return
-      }
-
-      // Open in new tab if successful
-      window.open(`/api/documents/${documentId}/download`, '_blank')
-    } catch (error) {
-      console.error('Failed to view document:', error)
-      setMessage({
-        type: 'error',
-        text: 'Failed to download document. The file may not exist in storage.',
-      })
-    }
+    setPdfViewer({
+      documentId: doc.id,
+      documentName: doc.originalName || doc.filename,
+      collectionId: collectionId,
+    })
   }
 
   const getFileIcon = (mimeType: string, filename: string) => {
@@ -710,7 +713,7 @@ export default function CollectionDetailPage() {
     // Word documents
     else if (
       mimeType ===
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
       mimeType === 'application/msword' ||
       extension === 'doc' ||
       extension === 'docx'
@@ -721,7 +724,7 @@ export default function CollectionDetailPage() {
     // Excel
     else if (
       mimeType ===
-        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
       mimeType === 'application/vnd.ms-excel' ||
       extension === 'xls' ||
       extension === 'xlsx'
@@ -732,7 +735,7 @@ export default function CollectionDetailPage() {
     // PowerPoint
     else if (
       mimeType ===
-        'application/vnd.openxmlformats-officedocument.presentationml.presentation' ||
+      'application/vnd.openxmlformats-officedocument.presentationml.presentation' ||
       mimeType === 'application/vnd.ms-powerpoint' ||
       extension === 'ppt' ||
       extension === 'pptx'
@@ -917,9 +920,9 @@ export default function CollectionDetailPage() {
                 <div className="font-medium">
                   {collection.lastDocumentUpdate
                     ? formatDistanceToNow(
-                        new Date(collection.lastDocumentUpdate),
-                        { addSuffix: true, locale: fr }
-                      )
+                      new Date(collection.lastDocumentUpdate),
+                      { addSuffix: true, locale: fr }
+                    )
                     : 'Jamais'}
                 </div>
               </div>
@@ -930,9 +933,9 @@ export default function CollectionDetailPage() {
                 <div className="font-medium">
                   {collection.lastChatActivity
                     ? formatDistanceToNow(
-                        new Date(collection.lastChatActivity),
-                        { addSuffix: true, locale: fr }
-                      )
+                      new Date(collection.lastChatActivity),
+                      { addSuffix: true, locale: fr }
+                    )
                     : 'Aucune activité'}
                 </div>
               </div>
@@ -942,9 +945,9 @@ export default function CollectionDetailPage() {
                   <VisibilityBadge
                     visibility={
                       collection.visibility as
-                        | 'PRIVATE'
-                        | 'ORGANIZATION'
-                        | 'PUBLIC'
+                      | 'PRIVATE'
+                      | 'ORGANIZATION'
+                      | 'PUBLIC'
                     }
                   />
                 </div>
@@ -994,7 +997,17 @@ export default function CollectionDetailPage() {
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex items-center gap-3">
                           <div className="text-2xl">
-                            {collectionAgent.agent.icon || '🤖'}
+                            {collectionAgent.agent.icon === 'Scale' ? (
+                              <Scale className="h-8 w-8" />
+                            ) : collectionAgent.agent.icon?.startsWith('http') ? (
+                              <img
+                                src={collectionAgent.agent.icon}
+                                alt={collectionAgent.agent.name}
+                                className="h-8 w-8 object-contain"
+                              />
+                            ) : (
+                              collectionAgent.agent.icon || '🤖'
+                            )}
                           </div>
                           <div>
                             <h3 className="font-medium">
@@ -1251,7 +1264,7 @@ export default function CollectionDetailPage() {
               <div className="border-b p-4">
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-base font-semibold">
-                    Documents ({allFilteredAndSorted.length})
+                    Documents ({totalDocs})
                   </h2>
                   <div>
                     <input
@@ -1354,8 +1367,13 @@ export default function CollectionDetailPage() {
               </div>
 
               {/* Documents Table */}
-              <div className="overflow-x-auto">
-                {filteredAndSortedDocuments.length === 0 ? (
+              <div className="overflow-x-auto relative min-h-[200px]">
+                {documentsLoading && (
+                  <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/50 backdrop-blur-sm">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                  </div>
+                )}
+                {(!collection.documents || collection.documents.length === 0) && !documentsLoading ? (
                   <div className="text-center py-12">
                     <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
                     <p className="text-muted-foreground">
@@ -1378,11 +1396,11 @@ export default function CollectionDetailPage() {
                           <Checkbox
                             checked={
                               selectedDocIds.size ===
-                                filteredAndSortedDocuments.length &&
-                              filteredAndSortedDocuments.length > 0
+                              collection.documents.length &&
+                              collection.documents.length > 0
                             }
                             onCheckedChange={() =>
-                              toggleSelectAll(filteredAndSortedDocuments)
+                              toggleSelectAll(collection.documents)
                             }
                           />
                         </TableHead>
@@ -1442,7 +1460,7 @@ export default function CollectionDetailPage() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {filteredAndSortedDocuments.map((doc) => (
+                      {collection.documents.map((doc) => (
                         <TableRow
                           key={doc.id}
                           className="group cursor-pointer hover:bg-muted/50"
@@ -1550,7 +1568,7 @@ export default function CollectionDetailPage() {
                           </TableCell>
                         </TableRow>
                       ))}
-                      {hasMore && (
+                      {hasMoreDocs && (
                         <TableRow>
                           <TableCell colSpan={9} className="h-24">
                             <div
@@ -1567,15 +1585,14 @@ export default function CollectionDetailPage() {
                               ) : (
                                 <>
                                   <div className="text-sm text-muted-foreground">
-                                    {allFilteredAndSorted.length -
-                                      displayedCount}{' '}
+                                    {totalDocs - collection.documents.length}{' '}
                                     more documents
                                   </div>
                                   <Button
                                     size="sm"
                                     variant="outline"
                                     onClick={() =>
-                                      setDisplayedCount((prev) => prev + 20)
+                                      fetchDocuments(true, false, nextCursor)
                                     }
                                     className="gap-2"
                                   >
@@ -1688,6 +1705,17 @@ export default function CollectionDetailPage() {
           </DialogContent>
         </Dialog>
       </div>
+      {pdfViewer && (
+        <PDFViewer
+          documentId={pdfViewer.documentId}
+          documentName={pdfViewer.documentName}
+          collectionId={pdfViewer.collectionId}
+          initialPage={pdfViewer.initialPage || undefined}
+          highlightText={pdfViewer.highlightText}
+          onClose={() => setPdfViewer(null)}
+        />
+      )}
     </DashboardLayout>
-  )
+  );
 }
+

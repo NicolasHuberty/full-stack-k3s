@@ -70,14 +70,6 @@ export default function InvitePage() {
       setError('Please log in first to accept this invitation')
       return
     }
-
-    console.log(
-      'Accepting invitation for user:',
-      session.user.email,
-      'ID:',
-      session.user.id
-    )
-
     setAccepting(true)
     setError(null)
 

@@ -3,8 +3,6 @@ import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
 
 async function main() {
-  console.log('Seeding agents...')
-
   // Create Lawyer Agent with Emate logic
   const lawyerAgent = await prisma.agent.upsert({
     where: { id: 'lawyer-agent-1' },
@@ -44,8 +42,6 @@ Répondez à la question en vous basant uniquement sur les documents fournis.`,
     },
   })
 
-  console.log('Created Lawyer Agent:', lawyerAgent.id)
-
   // Create actions for Lawyer Agent
   await prisma.agentAction.upsert({
     where: {
@@ -84,10 +80,6 @@ Répondez à la question en vous basant uniquement sur les documents fournis.`,
       order: 2,
     },
   })
-
-  console.log('Created Lawyer Agent actions')
-
-  console.log('Agent seeding completed!')
 }
 
 main()

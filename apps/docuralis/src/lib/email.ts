@@ -54,8 +54,6 @@ export async function sendEmail({ to, subject, html, text }: EmailOptions) {
       html,
       text: text || html.replace(/<[^>]*>/g, ''), // Strip HTML as fallback
     })
-
-    console.log('✅ Email sent:', info.messageId)
     return { success: true, messageId: info.messageId }
   } catch (error) {
     console.error('❌ Failed to send email:', error)

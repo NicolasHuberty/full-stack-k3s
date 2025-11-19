@@ -27,9 +27,6 @@ export async function decomposeQuery(
   state: AgentState
 ): Promise<Partial<AgentState>> {
   try {
-    console.log('\n🔍 [AGENT STEP 1/4] DECOMPOSE QUERY')
-    console.log(`📝 Original query: "${state.query}"`)
-
     const prompt = DECOMPOSE_QUERY_PROMPT.replace('{query}', state.query)
 
     const response = await model.invoke([
@@ -45,9 +42,6 @@ export async function decomposeQuery(
       .split('\n')
       .map((line) => line.trim())
       .filter((line) => line.length > 0)
-
-    console.log(`✅ Generated ${subQueries.length} sub-queries:`)
-    subQueries.forEach((q, i) => console.log(`   ${i + 1}. "${q}"`))
 
     return {
       subQueries,
@@ -65,15 +59,11 @@ export async function retrieveDocuments(
   state: AgentState
 ): Promise<Partial<AgentState>> {
   try {
-    console.log('\n📚 [AGENT STEP 2/4] RETRIEVE DOCUMENTS')
     const allDocs: DocumentChunk[] = []
     const queriesToSearch = state.subQueries || [state.query]
 
     // Determine number of docs per query based on mode
     const docsPerQuery = state.smartMode || state.reflexion ? 30 : 10
-    console.log(
-      `🔎 Searching ${queriesToSearch.length} queries, ${docsPerQuery} docs per query`
-    )
 
     for (const query of queriesToSearch) {
       // Retrieve French documents
@@ -114,8 +104,6 @@ export async function retrieveDocuments(
         uniqueDocs.push(doc)
       }
     }
-
-    console.log(`🚀 [RETRIEVE NODE] Returning state with ${uniqueDocs.length} retrievedDocs`)
     return {
       retrievedDocs: uniqueDocs,
     }
@@ -182,10 +170,6 @@ export async function gradeDocumentsReflexion(
   state: AgentState
 ): Promise<Partial<AgentState>> {
   try {
-    console.log('\n⭐ [AGENT STEP 3/4] GRADE DOCUMENTS (REFLEXION MODE)')
-    console.log(
-      `📊 Evaluating ${state.retrievedDocs.length} documents in parallel...`
-    )
 
     // Grade all documents in parallel for speed
     const gradingPromises = state.retrievedDocs.map(async (doc) => {
@@ -307,11 +291,6 @@ export async function generateResponse(
   state: AgentState
 ): Promise<Partial<AgentState>> {
   try {
-    console.log('\n✍️  [AGENT STEP 4/4] GENERATE FINAL ANSWER')
-    console.log(
-      `📄 Using ${state.relevantDocs.length} documents to generate response...`
-    )
-
     // Format documents with filenames for proper citation
     const formattedDocs = state.relevantDocs
       .map((doc, idx) => {

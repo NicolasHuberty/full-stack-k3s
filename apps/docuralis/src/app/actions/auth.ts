@@ -46,31 +46,6 @@ export async function register(formData: FormData) {
         planEndDate: new Date(Date.now() + 31 * 24 * 60 * 60 * 1000), // 31 days trial
       },
     })
-
-    console.log('User created successfully:', {
-      id: newUser.id,
-      email: newUser.email,
-      name: newUser.name,
-    })
-
-    // Verify user exists by querying it back
-    const verifyUser = await prisma.user.findUnique({
-      where: { id: newUser.id },
-    })
-    console.log(
-      'User verification query result:',
-      verifyUser ? 'FOUND' : 'NOT FOUND'
-    )
-
-    // Auto sign in after registration
-    const signInResult = await signIn('credentials', {
-      email,
-      password,
-      redirect: false,
-    })
-
-    console.log('Sign in after registration result:', signInResult)
-
     return { success: true }
   } catch (error) {
     console.error('Registration error:', error)

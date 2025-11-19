@@ -123,11 +123,6 @@ export async function inviteMemberToOrganization(data: {
       'Failed to send invitation email (invitation still created):',
       error
     )
-    // In development, you might want to log the invitation link
-    if (process.env.NODE_ENV === 'development') {
-      const inviteUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://docuralis.com'}/invite/${token}`
-      console.log(`\n📧 Invitation link for ${data.email}: ${inviteUrl}\n`)
-    }
   })
 
   return invitation
@@ -182,29 +177,41 @@ export async function resendInvitationEmail(invitationId: string) {
     html: emailContent.html,
   }).catch((error) => {
     console.error('Failed to resend invitation email:', error)
-    // In development, log the invitation link
-    if (process.env.NODE_ENV === 'development') {
-      const inviteUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://docuralis.com'}/invite/${invitation.token}`
-      console.log(
-        `\n📧 Resent invitation link for ${invitation.email}: ${inviteUrl}\n`
-      )
-    }
   })
 
   return invitation
 }
 
+
+/**
+ * Cancel/Delete a pending organization invitation
+ * @param invitationId - The ID of the invitation to cancel
+ */
+export async function cancelInvitation(invitationId: string) {
+  // Find the invitation
+  const invitation = await prisma.organizationInvitation.findUnique({
+    where: { id: invitationId },
+  })
+
+  if (!invitation) {
+    throw new Error('Invitation not found')
+  }
+
+  // Delete the invitation
+  await prisma.organizationInvitation.delete({
+    where: { id: invitationId },
+  })
+
+  return { success: true }
+}
+
 export async function acceptInvitation(token: string, userId: string) {
-  console.log('acceptInvitation called with userId:', userId, 'token:', token)
 
   // Find invitation
   const invitation = await prisma.organizationInvitation.findUnique({
     where: { token },
     include: { organization: true },
   })
-
-  console.log('Invitation found:', invitation ? 'yes' : 'no', invitation?.email)
-
   if (!invitation) {
     throw new Error('Invitation not found')
   }
@@ -227,23 +234,15 @@ export async function acceptInvitation(token: string, userId: string) {
   }
 
   // Get user
-  console.log('Looking up user with ID:', userId)
   const user = await prisma.user.findUnique({
     where: { id: userId },
   })
-
-  console.log('User found by ID:', user ? 'yes' : 'no', user?.email)
 
   if (!user) {
     // Try to find user by email as fallback
     const userByEmail = await prisma.user.findUnique({
       where: { email: invitation.email },
     })
-    console.log(
-      'User found by email:',
-      userByEmail ? 'yes' : 'no',
-      userByEmail?.id
-    )
 
     if (userByEmail) {
       throw new Error(

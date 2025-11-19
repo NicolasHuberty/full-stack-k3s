@@ -88,8 +88,6 @@ export class AgentService {
       // Use streaming to get intermediate steps
       let result: AgentState | undefined
       const streamEvents: Array<{ node: string; data: any }> = []
-
-      console.log('[Agent] Starting graph stream with initial state')
       const stream = await graph.stream(initialState, {
         streamMode: 'updates' // Explicitly request updates mode
       })
@@ -98,17 +96,10 @@ export class AgentService {
         // Track which node executed
         const nodeName = Object.keys(event)[0]
         const nodeData = event[nodeName]
-
-        console.log(`[Agent] ========================================`)
-        console.log(`[Agent] Node executed: "${nodeName}"`)
-        console.log(`[Agent] Has onProgress callback: ${!!onProgress}`)
-        console.log(`[Agent] nodeData keys:`, Object.keys(nodeData || {}))
-
         streamEvents.push({ node: nodeName, data: nodeData })
 
         // Emit progress events to callback
         if (nodeName === 'decompose' && nodeData?.subQueries) {
-          console.log(`[Agent] ✅ MATCH: decompose with ${nodeData.subQueries.length} subQueries`)
           try {
             await onProgress?.({
               type: 'decompose',
@@ -117,12 +108,10 @@ export class AgentService {
                 message: `Décomposition de la question en ${nodeData.subQueries.length} sous-questions`,
               },
             })
-            console.log('[Agent] ✅ Decompose event sent successfully')
           } catch (e) {
             console.error('[Agent] ❌ Error sending decompose event:', e)
           }
         } else if (nodeName === 'retrieve' && nodeData?.retrievedDocs) {
-          console.log(`[Agent] ✅ MATCH: retrieve with ${nodeData.retrievedDocs.length} docs`)
           try {
             await onProgress?.({
               type: 'retrieve',
@@ -131,7 +120,6 @@ export class AgentService {
                 message: `Récupération de ${nodeData.retrievedDocs.length} documents pertinents`,
               },
             })
-            console.log('[Agent] ✅ Retrieve event sent successfully')
           } catch (e) {
             console.error('[Agent] ❌ Error sending retrieve event:', e)
           }
@@ -139,7 +127,6 @@ export class AgentService {
           (nodeName === 'gradeReflexion' || nodeName === 'gradeClassical') &&
           nodeData?.relevantDocs
         ) {
-          console.log(`[Agent] ✅ MATCH: ${nodeName} with ${nodeData.relevantDocs.length} docs`)
           try {
             await onProgress?.({
               type: 'grade',
@@ -153,12 +140,10 @@ export class AgentService {
                 })),
               },
             })
-            console.log('[Agent] ✅ Grade event sent successfully')
           } catch (e) {
             console.error('[Agent] ❌ Error sending grade event:', e)
           }
         } else if (nodeName === 'generate' && nodeData?.answer) {
-          console.log('[Agent] ✅ MATCH: generate with answer')
           try {
             await onProgress?.({
               type: 'generate',
@@ -166,21 +151,10 @@ export class AgentService {
                 message: 'Génération de la réponse finale...',
               },
             })
-            console.log('[Agent] ✅ Generate event sent successfully')
           } catch (e) {
             console.error('[Agent] ❌ Error sending generate event:', e)
           }
-        } else {
-          console.log(`[Agent] ⚠️  NO MATCH for node "${nodeName}"`)
-          console.log(`[Agent]   - nodeData?.subQueries exists: ${!!nodeData?.subQueries}`)
-          console.log(`[Agent]   - nodeData?.retrievedDocs exists: ${!!nodeData?.retrievedDocs}`)
-          console.log(`[Agent]   - nodeData?.relevantDocs exists: ${!!nodeData?.relevantDocs}`)
-          console.log(`[Agent]   - nodeData?.answer exists: ${!!nodeData?.answer}`)
-          if (nodeData) {
-            console.log(`[Agent]   - nodeData sample:`, JSON.stringify(nodeData).substring(0, 300))
-          }
         }
-
         result = { ...result, ...nodeData } as AgentState
       }
 

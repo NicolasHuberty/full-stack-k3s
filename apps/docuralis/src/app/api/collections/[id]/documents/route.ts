@@ -118,9 +118,11 @@ export async function GET(
     const { searchParams } = new URL(request.url)
     const limit = Math.min(parseInt(searchParams.get('limit') || '50'), 100)
     const cursor = searchParams.get('cursor') || undefined
-    const search = searchParams.get('search') || undefined
-    const filename = searchParams.get('filename') || undefined
-    const status = searchParams.get('status') || undefined
+    const sort = searchParams.get('sort') || 'date'
+    const order = searchParams.get('order') || 'desc'
+    const search = searchParams.get('search')
+    const filename = searchParams.get('filename')
+    const status = searchParams.get('status')
 
     // Build where clause
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -145,6 +147,19 @@ export async function GET(
       where.status = status
     }
 
+    // Determine sort order
+    let orderBy: any = { createdAt: 'desc' }
+    if (sort === 'name') {
+      orderBy = { originalName: order }
+    } else if (sort === 'size') {
+      orderBy = { fileSize: order }
+    } else if (sort === 'date') {
+      orderBy = { createdAt: order }
+    }
+
+    // Get total count for the current filter
+    const totalCount = await prisma.document.count({ where })
+
     // Fetch documents with cursor-based pagination
     const documents = await prisma.document.findMany({
       where,
@@ -168,7 +183,7 @@ export async function GET(
           },
         },
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy,
       take: limit + 1, // Fetch one extra to check if there are more
       ...(cursor && {
         cursor: { id: cursor },
@@ -195,6 +210,7 @@ export async function GET(
       documents: serializedDocuments,
       nextCursor,
       hasMore,
+      totalCount,
     })
   } catch (error) {
     console.error('Failed to fetch documents:', error)

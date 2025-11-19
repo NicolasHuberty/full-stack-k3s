@@ -174,10 +174,6 @@ export class DocumentProcessor {
       )
       const cleanedText = extractor.cleanText(text)
 
-      console.log(
-        `Extracted text length: ${text.length}, cleaned: ${cleanedText.length}`
-      )
-
       // Check if text extraction failed
       if (!cleanedText || cleanedText.trim().length === 0) {
         throw new Error(
@@ -211,9 +207,6 @@ export class DocumentProcessor {
         chunkOverlap: document.collection.chunkOverlap,
         respectSentences: true,
       })
-
-      console.log(`Created ${chunks.length} chunks from document`)
-
       // Add token counts to chunks
       const chunksWithTokens = await chunker.addTokenCounts(chunks)
 
@@ -297,8 +290,6 @@ export class DocumentProcessor {
           completedAt: new Date(),
         },
       })
-
-      console.log(`Successfully processed document ${documentId}`)
     } catch (error) {
       console.error(`Failed to process document ${documentId}:`, error)
 
@@ -370,7 +361,6 @@ export class DocumentProcessor {
         },
       })
 
-      console.log(`Successfully deleted document ${documentId}`)
     } catch (error) {
       console.error('Failed to delete document:', error)
       throw error

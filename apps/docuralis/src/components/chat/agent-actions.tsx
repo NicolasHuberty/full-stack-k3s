@@ -109,19 +109,11 @@ export function AgentActions({
             setActionState(initialActionState)
             onAgentChange?.(firstAgent.agent.id, initialActionState, defaultModelName)
 
-            console.log('🤖 [AgentActions] Auto-selected agent:', {
-              agentId: firstAgent.agent.id,
-              agentName: firstAgent.agent.name,
-              actionState: initialActionState,
-              model: defaultModelName
-            })
           } else {
             // No active agents - start with no agent (default behavior)
             setSelectedAgent(null)
             setActionState({})
             onAgentChange?.(null, {}, defaultModelName)
-
-            console.log('📝 [AgentActions] No active agents found, using default chat')
           }
         }
       } catch (error) {

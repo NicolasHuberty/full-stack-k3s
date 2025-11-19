@@ -12,9 +12,6 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json()
     const { filename, collectionId } = body
-
-    console.log('[DownloadByName] Request body:', { filename, collectionId })
-
     if (!filename) {
       return NextResponse.json({ error: 'Filename is required' }, { status: 400 })
     }
@@ -23,8 +20,6 @@ export async function POST(request: NextRequest) {
     const bucketName = process.env.MINIO_BUCKET_NAME || 'docuralis'
     const accessKey = process.env.MINIO_ACCESS_KEY || 'minioadmin'
     const secretKey = process.env.MINIO_SECRET_KEY || 'minioadmin'
-
-    console.log(`[DownloadByName] Using credentials: ${accessKey.substring(0, 4)}...${accessKey.slice(-4)}`)
 
     // Configure S3 client for MinIO
     const s3 = new AWS.S3({
@@ -56,8 +51,6 @@ export async function POST(request: NextRequest) {
     // Try each possible path with AWS S3 SDK
     for (const path of possiblePaths) {
       try {
-        console.log(`[DownloadByName] Trying path with AWS SDK: ${path}`)
-
         const params = {
           Bucket: bucketName,
           Key: path as string
@@ -70,29 +63,23 @@ export async function POST(request: NextRequest) {
 
           // Check if it's actually a PDF (not HTML)
           const isPDF = buffer.length > 4 &&
-                        buffer[0] === 0x25 && // %
-                        buffer[1] === 0x50 && // P
-                        buffer[2] === 0x44 && // D
-                        buffer[3] === 0x46    // F
+            buffer[0] === 0x25 && // %
+            buffer[1] === 0x50 && // P
+            buffer[2] === 0x44 && // D
+            buffer[3] === 0x46    // F
 
           if (isPDF) {
-            console.log(`[DownloadByName] ✅ SUCCESS! Downloaded valid PDF at: ${path} (${buffer.length} bytes)`)
             pdfBuffer = buffer
             foundPath = path
             break
-          } else {
-            console.log(`[DownloadByName] File at ${path} is not a valid PDF (${buffer.length} bytes)`)
           }
         }
       } catch (pathError: any) {
-        console.log(`[DownloadByName] Failed to get ${path}: ${pathError.code || pathError.message}`)
         continue // Try next path
       }
     }
 
     if (!pdfBuffer) {
-      console.error(`[DownloadByName] File not found. Tried paths:`, possiblePaths)
-
       return NextResponse.json(
         {
           error: 'File not found in storage. Tried multiple paths.',
@@ -102,9 +89,6 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.log(`[DownloadByName] Successfully found valid PDF at: ${foundPath}, size: ${pdfBuffer.length} bytes`)
-
-    // Return PDF buffer
     return new NextResponse(pdfBuffer as BodyInit, {
       headers: {
         'Content-Type': 'application/pdf',

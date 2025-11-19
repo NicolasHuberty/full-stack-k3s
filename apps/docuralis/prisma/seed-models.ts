@@ -3,7 +3,6 @@ import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
 
 async function main() {
-  console.log('Seeding LLM models...')
 
   const models = [
     {
@@ -80,10 +79,8 @@ async function main() {
       update: model,
       create: model,
     })
-    console.log(`✓ ${model.displayName}`)
   }
 
-  console.log('LLM models seeded successfully!')
 }
 
 main()

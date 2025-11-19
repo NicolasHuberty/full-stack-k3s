@@ -38,6 +38,14 @@ export const auth = betterAuth({
       enabled: true,
       trustedProviders: ["google", "github"],
     },
+    // Map NextAuth field names to Better Auth expected names
+    fields: {
+      accountId: "providerAccountId",
+      providerId: "provider",
+      refreshToken: "refresh_token",
+      accessToken: "access_token",
+      idToken: "id_token",
+    },
   },
   session: {
     expiresIn: 60 * 60 * 24 * 7, // 7 days

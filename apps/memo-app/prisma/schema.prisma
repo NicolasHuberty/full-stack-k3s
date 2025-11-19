@@ -14,7 +14,7 @@ datasource db {
 model User {
   id String @id @default(uuid())
   email String @unique
-  emailVerified Boolean @default(false)
+  emailVerified DateTime?
   name String
   image String?
   language String @default("en") // User's preferred language (en, fr, nl)
@@ -33,21 +33,24 @@ model User {
 }
 
 model Account {
-  id String @id @default(uuid())
-  userId String
-  accountId String
-  providerId String
-  accessToken String?
-  refreshToken String?
-  idToken String?
-  expiresAt DateTime?
-  password String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                String  @id @default(uuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  password          String?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([providerId, accountId])
+  @@unique([provider, providerAccountId])
+  @@index([userId])
 }
 
 model Session {

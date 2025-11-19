@@ -7,10 +7,12 @@ spec:
   selector:
     matchLabels:
       app: memo
+      component: frontend
   template:
     metadata:
       labels:
         app: memo
+        component: frontend
     spec:
       initContainers:
       - name: migrate
@@ -67,6 +69,11 @@ spec:
           value: "false"
         - name: MINIO_BUCKET_NAME
           value: memo
+        - name: BETTER_AUTH_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: memo-secrets
+              key: better-auth-secret
         livenessProbe:
           httpGet:
             path: /api/queue/health

@@ -17,7 +17,9 @@ export async function POST(request: NextRequest) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    console.log(`Uploading file: ${file.name}, MIME type: ${file.type}, Size: ${file.size}`);
+    console.log(
+      `Uploading file: ${file.name}, MIME type: ${file.type}, Size: ${file.size}`,
+    );
 
     // Upload to MinIO and create database record
     const result = await fileService.uploadFile(buffer, {

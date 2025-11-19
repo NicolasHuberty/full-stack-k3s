@@ -13,7 +13,7 @@ async function main() {
       id: "00000000-0000-0000-0000-000000000000",
       email: "demo@memo-app.local",
       name: "Demo User",
-      emailVerified: true,
+      emailVerified: new Date(),
     },
   });
 
@@ -24,19 +24,17 @@ async function main() {
 
   await prisma.account.upsert({
     where: {
-      providerId_accountId: {
-        providerId: "credential",
-        accountId: defaultUser.id,
+      provider_providerAccountId: {
+        provider: "credential",
+        providerAccountId: defaultUser.id,
       },
     },
-    update: {
-      password: hashedPassword,
-    },
+    update: {},
     create: {
       userId: defaultUser.id,
-      accountId: defaultUser.id,
-      providerId: "credential",
-      password: hashedPassword,
+      type: "credential",
+      provider: "credential",
+      providerAccountId: defaultUser.id,
     },
   });
 

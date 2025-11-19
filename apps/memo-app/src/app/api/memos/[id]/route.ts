@@ -32,10 +32,17 @@ export async function GET(
     }
 
     // Debug: log form data structure
-    if ('formData' in memo && memo.formData) {
-      console.log("[Memo API] FormData keys:", Object.keys(memo.formData.data || {}));
-      console.log("[Memo API] Missing fields:", memo.formData.missingFields);
-      console.log("[Memo API] Form field names:", memo.formData.form?.fields?.map((f: any) => f.name));
+    if ("formData" in memo && memo.formData) {
+      const formData = memo.formData as any;
+      console.log(
+        "[Memo API] FormData keys:",
+        Object.keys(formData.data || {}),
+      );
+      console.log("[Memo API] Missing fields:", formData.missingFields);
+      console.log(
+        "[Memo API] Form field names:",
+        formData.form?.fields?.map((f: any) => f.name),
+      );
     }
 
     return NextResponse.json({ data: memo });

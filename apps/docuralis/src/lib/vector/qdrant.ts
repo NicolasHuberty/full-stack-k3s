@@ -30,6 +30,8 @@ export interface DocumentChunkVector {
     chunkIndex: number
     content: string
     documentName?: string
+    page_number?: number  // Direct page number field (for migrated documents)
+    pageNumber?: number   // Alternative naming
     metadata?: Record<string, any>
   }
 }
@@ -43,6 +45,8 @@ export interface SearchResult {
     chunkIndex: number
     content: string
     documentName?: string
+    page_number?: number  // Direct page number field (for migrated documents)
+    pageNumber?: number   // Alternative naming
     metadata?: Record<string, any>
   }
 }
@@ -288,11 +292,24 @@ class QdrantService {
         with_payload: true,
       })
 
-      return results.map((result) => ({
+      const mappedResults = results.map((result) => ({
         id: result.id as string,
         score: result.score,
         payload: result.payload as any,
       }))
+
+      // Debug log first result to see structure
+      if (mappedResults.length > 0) {
+        console.log('[Qdrant] First search result structure:', {
+          id: mappedResults[0].id,
+          score: mappedResults[0].score,
+          payloadKeys: Object.keys(mappedResults[0].payload),
+          pageNumber: mappedResults[0].payload.page_number,
+          fullPayload: mappedResults[0].payload
+        })
+      }
+
+      return mappedResults
     } catch (error) {
       console.error('Failed to search similar chunks:', error)
       throw new Error(

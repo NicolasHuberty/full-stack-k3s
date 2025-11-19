@@ -11,7 +11,11 @@ export class AgentService {
     userId: string,
     collectionId: string,
     actionState?: Record<string, unknown>,
-    sessionId?: string
+    sessionId?: string,
+    onProgress?: (event: {
+      type: 'decompose' | 'retrieve' | 'grade' | 'generate' | 'complete'
+      data?: any
+    }) => void
   ): Promise<{
     answer: string
     sources: Array<{
@@ -85,25 +89,96 @@ export class AgentService {
       let result: AgentState | undefined
       const streamEvents: Array<{ node: string; data: any }> = []
 
-      for await (const event of await graph.stream(initialState)) {
+      console.log('[Agent] Starting graph stream with initial state')
+      const stream = await graph.stream(initialState, {
+        streamMode: 'updates' // Explicitly request updates mode
+      })
+
+      for await (const event of stream) {
         // Track which node executed
         const nodeName = Object.keys(event)[0]
         const nodeData = event[nodeName]
 
+        console.log(`[Agent] ========================================`)
+        console.log(`[Agent] Node executed: "${nodeName}"`)
+        console.log(`[Agent] Has onProgress callback: ${!!onProgress}`)
+        console.log(`[Agent] nodeData keys:`, Object.keys(nodeData || {}))
+
         streamEvents.push({ node: nodeName, data: nodeData })
 
-        // Log intermediate steps
-        if (nodeName === 'decompose' && nodeData.subQueries) {
-          console.log('[Agent] Sub-queries:', nodeData.subQueries)
-        } else if (nodeName === 'retrieve' && nodeData.retrievedDocs) {
-          console.log('[Agent] Retrieved docs:', nodeData.retrievedDocs.length)
+        // Emit progress events to callback
+        if (nodeName === 'decompose' && nodeData?.subQueries) {
+          console.log(`[Agent] ✅ MATCH: decompose with ${nodeData.subQueries.length} subQueries`)
+          try {
+            await onProgress?.({
+              type: 'decompose',
+              data: {
+                subQueries: nodeData.subQueries,
+                message: `Décomposition de la question en ${nodeData.subQueries.length} sous-questions`,
+              },
+            })
+            console.log('[Agent] ✅ Decompose event sent successfully')
+          } catch (e) {
+            console.error('[Agent] ❌ Error sending decompose event:', e)
+          }
+        } else if (nodeName === 'retrieve' && nodeData?.retrievedDocs) {
+          console.log(`[Agent] ✅ MATCH: retrieve with ${nodeData.retrievedDocs.length} docs`)
+          try {
+            await onProgress?.({
+              type: 'retrieve',
+              data: {
+                count: nodeData.retrievedDocs.length,
+                message: `Récupération de ${nodeData.retrievedDocs.length} documents pertinents`,
+              },
+            })
+            console.log('[Agent] ✅ Retrieve event sent successfully')
+          } catch (e) {
+            console.error('[Agent] ❌ Error sending retrieve event:', e)
+          }
         } else if (
           (nodeName === 'gradeReflexion' || nodeName === 'gradeClassical') &&
-          nodeData.relevantDocs
+          nodeData?.relevantDocs
         ) {
-          console.log('[Agent] Relevant docs:', nodeData.relevantDocs.length)
-        } else if (nodeName === 'generate' && nodeData.answer) {
-          console.log('[Agent] Generated answer')
+          console.log(`[Agent] ✅ MATCH: ${nodeName} with ${nodeData.relevantDocs.length} docs`)
+          try {
+            await onProgress?.({
+              type: 'grade',
+              data: {
+                count: nodeData.relevantDocs.length,
+                message: `Analyse de la pertinence : ${nodeData.relevantDocs.length} documents retenus`,
+                documents: nodeData.relevantDocs.map((d: any) => ({
+                  title: d.metadata.title,
+                  score: d.metadata.pertinenceScore || d.metadata.similarity,
+                  justification: d.metadata.justification,
+                })),
+              },
+            })
+            console.log('[Agent] ✅ Grade event sent successfully')
+          } catch (e) {
+            console.error('[Agent] ❌ Error sending grade event:', e)
+          }
+        } else if (nodeName === 'generate' && nodeData?.answer) {
+          console.log('[Agent] ✅ MATCH: generate with answer')
+          try {
+            await onProgress?.({
+              type: 'generate',
+              data: {
+                message: 'Génération de la réponse finale...',
+              },
+            })
+            console.log('[Agent] ✅ Generate event sent successfully')
+          } catch (e) {
+            console.error('[Agent] ❌ Error sending generate event:', e)
+          }
+        } else {
+          console.log(`[Agent] ⚠️  NO MATCH for node "${nodeName}"`)
+          console.log(`[Agent]   - nodeData?.subQueries exists: ${!!nodeData?.subQueries}`)
+          console.log(`[Agent]   - nodeData?.retrievedDocs exists: ${!!nodeData?.retrievedDocs}`)
+          console.log(`[Agent]   - nodeData?.relevantDocs exists: ${!!nodeData?.relevantDocs}`)
+          console.log(`[Agent]   - nodeData?.answer exists: ${!!nodeData?.answer}`)
+          if (nodeData) {
+            console.log(`[Agent]   - nodeData sample:`, JSON.stringify(nodeData).substring(0, 300))
+          }
         }
 
         result = { ...result, ...nodeData } as AgentState
@@ -128,21 +203,6 @@ export class AgentService {
           documentFilenames.add(cleanFilename)
         }
       })
-
-      console.log(
-        '[AgentService] Document IDs to lookup:',
-        Array.from(documentIds).slice(0, 5),
-        `... (${documentIds.size} total)`
-      )
-      console.log(
-        '[AgentService] Document filenames to lookup:',
-        Array.from(documentFilenames).slice(0, 5),
-        `... (${documentFilenames.size} total)`
-      )
-      console.log(
-        '[AgentService] Number of relevant docs:',
-        result.relevantDocs.length
-      )
 
       // Lookup documents by ID first, then by filename
       const documents = await prisma.document.findMany({
@@ -183,19 +243,7 @@ export class AgentService {
         },
       })
 
-      console.log('[AgentService] Found documents in DB:', documents.length)
-      console.log(
-        '[AgentService] Document map:',
-        documents.map((d) => ({
-          id: d.id.substring(0, 20) + '...',
-          filename: d.filename,
-          originalName: d.originalName,
-        }))
-      )
-
-      if (documents.length === 0) {
-        console.warn('[AgentService] ⚠️  No documents found in DB for filenames:', documentFilenames)
-      }
+  
 
       // Create multiple mappings for flexible lookup
       const filenameToDocMap = new Map<string, { id: string; originalName: string; filename: string }>()
@@ -249,6 +297,10 @@ export class AgentService {
             content: doc.pageContent,
             score: doc.metadata.pertinenceScore || doc.metadata.similarity || 0,
             justification: doc.metadata.justification,
+            pageNumber: doc.metadata.pageNumber || null, // Include page number
+            metadata: {
+              pageNumber: doc.metadata.pageNumber || null, // Also include in metadata for compatibility
+            },
           }
         }
 
@@ -287,6 +339,10 @@ export class AgentService {
             content: doc.pageContent,
             score: doc.metadata.pertinenceScore || doc.metadata.similarity || 0,
             justification: doc.metadata.justification,
+            pageNumber: doc.metadata.pageNumber || null, // Include page number
+            metadata: {
+              pageNumber: doc.metadata.pageNumber || null, // Also include in metadata for compatibility
+            },
           }
         }
 
@@ -306,8 +362,13 @@ export class AgentService {
           content: doc.pageContent,
           score: doc.metadata.pertinenceScore || doc.metadata.similarity || 0,
           justification: doc.metadata.justification,
+          pageNumber: doc.metadata.pageNumber || null, // Include page number
+          metadata: {
+            pageNumber: doc.metadata.pageNumber || null, // Also include in metadata for compatibility
+          },
         }
       })
+
 
       const missingDocs = sources.filter((s) => !s.documentId)
       if (missingDocs.length > 0) {
@@ -315,31 +376,6 @@ export class AgentService {
           `[AgentService] ⚠️  ${missingDocs.length} sources have missing documentId`
         )
       }
-
-      console.log(
-        '[AgentService] Transformed sources:',
-        sources.map(
-          (s: {
-            documentId: string
-            documentName: string
-            documentUrl?: string | null
-            collectionId: string
-            content: string
-            score: number
-            justification?: string
-          }) => ({
-            documentId:
-              s.documentId
-                ? s.documentId.substring(0, Math.min(20, s.documentId.length)) +
-                  '...'
-                : '❌ MISSING',
-            documentName: s.documentName,
-            hasUrl: !!s.documentUrl,
-            score: s.score,
-            hasContent: !!s.content,
-          })
-        )
-      )
 
       return {
         answer: result.answer,

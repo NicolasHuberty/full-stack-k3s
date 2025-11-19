@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/auth'
-import { getMinioClient } from '@/lib/storage/minio'
+import AWS from 'aws-sdk'
 
 export async function POST(request: NextRequest) {
   try {
@@ -19,84 +19,80 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Filename is required' }, { status: 400 })
     }
 
-    // Get MinIO client
-    const minioClient = getMinioClient()
+    // Use AWS S3 SDK for proper authentication
     const bucketName = process.env.MINIO_BUCKET_NAME || 'docuralis'
+    const accessKey = process.env.MINIO_ACCESS_KEY || 'minioadmin'
+    const secretKey = process.env.MINIO_SECRET_KEY || 'minioadmin'
+
+    console.log(`[DownloadByName] Using credentials: ${accessKey.substring(0, 4)}...${accessKey.slice(-4)}`)
+
+    // Configure S3 client for MinIO
+    const s3 = new AWS.S3({
+      accessKeyId: accessKey,
+      secretAccessKey: secretKey,
+      endpoint: 'https://s3.docuralis.com',
+      region: 'us-east-1',
+      s3ForcePathStyle: true,
+      signatureVersion: 'v4',
+    })
 
     // Try different filename patterns
     const possiblePaths = [
-      filename, // Direct filename
-      collectionId ? `${collectionId}/${filename}` : null, // With collection ID if provided
-      filename.split('?')[0], // Without query parameters
+      // With collection ID if provided
+      collectionId ? `${collectionId}/${filename}` : null,
+      // Direct filename
+      filename,
+      // Without query parameters
+      filename.split('?')[0],
       // Try to extract collection from URL patterns
       ...(filename.includes('%2F') ? [decodeURIComponent(filename)] : []),
-      // Common MinIO collection patterns - try with hardcoded collection ID
-      `cmhxblm5p00018001iwvrwdxq/${filename}`,
+      // Common MinIO collection patterns - try with hardcoded collection ID if no collectionId provided
+      !collectionId ? `cmhxblm5p00018001iwvrwdxq/${filename}` : null,
     ].filter(Boolean)
 
     let pdfBuffer: Buffer | null = null
     let foundPath: string | null = null
 
-    // Try each possible path
+    // Try each possible path with AWS S3 SDK
     for (const path of possiblePaths) {
       try {
-        console.log(`[DownloadByName] Trying path: ${path}`)
-        const exists = await minioClient.fileExists(path)
+        console.log(`[DownloadByName] Trying path with AWS SDK: ${path}`)
 
-        if (exists) {
-          console.log(`[DownloadByName] Found file at: ${path}`)
-          const stream = await minioClient.getObject(bucketName, path)
-
-          // Convert stream to buffer
-          const chunks: Buffer[] = []
-          for await (const chunk of stream) {
-            chunks.push(Buffer.from(chunk))
-          }
-          pdfBuffer = Buffer.concat(chunks)
-          foundPath = path
-          break
+        const params = {
+          Bucket: bucketName,
+          Key: path as string
         }
-      } catch (pathError) {
-        console.log(`[DownloadByName] Path ${path} failed:`, pathError)
+
+        const data = await s3.getObject(params).promise()
+
+        if (data.Body) {
+          const buffer = Buffer.from(data.Body as Uint8Array)
+
+          // Check if it's actually a PDF (not HTML)
+          const isPDF = buffer.length > 4 &&
+                        buffer[0] === 0x25 && // %
+                        buffer[1] === 0x50 && // P
+                        buffer[2] === 0x44 && // D
+                        buffer[3] === 0x46    // F
+
+          if (isPDF) {
+            console.log(`[DownloadByName] ✅ SUCCESS! Downloaded valid PDF at: ${path} (${buffer.length} bytes)`)
+            pdfBuffer = buffer
+            foundPath = path
+            break
+          } else {
+            console.log(`[DownloadByName] File at ${path} is not a valid PDF (${buffer.length} bytes)`)
+          }
+        }
+      } catch (pathError: any) {
+        console.log(`[DownloadByName] Failed to get ${path}: ${pathError.code || pathError.message}`)
         continue // Try next path
       }
     }
 
     if (!pdfBuffer) {
-      console.log(`[DownloadByName] File not found with standard paths, trying to search bucket...`)
-
-      // Last resort: search the entire bucket for files ending with this filename
-      try {
-        const objects = []
-        const objectStream = minioClient.listObjects(bucketName, '', true)
-
-        for await (const obj of objectStream) {
-          if (obj.name?.endsWith(filename)) {
-            objects.push(obj.name)
-          }
-        }
-
-        console.log(`[DownloadByName] Found ${objects.length} matching files:`, objects)
-
-        if (objects.length > 0) {
-          // Try the first matching file
-          const matchedPath = objects[0]
-          const stream = await minioClient.getObject(bucketName, matchedPath)
-          const chunks: Buffer[] = []
-          for await (const chunk of stream) {
-            chunks.push(Buffer.from(chunk))
-          }
-          pdfBuffer = Buffer.concat(chunks)
-          foundPath = matchedPath
-          console.log(`[DownloadByName] Successfully found file via search: ${matchedPath}`)
-        }
-      } catch (searchError) {
-        console.error('[DownloadByName] Search failed:', searchError)
-      }
-    }
-
-    if (!pdfBuffer) {
       console.error(`[DownloadByName] File not found. Tried paths:`, possiblePaths)
+
       return NextResponse.json(
         {
           error: 'File not found in storage. Tried multiple paths.',
@@ -106,10 +102,10 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.log(`[DownloadByName] Successfully found file at: ${foundPath}, size: ${pdfBuffer.length} bytes`)
+    console.log(`[DownloadByName] Successfully found valid PDF at: ${foundPath}, size: ${pdfBuffer.length} bytes`)
 
     // Return PDF buffer
-    return new NextResponse(pdfBuffer, {
+    return new NextResponse(pdfBuffer as BodyInit, {
       headers: {
         'Content-Type': 'application/pdf',
         'Content-Length': pdfBuffer.length.toString(),

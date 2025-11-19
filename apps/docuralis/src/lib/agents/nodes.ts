@@ -77,14 +77,12 @@ export async function retrieveDocuments(
 
     for (const query of queriesToSearch) {
       // Retrieve French documents
-      console.log(`   Searching: "${query.substring(0, 60)}..."`)
       const frenchDocs = await searchDocuments(
         state.collectionId,
         query,
         docsPerQuery
       )
       allDocs.push(...frenchDocs)
-      console.log(`   ✓ Found ${frenchDocs.length} French documents`)
 
       // If multilingual or translator mode, retrieve Dutch documents
       if (state.multilingual || state.translatorMode) {
@@ -98,7 +96,6 @@ export async function retrieveDocuments(
           state.smartMode || state.reflexion ? 20 : 10
         )
         allDocs.push(...dutchDocs)
-        console.log(`   ✓ Found ${dutchDocs.length} Dutch documents`)
       }
     }
 
@@ -118,9 +115,7 @@ export async function retrieveDocuments(
       }
     }
 
-    console.log(
-      `✅ Retrieved ${uniqueDocs.length} unique documents after deduplication (from ${allDocs.length} total)\n`
-    )
+    console.log(`🚀 [RETRIEVE NODE] Returning state with ${uniqueDocs.length} retrievedDocs`)
     return {
       retrievedDocs: uniqueDocs,
     }
@@ -207,49 +202,54 @@ export async function gradeDocumentsReflexion(
         // Extract JSON from markdown code blocks if present
         let jsonString = response.content.toString().trim()
 
-        // Remove markdown code blocks (```json ... ``` or ``` ... ```)
-        const codeBlockMatch = jsonString.match(
-          /```(?:json)?\s*([\s\S]*?)\s*```/
-        )
-        if (codeBlockMatch) {
-          jsonString = codeBlockMatch[1].trim()
-        }
+        try {
+          // Remove markdown code blocks (```json ... ``` or ``` ... ```)
+          const codeBlockMatch = jsonString.match(
+            /```(?:json)?\s*([\s\S]*?)\s*```/
+          )
+          if (codeBlockMatch) {
+            jsonString = codeBlockMatch[1].trim()
+          }
 
-        const result = JSON.parse(jsonString) as ReflexionGradingResult
+          const result = JSON.parse(jsonString) as ReflexionGradingResult
 
-        // Validate score is a number between 1-10
-        if (
-          typeof result.pertinenceScore !== 'number' ||
-          result.pertinenceScore < 1 ||
-          result.pertinenceScore > 10
-        ) {
-          console.warn(
-            `Invalid pertinence score: ${result.pertinenceScore} for doc`
+          // Validate score is a number between 1-10
+          if (
+            typeof result.pertinenceScore !== 'number' ||
+            result.pertinenceScore < 1 ||
+            result.pertinenceScore > 10
+          ) {
+            console.warn(
+              `Invalid pertinence score: ${result.pertinenceScore} for doc`
+            )
+            return null
+          }
+
+          // Accept any score >= 1 (very inclusive)
+          // We'll filter and sort later
+          return {
+            ...doc,
+            score: result.pertinenceScore,
+            metadata: {
+              ...doc.metadata,
+              pertinenceScore: result.pertinenceScore,
+              justification: result.justification,
+            },
+          }
+        } catch (parseError) {
+          console.error(
+            'Error parsing reflexion grading result:',
+            parseError,
+            'Response:',
+            jsonString?.substring(0, 200)
           )
           return null
         }
-
-        // Accept any score >= 1 (very inclusive)
-        // We'll filter and sort later
-        return {
-          ...doc,
-          score: result.pertinenceScore,
-          metadata: {
-            ...doc.metadata,
-            pertinenceScore: result.pertinenceScore,
-            justification: result.justification,
-          },
-        }
-      } catch (parseError) {
-        console.error(
-          'Error parsing reflexion grading result:',
-          parseError,
-          'Response:',
-          jsonString?.substring(0, 200)
-        )
+      } catch (error) {
+        console.error('Error in reflexion grading:', error)
         return null
       }
-    })
+    });
 
     // Wait for all grading to complete in parallel
     const results = await Promise.all(gradingPromises)
@@ -257,24 +257,10 @@ export async function gradeDocumentsReflexion(
       DocumentChunk & { score: number }
     >
 
-    console.log(
-      `✅ Graded ${scoredDocs.length}/${state.retrievedDocs.length} documents successfully`
-    )
-
     if (scoredDocs.length > 0) {
       const scores = scoredDocs.map((d) => d.score)
-      console.log(
-        `📈 Score distribution: min=${Math.min(...scores)}, max=${Math.max(...scores)}, avg=${(scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(1)}`
-      )
-      console.log(
-        `📊 All scores: ${scores.slice(0, 20).join(', ')}${scores.length > 20 ? '...' : ''}`
-      )
-
       // Filter by threshold >= 2
       const passedThreshold = scoredDocs.filter((d) => d.score >= 2)
-      console.log(
-        `✓ ${passedThreshold.length} documents passed threshold (>= 2/10)`
-      )
 
       // If enough docs passed threshold, use them
       if (passedThreshold.length >= 10) {
@@ -282,30 +268,13 @@ export async function gradeDocumentsReflexion(
         passedThreshold.sort((a, b) => b.score - a.score)
         const relevantDocs = passedThreshold.slice(0, 30)
 
-        console.log(
-          `📑 Using ${relevantDocs.length} threshold-passing documents`
-        )
-        console.log(
-          `   Top 5 scores: ${relevantDocs.slice(0, 5).map((d) => d.score).join(', ')}\n`
-        )
-
         return {
           relevantDocs,
         }
       } else {
         // Fallback: If not enough passed threshold, take top 30 by score regardless
-        console.log(
-          `⚠️  Only ${passedThreshold.length} passed threshold - using top 30 by score instead`
-        )
         scoredDocs.sort((a, b) => b.score - a.score)
         const relevantDocs = scoredDocs.slice(0, 30)
-
-        console.log(
-          `📑 Returning top ${relevantDocs.length} documents by score`
-        )
-        console.log(
-          `   Top 5 scores: ${relevantDocs.slice(0, 5).map((d) => d.score).join(', ')}\n`
-        )
 
         return {
           relevantDocs,
@@ -314,9 +283,6 @@ export async function gradeDocumentsReflexion(
     }
 
     // Final fallback: use vector similarity scores if grading completely failed
-    console.log(
-      '⚠️  All grading failed - falling back to vector similarity scores'
-    )
     const docsWithSimilarity = state.retrievedDocs
       .map((doc) => ({
         ...doc,
@@ -324,10 +290,6 @@ export async function gradeDocumentsReflexion(
       }))
       .sort((a, b) => b.score - a.score)
       .slice(0, 30)
-
-    console.log(
-      `📑 Using top ${docsWithSimilarity.length} documents by similarity\n`
-    )
 
     return {
       relevantDocs: docsWithSimilarity,
@@ -350,11 +312,12 @@ export async function generateResponse(
       `📄 Using ${state.relevantDocs.length} documents to generate response...`
     )
 
-    // Format documents
+    // Format documents with filenames for proper citation
     const formattedDocs = state.relevantDocs
       .map((doc, idx) => {
         const justification = doc.metadata.justification || ''
-        return `**Document ${idx + 1}: ${doc.metadata.title} (Page ${doc.metadata.pageNumber})**\n${justification ? `Justification: ${justification}\n` : ''}Contenu: ${doc.pageContent}`
+        const filename = doc.metadata.title || `document_${idx + 1}.pdf`
+        return `**${filename} (Page ${doc.metadata.pageNumber})**\n${justification ? `Justification: ${justification}\n` : ''}Contenu: ${doc.pageContent}`
       })
       .join('\n\n---\n\n')
 
@@ -382,8 +345,6 @@ export async function generateResponse(
         .replace(/```/g, '')
         .trim()
     }
-
-    console.log(`✅ Answer generated (${answer.length} characters)\n`)
 
     return {
       answer,

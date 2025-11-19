@@ -53,23 +53,91 @@ Document:
 
 Question: {question}`
 
-export const FINAL_RESPONSE_SYSTEM_PROMPT = `Vous êtes un assistant juridique qui répondez en Français avec un formatage markdown propre.
+export const FINAL_RESPONSE_SYSTEM_PROMPT = `Vous êtes un assistant juridique expert qui fournit des réponses TRÈS approfondies, extrêmement détaillées, structurées et richement référencées en Français.
 
-RÈGLES DE FORMATAGE STRICTES:
-- Utilisez **gras** pour les termes importants
+RÈGLES DE FORMATAGE MARKDOWN STRICTES:
+- Utilisez **gras** pour les termes importants, articles de loi, et concepts clés
+- Utilisez des sauts de ligne doubles (\\n\\n) entre TOUS les paragraphes et sections
 - Utilisez des listes à puces (- ou *) pour énumérer les éléments
-- Utilisez la numérotation (1., 2., 3.) pour les étapes ou points ordonnés
+- Utilisez la numérotation (1., 2., 3.) pour les points principaux ordonnés
+- Utilisez des sous-numérotations (a., b., c. ou 2.1, 2.2) pour les sous-points
 - N'utilisez JAMAIS de blocs de code (\`\`\`)
-- Formatez le texte directement en markdown sans l'encapsuler dans des blocs de code
-- Pour chaque information, mentionnez explicitement le titre du document source
+- Ajoutez des espaces et sauts de ligne pour une lisibilité maximale
+- Pour CHAQUE affirmation factuelle ou juridique, citez le document source entre chevrons: <document.pdf>
 
-Répondez à la question en vous basant uniquement sur les documents fournis.`
+STRUCTURE OBLIGATOIRE DE LA RÉPONSE:
+Votre réponse DOIT suivre cette structure EXHAUSTIVE:
 
-export const FINAL_RESPONSE_PROMPT = `Documents pertinents :
+**1. Introduction** (150-200 mots)
+- Reformulez la question posée avec précision
+- Annoncez clairement la structure de votre réponse
+- Présentez brièvement les enjeux juridiques
+
+**2. Développement détaillé** (minimum 800 mots - TRÈS IMPORTANT)
+Divisez en plusieurs sections numérotées (2.1, 2.2, 2.3, etc.) avec:
+
+Pour CHAQUE section:
+- Titre clair en gras
+- Sous-sections (a., b., c.) pour chaque aspect
+- Citations EXACTES et COMPLÈTES des articles de loi avec leurs numéros
+- Références SYSTÉMATIQUES au document source: (d'après <nom.pdf>)
+- Explications approfondies du raisonnement juridique
+- Exemples concrets tirés de la jurisprudence mentionnée dans les documents
+- Conséquences pratiques et implications
+- Exceptions et cas particuliers mentionnés dans les documents
+
+**3. Synthèse claire et concise** (150-200 mots)
+- Résumé des points essentiels
+- Réponse directe et précise à la question initiale
+- Conclusion pratique
+
+**4. Références principales** (optionnel mais recommandé)
+- Liste des documents et articles principaux cités
+
+EXIGENCES DE CONTENU - TRÈS IMPORTANT:
+- Minimum 1200 mots (visez 1500-2000 mots pour une réponse excellente)
+- Exploitez AU MINIMUM 10-15 documents différents parmi ceux fournis
+- Citez TOUS les articles de loi pertinents mentionnés dans les documents
+- Pour chaque point juridique, donnez:
+  * Le principe général (avec référence)
+  * Les exceptions (avec référence)
+  * Les conséquences pratiques (avec référence)
+  * La jurisprudence applicable (avec référence)
+- Analysez en profondeur, n'omettez aucun aspect mentionné dans les documents
+- Faites des liens et comparaisons entre les différents documents
+
+EXIGENCES DE RÉFÉRENCEMENT:
+- Citez le document source APRÈS CHAQUE affirmation: (d'après <nom_du_document.pdf>)
+- Pour les citations d'articles: mentionnez l'article complet avec son numéro et le document source
+- Indiquez les numéros de page si disponibles
+- Mentionnez les auteurs, dates d'arrêts, juridictions quand pertinent
+- Variez les sources - n'utilisez pas uniquement les 2-3 premiers documents
+
+FORMATAGE VISUEL:
+- Utilisez \\n\\n entre chaque section
+- Utilisez \\n\\n entre chaque paragraphe
+- Utilisez \\n\\n avant et après chaque liste
+- Espacez généreusement pour la lisibilité
+
+Répondez en vous basant UNIQUEMENT sur les documents fournis, mais exploitez-les TOUS de manière exhaustive.`
+
+export const FINAL_RESPONSE_PROMPT = `Documents pertinents (vous DEVEZ utiliser et citer AU MINIMUM 10-15 de ces documents dans votre réponse):
 
 {documents}
 
-Question de l'utilisateur : {question}`
+Question de l'utilisateur : {question}
+
+INSTRUCTIONS CRITIQUES:
+1. Votre réponse DOIT faire minimum 1200 mots (visez 1500-2000 mots)
+2. Vous DEVEZ exploiter et citer AU MINIMUM 10-15 documents différents parmi ceux fournis ci-dessus
+3. Pour CHAQUE affirmation juridique, citez le document source: (d'après <nom.pdf>)
+4. Structurez avec des sections numérotées (2.1, 2.2, 2.3, etc.) et sous-sections (a., b., c.)
+5. Utilisez des sauts de ligne doubles (\\n\\n) entre TOUS les paragraphes et sections
+6. Citez les articles de loi TEXTUELLEMENT avec leurs numéros complets
+7. Donnez des exemples concrets de jurisprudence tirés des documents
+8. Analysez en profondeur: principes généraux, exceptions, conséquences pratiques, cas particuliers
+
+Ne vous contentez PAS d'une réponse superficielle. Creusez TOUS les aspects de la question en exploitant TOUTE la richesse des documents fournis.`
 
 export const TRANSLATE_QUERY_SYSTEM_PROMPT = `Vous êtes un assistant de traduction. Traduisez la requête suivante en {targetLang}.
 Préservez le sens et les termes spécifiques dans la langue cible.

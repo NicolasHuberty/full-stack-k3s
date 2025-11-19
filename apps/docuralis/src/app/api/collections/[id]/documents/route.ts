@@ -119,13 +119,22 @@ export async function GET(
     const limit = Math.min(parseInt(searchParams.get('limit') || '50'), 100)
     const cursor = searchParams.get('cursor') || undefined
     const search = searchParams.get('search') || undefined
+    const filename = searchParams.get('filename') || undefined
     const status = searchParams.get('status') || undefined
 
     // Build where clause
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const where: any = { collectionId }
 
-    if (search) {
+    // Exact filename match takes precedence over search
+    if (filename) {
+      where.OR = [
+        { originalName: { equals: filename, mode: 'insensitive' } },
+        { filename: { equals: filename, mode: 'insensitive' } },
+        { originalName: { contains: filename, mode: 'insensitive' } },
+        { filename: { contains: filename, mode: 'insensitive' } },
+      ]
+    } else if (search) {
       where.OR = [
         { originalName: { contains: search, mode: 'insensitive' } },
         { filename: { contains: search, mode: 'insensitive' } },

@@ -270,6 +270,11 @@ async function processDocumentJob(job: {
           chunkIndex: chunk.chunkIndex,
           content: chunk.content,
           documentName: document.originalName,
+          metadata: {
+            startPage: chunk.startPage,
+            endPage: chunk.endPage,
+            pageNumber: chunk.startPage || chunk.endPage || 1, // Use startPage as primary page number
+          },
         },
       }))
 

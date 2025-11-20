@@ -25,6 +25,7 @@ async function extractFirstPages(
   numPages: number = 2
 ): Promise<string> {
   return new Promise((resolve, reject) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const pdfParser = new (PDFParser as any)(null, true)
 
     pdfParser.on('pdfParser_dataError', (errData: { parserError: string }) => {

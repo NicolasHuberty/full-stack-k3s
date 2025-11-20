@@ -2,7 +2,10 @@
 
 import Parser from 'rss-parser'
 import { prisma } from '../src/lib/prisma'
-import { createCollection, CollectionVisibility } from '../src/lib/collections/service'
+import {
+  createCollection,
+  CollectionVisibility,
+} from '../src/lib/collections/service'
 
 const parser = new Parser<
   Record<string, unknown>,

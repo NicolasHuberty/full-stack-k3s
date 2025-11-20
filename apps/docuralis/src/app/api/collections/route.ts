@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/auth'
-import { createCollection, CollectionVisibility } from '@/lib/collections/service'
+import {
+  createCollection,
+  CollectionVisibility,
+} from '@/lib/collections/service'
 import { getUserCollections } from '@/lib/collections/permissions'
 import { z } from 'zod'
 

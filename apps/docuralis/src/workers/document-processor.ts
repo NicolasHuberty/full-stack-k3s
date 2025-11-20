@@ -195,13 +195,21 @@ async function processDocumentJob(job: {
         orderBy: { chunkIndex: 'asc' },
       })
 
-      chunksWithTokens = dbChunks.map((chunk: { content: string; chunkIndex: number; startChar: number | null; endChar: number | null; tokenCount: number | null }) => ({
-        content: chunk.content,
-        index: chunk.chunkIndex,
-        startChar: chunk.startChar || 0,
-        endChar: chunk.endChar || 0,
-        tokenCount: chunk.tokenCount || 0,
-      }))
+      chunksWithTokens = dbChunks.map(
+        (chunk: {
+          content: string
+          chunkIndex: number
+          startChar: number | null
+          endChar: number | null
+          tokenCount: number | null
+        }) => ({
+          content: chunk.content,
+          index: chunk.chunkIndex,
+          startChar: chunk.startChar || 0,
+          endChar: chunk.endChar || 0,
+          tokenCount: chunk.tokenCount || 0,
+        })
+      )
     }
 
     // Step 3: Generate embeddings (if not already done)
@@ -210,7 +218,9 @@ async function processDocumentJob(job: {
       logger.info('Step 3: Generating embeddings', { documentId })
 
       const embeddingService = getEmbeddingService()
-      const chunkTexts = chunksWithTokens.map((c: { content: string }) => c.content)
+      const chunkTexts = chunksWithTokens.map(
+        (c: { content: string }) => c.content
+      )
 
       const result = await embeddingService.generateBatchEmbeddings(
         chunkTexts,
@@ -241,7 +251,9 @@ async function processDocumentJob(job: {
 
       // Need to regenerate embeddings for storage (we don't store them in DB)
       const embeddingService = getEmbeddingService()
-      const chunkTexts = chunksWithTokens.map((c: { content: string }) => c.content)
+      const chunkTexts = chunksWithTokens.map(
+        (c: { content: string }) => c.content
+      )
 
       const result = await embeddingService.generateBatchEmbeddings(
         chunkTexts,
@@ -261,22 +273,33 @@ async function processDocumentJob(job: {
       })
 
       const qdrant = getQdrantClient()
-      const vectorData = documentChunks.map((chunk: { id: string; chunkIndex: number; content: string; startPage: number | null; endPage: number | null }, index: number) => ({
-        id: chunk.id,
-        vector: embeddings[index],
-        payload: {
-          documentId: document.id,
-          collectionId: document.collectionId,
-          chunkIndex: chunk.chunkIndex,
-          content: chunk.content,
-          documentName: document.originalName,
-          metadata: {
-            startPage: chunk.startPage,
-            endPage: chunk.endPage,
-            pageNumber: chunk.startPage || chunk.endPage || 1, // Use startPage as primary page number
+      const vectorData = documentChunks.map(
+        (
+          chunk: {
+            id: string
+            chunkIndex: number
+            content: string
+            startPage: number | null
+            endPage: number | null
           },
-        },
-      }))
+          index: number
+        ) => ({
+          id: chunk.id,
+          vector: embeddings[index],
+          payload: {
+            documentId: document.id,
+            collectionId: document.collectionId,
+            chunkIndex: chunk.chunkIndex,
+            content: chunk.content,
+            documentName: document.originalName,
+            metadata: {
+              startPage: chunk.startPage,
+              endPage: chunk.endPage,
+              pageNumber: chunk.startPage || chunk.endPage || 1, // Use startPage as primary page number
+            },
+          },
+        })
+      )
 
       await qdrant.upsertChunks(
         document.collectionId,

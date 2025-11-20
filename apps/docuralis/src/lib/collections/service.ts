@@ -361,13 +361,18 @@ export async function getCollectionStats(collectionId: string, userId: string) {
     )
 
     const documentsByStatus = {
-      pending: collection.documents.filter((d: { status: string }) => d.status === 'PENDING')
-        .length,
-      processing: collection.documents.filter((d: { status: string }) => d.status === 'PROCESSING')
-        .length,
-      completed: collection.documents.filter((d: { status: string }) => d.status === 'COMPLETED')
-        .length,
-      failed: collection.documents.filter((d: { status: string }) => d.status === 'FAILED').length,
+      pending: collection.documents.filter(
+        (d: { status: string }) => d.status === 'PENDING'
+      ).length,
+      processing: collection.documents.filter(
+        (d: { status: string }) => d.status === 'PROCESSING'
+      ).length,
+      completed: collection.documents.filter(
+        (d: { status: string }) => d.status === 'COMPLETED'
+      ).length,
+      failed: collection.documents.filter(
+        (d: { status: string }) => d.status === 'FAILED'
+      ).length,
     }
 
     return {

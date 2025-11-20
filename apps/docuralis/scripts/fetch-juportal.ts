@@ -14,12 +14,14 @@ interface ECLIDocument {
   metadata?: Record<string, unknown>
 }
 
-async function fetchECLIDocument(ecli: string): Promise<Record<string, unknown> | null> {
+async function fetchECLIDocument(
+  ecli: string
+): Promise<Record<string, unknown> | null> {
   try {
     const response = await fetch(`${ECLI_API_BASE}/ecli/${ecli}`, {
       headers: {
-        'Accept': 'application/json'
-      }
+        Accept: 'application/json',
+      },
     })
 
     if (!response.ok) {
@@ -51,8 +53,8 @@ async function fetchJUPORTALDocuments() {
   let collection = await prisma.collection.findFirst({
     where: {
       name: 'JUPORTAL Jurisprudence',
-      ownerId: userId
-    }
+      ownerId: userId,
+    },
   })
 
   if (!collection) {
@@ -64,7 +66,7 @@ async function fetchJUPORTALDocuments() {
       ownerId: userId,
       embeddingModel: 'text-embedding-3-small',
       chunkSize: 1000,
-      chunkOverlap: 200
+      chunkOverlap: 200,
     })
   }
 
@@ -91,7 +93,9 @@ async function fetchJUPORTALDocuments() {
 
       // Process and add to collection
       try {
-        const file = new File([JSON.stringify(doc)], fileName, { type: 'application/json' })
+        const file = new File([JSON.stringify(doc)], fileName, {
+          type: 'application/json',
+        })
 
         await processDocument({
           file,
@@ -101,8 +105,8 @@ async function fetchJUPORTALDocuments() {
             source: 'JUPORTAL',
             ecli,
             court: ecli.split(':')[2],
-            year: ecli.split(':')[3]
-          }
+            year: ecli.split(':')[3],
+          },
         })
 
         console.log(`Processed and added ${ecli} to collection`)

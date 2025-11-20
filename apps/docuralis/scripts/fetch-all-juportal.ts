@@ -19,7 +19,12 @@
  *   - Wait 2000ms between batches
  */
 
-import { fetchAllJUPORTALDocuments, getAllSitemapUrls, fetchSitemapIndex, fetchSitemap } from './fetch-juportal-sitemaps'
+import {
+  fetchAllJUPORTALDocuments,
+  getAllSitemapUrls,
+  fetchSitemapIndex,
+  fetchSitemap,
+} from './fetch-juportal-sitemaps'
 import { prisma } from '../src/lib/prisma'
 import { createCollection } from '../src/lib/collections/service'
 import { promises as fs } from 'fs'
@@ -76,7 +81,9 @@ async function fetchAllJUPORTALProduction(
   // Load or create progress state
   let progress = await loadProgress()
   if (progress) {
-    log(`📊 Resuming from previous session: ${progress.processedSitemaps}/${progress.totalSitemaps} sitemaps processed`)
+    log(
+      `📊 Resuming from previous session: ${progress.processedSitemaps}/${progress.totalSitemaps} sitemaps processed`
+    )
     startIndex = Math.max(startIndex, progress.currentSitemapIndex)
   } else {
     progress = {
@@ -88,7 +95,7 @@ async function fetchAllJUPORTALProduction(
       startTime: new Date().toISOString(),
       lastUpdate: new Date().toISOString(),
       currentSitemapIndex: startIndex,
-      errors: []
+      errors: [],
     }
   }
 
@@ -103,20 +110,21 @@ async function fetchAllJUPORTALProduction(
   let collection = await prisma.collection.findFirst({
     where: {
       name: 'JUPORTAL Complete Database',
-      ownerId: user.id
-    }
+      ownerId: user.id,
+    },
   })
 
   if (!collection) {
     log('📚 Creating JUPORTAL Complete Database collection...')
     collection = await createCollection({
       name: 'JUPORTAL Complete Database',
-      description: 'Complete Belgian jurisprudence from JUPORTAL sitemaps (~200,000 documents)',
+      description:
+        'Complete Belgian jurisprudence from JUPORTAL sitemaps (~200,000 documents)',
       visibility: 'PRIVATE',
       ownerId: user.id,
       embeddingModel: 'text-embedding-3-small',
       chunkSize: 1000,
-      chunkOverlap: 200
+      chunkOverlap: 200,
     })
   }
 
@@ -126,16 +134,23 @@ async function fetchAllJUPORTALProduction(
   log('🗺️  Fetching sitemap URLs...')
   const sitemapIndexUrls = await getAllSitemapUrls()
   progress.totalSitemaps = Math.min(sitemapIndexUrls.length, maxSitemaps)
-  log(`📊 Found ${sitemapIndexUrls.length} sitemap indexes (processing ${progress.totalSitemaps})`)
+  log(
+    `📊 Found ${sitemapIndexUrls.length} sitemap indexes (processing ${progress.totalSitemaps})`
+  )
 
   // Process sitemaps starting from the specified index
-  const endIndex = Math.min(startIndex + progress.totalSitemaps, sitemapIndexUrls.length)
+  const endIndex = Math.min(
+    startIndex + progress.totalSitemaps,
+    sitemapIndexUrls.length
+  )
 
   for (let i = startIndex; i < endIndex; i++) {
     const indexUrl = sitemapIndexUrls[i]
     progress.currentSitemapIndex = i
 
-    log(`\n📋 Processing sitemap index ${i + 1}/${progress.totalSitemaps}: ${indexUrl}`)
+    log(
+      `\n📋 Processing sitemap index ${i + 1}/${progress.totalSitemaps}: ${indexUrl}`
+    )
 
     try {
       // Get individual sitemap URLs from this index
@@ -148,7 +163,9 @@ async function fetchAllJUPORTALProduction(
           const documents = await fetchSitemap(sitemapUrl)
           progress.totalDocuments += documents.length
 
-          log(`   📄 Processing ${documents.length} documents from ${sitemapUrl}`)
+          log(
+            `   📄 Processing ${documents.length} documents from ${sitemapUrl}`
+          )
 
           // Import documents in batches
           for (let j = 0; j < documents.length; j += batchSize) {
@@ -162,30 +179,39 @@ async function fetchAllJUPORTALProduction(
                 const existingDoc = await prisma.document.findFirst({
                   where: {
                     collectionId: collection.id,
-                    filename: filename
-                  }
+                    filename: filename,
+                  },
                 })
 
                 if (!existingDoc) {
-                  const frenchUrl = doc.urls.fr || doc.urls.nl || doc.urls.de || ''
-                  const abstract = doc.abstract.fr || doc.abstract.nl || doc.abstract.de || ''
-                  const description = doc.description.fr || doc.description.nl || doc.description.de || ''
-                  const subject = doc.subject.fr || doc.subject.nl || doc.subject.de || ''
+                  const frenchUrl =
+                    doc.urls.fr || doc.urls.nl || doc.urls.de || ''
+                  const abstract =
+                    doc.abstract.fr || doc.abstract.nl || doc.abstract.de || ''
+                  const description =
+                    doc.description.fr ||
+                    doc.description.nl ||
+                    doc.description.de ||
+                    ''
+                  const subject =
+                    doc.subject.fr || doc.subject.nl || doc.subject.de || ''
 
                   await prisma.document.create({
                     data: {
                       filename: filename,
                       originalName: filename,
                       mimeType: 'text/html',
-                      fileSize: BigInt(abstract.length + description.length + subject.length),
+                      fileSize: BigInt(
+                        abstract.length + description.length + subject.length
+                      ),
                       fileUrl: frenchUrl,
                       collectionId: collection.id,
                       uploadedById: user.id,
                       title: doc.ecli,
                       status: 'PENDING',
                       extractedText: `${abstract}\n\n${description}\n\nSubject: ${subject}`,
-                      language: doc.languages[0] || 'fr'
-                    }
+                      language: doc.languages[0] || 'fr',
+                    },
                   })
 
                   progress.importedDocuments++
@@ -194,16 +220,28 @@ async function fetchAllJUPORTALProduction(
                 }
 
                 // Log progress every 100 documents
-                if ((progress.importedDocuments + progress.skippedDocuments) % 100 === 0) {
-                  const total = progress.importedDocuments + progress.skippedDocuments
-                  const rate = total / ((Date.now() - new Date(progress.startTime).getTime()) / 1000 / 60)
-                  log(`     ⚡ Progress: ${total} documents (${rate.toFixed(1)}/min), ${progress.importedDocuments} imported, ${progress.skippedDocuments} skipped`)
+                if (
+                  (progress.importedDocuments + progress.skippedDocuments) %
+                    100 ===
+                  0
+                ) {
+                  const total =
+                    progress.importedDocuments + progress.skippedDocuments
+                  const rate =
+                    total /
+                    ((Date.now() - new Date(progress.startTime).getTime()) /
+                      1000 /
+                      60)
+                  log(
+                    `     ⚡ Progress: ${total} documents (${rate.toFixed(1)}/min), ${progress.importedDocuments} imported, ${progress.skippedDocuments} skipped`
+                  )
                 }
               } catch (error) {
                 progress.errors.push({
                   ecli: doc.ecli,
-                  error: error instanceof Error ? error.message : 'Unknown error',
-                  timestamp: new Date().toISOString()
+                  error:
+                    error instanceof Error ? error.message : 'Unknown error',
+                  timestamp: new Date().toISOString(),
                 })
                 log(`     ❌ Error importing ${doc.ecli}: ${error}`)
               }
@@ -215,14 +253,14 @@ async function fetchAllJUPORTALProduction(
 
             // Rate limiting between batches
             if (delayMs > 0) {
-              await new Promise(resolve => setTimeout(resolve, delayMs))
+              await new Promise((resolve) => setTimeout(resolve, delayMs))
             }
           }
         } catch (error) {
           progress.errors.push({
             sitemap: sitemapUrl,
             error: error instanceof Error ? error.message : 'Unknown error',
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
           })
           log(`   ❌ Error processing sitemap ${sitemapUrl}: ${error}`)
         }
@@ -233,22 +271,26 @@ async function fetchAllJUPORTALProduction(
 
       // Rate limiting between sitemap indexes
       if (delayMs > 0) {
-        await new Promise(resolve => setTimeout(resolve, delayMs * 2))
+        await new Promise((resolve) => setTimeout(resolve, delayMs * 2))
       }
-
     } catch (error) {
       progress.errors.push({
         sitemap: indexUrl,
         error: error instanceof Error ? error.message : 'Unknown error',
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       })
       log(`❌ Error processing sitemap index ${indexUrl}: ${error}`)
     }
 
     // Log overall progress
-    const elapsed = (Date.now() - new Date(progress.startTime).getTime()) / 1000 / 60
-    const eta = ((progress.totalSitemaps - progress.processedSitemaps) / (progress.processedSitemaps / elapsed))
-    log(`📊 Overall: ${progress.processedSitemaps}/${progress.totalSitemaps} sitemaps, ${progress.totalDocuments} docs found, ${progress.importedDocuments} imported, ETA: ${eta.toFixed(1)} min`)
+    const elapsed =
+      (Date.now() - new Date(progress.startTime).getTime()) / 1000 / 60
+    const eta =
+      (progress.totalSitemaps - progress.processedSitemaps) /
+      (progress.processedSitemaps / elapsed)
+    log(
+      `📊 Overall: ${progress.processedSitemaps}/${progress.totalSitemaps} sitemaps, ${progress.totalDocuments} docs found, ${progress.importedDocuments} imported, ETA: ${eta.toFixed(1)} min`
+    )
   }
 
   // Final report
@@ -262,7 +304,9 @@ async function fetchAllJUPORTALProduction(
   log(`   - Collection: ${collection.name} (${collection.id})`)
 
   if (progress.errors.length > 0) {
-    log(`⚠️  ${progress.errors.length} errors occurred. Check ${LOG_FILE} for details.`)
+    log(
+      `⚠️  ${progress.errors.length} errors occurred. Check ${LOG_FILE} for details.`
+    )
   }
 
   return progress
@@ -279,7 +323,9 @@ if (require.main === module) {
   console.log(`   - Start index: ${startIndex}`)
   console.log(`   - Batch size: ${batchSize}`)
   console.log(`   - Delay between batches: ${delayMs}ms`)
-  console.log(`   - Max sitemaps: ${maxSitemaps === Infinity ? 'All' : maxSitemaps}`)
+  console.log(
+    `   - Max sitemaps: ${maxSitemaps === Infinity ? 'All' : maxSitemaps}`
+  )
   console.log(`   - Progress file: ${PROGRESS_FILE}`)
   console.log(`   - Log file: ${LOG_FILE}`)
   console.log()

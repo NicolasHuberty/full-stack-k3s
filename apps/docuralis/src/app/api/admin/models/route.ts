@@ -15,6 +15,7 @@ const modelSchema = z.object({
   isDefault: z.boolean().default(false),
 })
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function GET(_request: NextRequest) {
   try {
     const session = await auth()

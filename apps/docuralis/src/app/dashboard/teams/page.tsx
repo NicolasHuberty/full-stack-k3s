@@ -328,14 +328,15 @@ export default function TeamsPage() {
                         </div>
                       </div>
                       <span
-                        className={`px-3 py-1 rounded-full text-xs font-medium ${member.role === 'OWNER'
-                          ? 'bg-purple-500/10 text-purple-600'
-                          : member.role === 'ADMIN'
-                            ? 'bg-blue-500/10 text-blue-600'
-                            : member.role === 'MEMBER'
-                              ? 'bg-green-500/10 text-green-600'
-                              : 'bg-gray-500/10 text-gray-600'
-                          }`}
+                        className={`px-3 py-1 rounded-full text-xs font-medium ${
+                          member.role === 'OWNER'
+                            ? 'bg-purple-500/10 text-purple-600'
+                            : member.role === 'ADMIN'
+                              ? 'bg-blue-500/10 text-blue-600'
+                              : member.role === 'MEMBER'
+                                ? 'bg-green-500/10 text-green-600'
+                                : 'bg-gray-500/10 text-gray-600'
+                        }`}
                       >
                         {member.role}
                       </span>

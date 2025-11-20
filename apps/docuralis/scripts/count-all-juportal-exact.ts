@@ -115,7 +115,9 @@ async function countAllDocumentsExact(
   delayMs = 100
 ) {
   console.log('🚀 Starting EXACT count of ALL JUPORTAL documents...')
-  console.log(`📊 Parameters: startIndex=${startIndex}, maxIndexes=${maxIndexes}, delay=${delayMs}ms\n`)
+  console.log(
+    `📊 Parameters: startIndex=${startIndex}, maxIndexes=${maxIndexes}, delay=${delayMs}ms\n`
+  )
 
   // Load or create progress
   let progress = await loadProgress()
@@ -128,7 +130,10 @@ async function countAllDocumentsExact(
 
   // Get all sitemap index URLs
   const allIndexUrls = await getAllSitemapIndexUrls()
-  const indexUrls = allIndexUrls.slice(startIndex, Math.min(startIndex + maxIndexes, allIndexUrls.length))
+  const indexUrls = allIndexUrls.slice(
+    startIndex,
+    Math.min(startIndex + maxIndexes, allIndexUrls.length)
+  )
 
   if (!progress) {
     progress = {
@@ -142,12 +147,16 @@ async function countAllDocumentsExact(
       errors: 0,
       avgDocsPerIndex: 0,
       estimatedRemaining: 0,
-      etaMinutes: 0
+      etaMinutes: 0,
     }
   }
 
-  console.log(`🎯 Processing ${indexUrls.length} sitemap indexes (${startIndex} to ${startIndex + indexUrls.length - 1})`)
-  console.log(`📅 Date range: ${allIndexUrls[0]} to ${allIndexUrls[allIndexUrls.length - 1]}`)
+  console.log(
+    `🎯 Processing ${indexUrls.length} sitemap indexes (${startIndex} to ${startIndex + indexUrls.length - 1})`
+  )
+  console.log(
+    `📅 Date range: ${allIndexUrls[0]} to ${allIndexUrls[allIndexUrls.length - 1]}`
+  )
   console.log()
 
   const startTime = new Date()
@@ -159,7 +168,9 @@ async function countAllDocumentsExact(
     progress.currentIndex = globalIndex
 
     try {
-      console.log(`📋 [${globalIndex + 1}/${allIndexUrls.length}] Processing: ${indexUrl}`)
+      console.log(
+        `📋 [${globalIndex + 1}/${allIndexUrls.length}] Processing: ${indexUrl}`
+      )
 
       // Count sitemaps in this index
       const sitemapCount = await countSitemapsInIndex(indexUrl)
@@ -181,7 +192,7 @@ async function countAllDocumentsExact(
 
           // Small delay between sitemap requests
           if (delayMs > 0) {
-            await new Promise(resolve => setTimeout(resolve, delayMs))
+            await new Promise((resolve) => setTimeout(resolve, delayMs))
           }
         }
       }
@@ -190,28 +201,45 @@ async function countAllDocumentsExact(
       progress.processedIndexes++
 
       // Calculate statistics
-      progress.avgDocsPerIndex = progress.totalDocuments / progress.processedIndexes
-      progress.estimatedRemaining = progress.avgDocsPerIndex * (progress.totalIndexes - progress.processedIndexes)
+      progress.avgDocsPerIndex =
+        progress.totalDocuments / progress.processedIndexes
+      progress.estimatedRemaining =
+        progress.avgDocsPerIndex *
+        (progress.totalIndexes - progress.processedIndexes)
 
       const elapsedMs = new Date().getTime() - startTime.getTime()
       const avgTimePerIndex = elapsedMs / progress.processedIndexes
-      progress.etaMinutes = (avgTimePerIndex * (progress.totalIndexes - progress.processedIndexes)) / 1000 / 60
+      progress.etaMinutes =
+        (avgTimePerIndex *
+          (progress.totalIndexes - progress.processedIndexes)) /
+        1000 /
+        60
 
       // Progress line
-      const progressPercent = ((progress.processedIndexes / progress.totalIndexes) * 100).toFixed(1)
+      const progressPercent = (
+        (progress.processedIndexes / progress.totalIndexes) *
+        100
+      ).toFixed(1)
       console.log(`   ✅ Index documents: ${indexDocuments}`)
-      console.log(`   📊 RUNNING TOTAL: ${progress.totalDocuments.toLocaleString()} documents`)
-      console.log(`   🚀 Progress: ${progress.processedIndexes}/${progress.totalIndexes} (${progressPercent}%) - ETA: ${progress.etaMinutes.toFixed(1)} min`)
-      console.log(`   📈 Avg per index: ${progress.avgDocsPerIndex.toFixed(1)} - Estimated final: ${(progress.totalDocuments + progress.estimatedRemaining).toLocaleString()}`)
+      console.log(
+        `   📊 RUNNING TOTAL: ${progress.totalDocuments.toLocaleString()} documents`
+      )
+      console.log(
+        `   🚀 Progress: ${progress.processedIndexes}/${progress.totalIndexes} (${progressPercent}%) - ETA: ${progress.etaMinutes.toFixed(1)} min`
+      )
+      console.log(
+        `   📈 Avg per index: ${progress.avgDocsPerIndex.toFixed(1)} - Estimated final: ${(progress.totalDocuments + progress.estimatedRemaining).toLocaleString()}`
+      )
       console.log()
 
       // Save progress every 10 indexes
       if (progress.processedIndexes % 10 === 0) {
         progress.lastUpdate = new Date().toISOString()
         await saveProgress(progress)
-        console.log(`💾 Progress saved (${progress.processedIndexes}/${progress.totalIndexes})\n`)
+        console.log(
+          `💾 Progress saved (${progress.processedIndexes}/${progress.totalIndexes})\n`
+        )
       }
-
     } catch (error) {
       progress.errors++
       console.error(`❌ Error processing index ${globalIndex + 1}: ${error}`)
@@ -220,7 +248,7 @@ async function countAllDocumentsExact(
 
     // Rate limiting between indexes
     if (delayMs > 0) {
-      await new Promise(resolve => setTimeout(resolve, delayMs))
+      await new Promise((resolve) => setTimeout(resolve, delayMs))
     }
   }
 
@@ -230,19 +258,31 @@ async function countAllDocumentsExact(
   console.log('🎉 EXACT COUNT COMPLETED!')
   console.log('================================')
   console.log(`📊 FINAL RESULTS:`)
-  console.log(`   • Total sitemap indexes processed: ${progress.processedIndexes}`)
+  console.log(
+    `   • Total sitemap indexes processed: ${progress.processedIndexes}`
+  )
   console.log(`   • Total individual sitemaps: ${progress.totalSitemaps}`)
-  console.log(`   • EXACT DOCUMENT COUNT: ${progress.totalDocuments.toLocaleString()}`)
+  console.log(
+    `   • EXACT DOCUMENT COUNT: ${progress.totalDocuments.toLocaleString()}`
+  )
   console.log(`   • Errors encountered: ${progress.errors}`)
   console.log(`   • Time elapsed: ${totalElapsed.toFixed(1)} minutes`)
-  console.log(`   • Average documents per index: ${progress.avgDocsPerIndex.toFixed(1)}`)
-  console.log(`   • Average processing rate: ${(progress.processedIndexes / totalElapsed).toFixed(1)} indexes/min`)
+  console.log(
+    `   • Average documents per index: ${progress.avgDocsPerIndex.toFixed(1)}`
+  )
+  console.log(
+    `   • Average processing rate: ${(progress.processedIndexes / totalElapsed).toFixed(1)} indexes/min`
+  )
   console.log()
 
   if (startIndex + indexUrls.length < allIndexUrls.length) {
     const remaining = allIndexUrls.length - (startIndex + indexUrls.length)
-    console.log(`⚠️  Note: Only processed ${indexUrls.length} of ${allIndexUrls.length} total indexes`)
-    console.log(`   To continue: bun run scripts/count-all-juportal-exact.ts ${startIndex + indexUrls.length}`)
+    console.log(
+      `⚠️  Note: Only processed ${indexUrls.length} of ${allIndexUrls.length} total indexes`
+    )
+    console.log(
+      `   To continue: bun run scripts/count-all-juportal-exact.ts ${startIndex + indexUrls.length}`
+    )
     console.log(`   Remaining: ${remaining} indexes`)
   } else {
     console.log(`✅ ALL ${allIndexUrls.length} sitemap indexes processed!`)
@@ -250,12 +290,17 @@ async function countAllDocumentsExact(
     // Extrapolate if we sampled
     if (progress.processedIndexes < allIndexUrls.length) {
       const extrapolated = progress.avgDocsPerIndex * allIndexUrls.length
-      console.log(`🔮 EXTRAPOLATED TOTAL (all ${allIndexUrls.length} indexes): ${extrapolated.toLocaleString()} documents`)
+      console.log(
+        `🔮 EXTRAPOLATED TOTAL (all ${allIndexUrls.length} indexes): ${extrapolated.toLocaleString()} documents`
+      )
     }
   }
 
   // Clean up progress file if completed successfully
-  if (startIndex + indexUrls.length >= allIndexUrls.length && progress.errors === 0) {
+  if (
+    startIndex + indexUrls.length >= allIndexUrls.length &&
+    progress.errors === 0
+  ) {
     try {
       await fs.unlink(PROGRESS_FILE)
       console.log('🧹 Cleaned up progress file')
@@ -273,7 +318,9 @@ if (require.main === module) {
 
   console.log('🔧 Configuration:')
   console.log(`   • Start index: ${startIndex}`)
-  console.log(`   • Max indexes: ${maxIndexes === Infinity ? 'All remaining' : maxIndexes}`)
+  console.log(
+    `   • Max indexes: ${maxIndexes === Infinity ? 'All remaining' : maxIndexes}`
+  )
   console.log(`   • Delay between requests: ${delayMs}ms`)
   console.log(`   • Progress file: ${PROGRESS_FILE}`)
   console.log()

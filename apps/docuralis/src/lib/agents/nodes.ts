@@ -170,7 +170,6 @@ export async function gradeDocumentsReflexion(
   state: AgentState
 ): Promise<Partial<AgentState>> {
   try {
-
     // Grade all documents in parallel for speed
     const gradingPromises = state.retrievedDocs.map(async (doc) => {
       try {
@@ -233,7 +232,7 @@ export async function gradeDocumentsReflexion(
         console.error('Error in reflexion grading:', error)
         return null
       }
-    });
+    })
 
     // Wait for all grading to complete in parallel
     const results = await Promise.all(gradingPromises)

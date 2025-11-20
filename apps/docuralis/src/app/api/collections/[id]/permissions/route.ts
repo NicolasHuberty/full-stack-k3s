@@ -42,7 +42,8 @@ export async function POST(
 
     const isOwner = collection.ownerId === session.user.id
     const hasAdminPermission = collection.permissions.some(
-      (p: { userId: string; permission: string }) => p.userId === session.user.id && p.permission === 'ADMIN'
+      (p: { userId: string; permission: string }) =>
+        p.userId === session.user.id && p.permission === 'ADMIN'
     )
 
     if (!isOwner && !hasAdminPermission) {

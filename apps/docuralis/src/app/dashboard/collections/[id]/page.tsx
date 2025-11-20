@@ -258,8 +258,6 @@ export default function CollectionDetailPage() {
     }
   }, [isLoadingMore, hasMoreDocs, nextCursor])
 
-
-
   const fetchCollection = async (silent = false) => {
     try {
       if (!silent) setLoading(true)
@@ -713,7 +711,7 @@ export default function CollectionDetailPage() {
     // Word documents
     else if (
       mimeType ===
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
       mimeType === 'application/msword' ||
       extension === 'doc' ||
       extension === 'docx'
@@ -724,7 +722,7 @@ export default function CollectionDetailPage() {
     // Excel
     else if (
       mimeType ===
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
       mimeType === 'application/vnd.ms-excel' ||
       extension === 'xls' ||
       extension === 'xlsx'
@@ -735,7 +733,7 @@ export default function CollectionDetailPage() {
     // PowerPoint
     else if (
       mimeType ===
-      'application/vnd.openxmlformats-officedocument.presentationml.presentation' ||
+        'application/vnd.openxmlformats-officedocument.presentationml.presentation' ||
       mimeType === 'application/vnd.ms-powerpoint' ||
       extension === 'ppt' ||
       extension === 'pptx'
@@ -920,9 +918,9 @@ export default function CollectionDetailPage() {
                 <div className="font-medium">
                   {collection.lastDocumentUpdate
                     ? formatDistanceToNow(
-                      new Date(collection.lastDocumentUpdate),
-                      { addSuffix: true, locale: fr }
-                    )
+                        new Date(collection.lastDocumentUpdate),
+                        { addSuffix: true, locale: fr }
+                      )
                     : 'Jamais'}
                 </div>
               </div>
@@ -933,9 +931,9 @@ export default function CollectionDetailPage() {
                 <div className="font-medium">
                   {collection.lastChatActivity
                     ? formatDistanceToNow(
-                      new Date(collection.lastChatActivity),
-                      { addSuffix: true, locale: fr }
-                    )
+                        new Date(collection.lastChatActivity),
+                        { addSuffix: true, locale: fr }
+                      )
                     : 'Aucune activité'}
                 </div>
               </div>
@@ -945,9 +943,9 @@ export default function CollectionDetailPage() {
                   <VisibilityBadge
                     visibility={
                       collection.visibility as
-                      | 'PRIVATE'
-                      | 'ORGANIZATION'
-                      | 'PUBLIC'
+                        | 'PRIVATE'
+                        | 'ORGANIZATION'
+                        | 'PUBLIC'
                     }
                   />
                 </div>
@@ -999,7 +997,9 @@ export default function CollectionDetailPage() {
                           <div className="text-2xl">
                             {collectionAgent.agent.icon === 'Scale' ? (
                               <Scale className="h-8 w-8" />
-                            ) : collectionAgent.agent.icon?.startsWith('http') ? (
+                            ) : collectionAgent.agent.icon?.startsWith(
+                                'http'
+                              ) ? (
                               <img
                                 src={collectionAgent.agent.icon}
                                 alt={collectionAgent.agent.name}
@@ -1373,7 +1373,8 @@ export default function CollectionDetailPage() {
                     <Loader2 className="h-8 w-8 animate-spin text-primary" />
                   </div>
                 )}
-                {(!collection.documents || collection.documents.length === 0) && !documentsLoading ? (
+                {(!collection.documents || collection.documents.length === 0) &&
+                !documentsLoading ? (
                   <div className="text-center py-12">
                     <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
                     <p className="text-muted-foreground">
@@ -1396,7 +1397,7 @@ export default function CollectionDetailPage() {
                           <Checkbox
                             checked={
                               selectedDocIds.size ===
-                              collection.documents.length &&
+                                collection.documents.length &&
                               collection.documents.length > 0
                             }
                             onCheckedChange={() =>
@@ -1716,6 +1717,5 @@ export default function CollectionDetailPage() {
         />
       )}
     </DashboardLayout>
-  );
+  )
 }
-

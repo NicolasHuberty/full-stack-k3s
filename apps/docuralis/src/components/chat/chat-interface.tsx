@@ -81,11 +81,13 @@ export function ChatInterface({
     initialPage?: number | null
     highlightText?: string
   } | null>(null)
-  const [agentThoughts, setAgentThoughts] = useState<Array<{
-    type: string
-    message: string
-    data?: any
-  }>>([])
+  const [agentThoughts, setAgentThoughts] = useState<
+    Array<{
+      type: string
+      message: string
+      data?: any
+    }>
+  >([])
   const [showThoughts, setShowThoughts] = useState(true)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
@@ -176,7 +178,7 @@ export function ChatInterface({
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Accept': 'text/event-stream',
+            Accept: 'text/event-stream',
           },
           body: JSON.stringify({
             message: userMessage,
@@ -228,11 +230,14 @@ export function ChatInterface({
 
                 if (eventType === 'progress') {
                   // Add thought to the list
-                  setAgentThoughts((prev) => [...prev, {
-                    type: data.type,
-                    message: data.data.message,
-                    data: data.data,
-                  }])
+                  setAgentThoughts((prev) => [
+                    ...prev,
+                    {
+                      type: data.type,
+                      message: data.data.message,
+                      data: data.data,
+                    },
+                  ])
                 } else if (eventType === 'complete') {
                   finalData = data
                 } else if (eventType === 'error') {
@@ -240,7 +245,11 @@ export function ChatInterface({
                   throw new Error(data.message)
                 }
               } catch (parseError) {
-                console.error('[SSE] Failed to parse event data:', parseError, eventData)
+                console.error(
+                  '[SSE] Failed to parse event data:',
+                  parseError,
+                  eventData
+                )
               }
             }
           }
@@ -253,7 +262,9 @@ export function ChatInterface({
 
         // Reload the session to get updated messages
         if (finalData?.sessionId) {
-          const sessionRes = await fetch(`/api/chat/sessions/${finalData.sessionId}`)
+          const sessionRes = await fetch(
+            `/api/chat/sessions/${finalData.sessionId}`
+          )
           const sessionData = await sessionRes.json()
           setSession(sessionData.session)
         }
@@ -338,7 +349,7 @@ export function ChatInterface({
         console.error('❌ [ChatInterface] Failed to find document:', {
           status: response.status,
           statusText: response.statusText,
-          error: errorText
+          error: errorText,
         })
         alert(`Failed to search for document: ${response.statusText}`)
         return
@@ -363,7 +374,9 @@ export function ChatInterface({
       }
     } catch (error) {
       console.error('❌ [ChatInterface] Error opening PDF:', error)
-      alert(`Failed to open PDF: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      alert(
+        `Failed to open PDF: ${error instanceof Error ? error.message : 'Unknown error'}`
+      )
     }
   }
 
@@ -434,10 +447,11 @@ export function ChatInterface({
             )}
 
             <Card
-              className={`max-w-[80%] ${msg.role === 'USER'
+              className={`max-w-[80%] ${
+                msg.role === 'USER'
                   ? 'bg-blue-500 text-white'
                   : 'bg-white border-gray-200'
-                }`}
+              }`}
             >
               <CardContent className="p-3">
                 <div className="max-w-none">
@@ -470,13 +484,23 @@ export function ChatInterface({
                             onClick={() => {
                               if (chunk?.documentId && chunk?.documentName) {
                                 // Use chunk's collectionId if available, otherwise fall back to session's collection ID
-                                const effectiveCollectionId = chunk.collectionId || session?.collection?.id
+                                const effectiveCollectionId =
+                                  chunk.collectionId || session?.collection?.id
                                 // Extract page number if available
-                                let pageNumber = chunk.pageNumber || chunk.metadata?.pageNumber || null
+                                let pageNumber =
+                                  chunk.pageNumber ||
+                                  chunk.metadata?.pageNumber ||
+                                  null
 
                                 // Convert to number and validate
-                                if (pageNumber !== null && pageNumber !== undefined) {
-                                  pageNumber = typeof pageNumber === 'string' ? parseInt(pageNumber, 10) : Number(pageNumber)
+                                if (
+                                  pageNumber !== null &&
+                                  pageNumber !== undefined
+                                ) {
+                                  pageNumber =
+                                    typeof pageNumber === 'string'
+                                      ? parseInt(pageNumber, 10)
+                                      : Number(pageNumber)
                                   if (isNaN(pageNumber) || pageNumber <= 0) {
                                     pageNumber = null
                                   }
@@ -513,9 +537,12 @@ export function ChatInterface({
                                       : '0.0'}
                                     %
                                   </span>
-                                  {(chunk?.pageNumber || chunk?.metadata?.pageNumber) && (
+                                  {(chunk?.pageNumber ||
+                                    chunk?.metadata?.pageNumber) && (
                                     <span className="text-xs text-blue-600 font-medium">
-                                      Page {chunk.pageNumber || chunk.metadata.pageNumber}
+                                      Page{' '}
+                                      {chunk.pageNumber ||
+                                        chunk.metadata.pageNumber}
                                     </span>
                                   )}
                                 </div>
@@ -582,7 +609,9 @@ export function ChatInterface({
                     <ChevronDown className="h-4 w-4" />
                   )}
                   <Brain className="h-4 w-4" />
-                  <span>Processus de réflexion ({agentThoughts.length} étapes)</span>
+                  <span>
+                    Processus de réflexion ({agentThoughts.length} étapes)
+                  </span>
                 </button>
 
                 {showThoughts && (
@@ -592,27 +621,51 @@ export function ChatInterface({
                       const isCompleted = idx < agentThoughts.length - 1
 
                       return (
-                        <div key={idx} className="bg-white rounded-lg p-3 border border-purple-200 shadow-sm">
+                        <div
+                          key={idx}
+                          className="bg-white rounded-lg p-3 border border-purple-200 shadow-sm"
+                        >
                           <div className="flex items-start gap-2 mb-2">
                             {isLastThought ? (
                               <Loader2 className="h-4 w-4 animate-spin text-purple-600 mt-0.5 flex-shrink-0" />
                             ) : (
-                              <svg className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                              <svg
+                                className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0"
+                                fill="currentColor"
+                                viewBox="0 0 20 20"
+                              >
+                                <path
+                                  fillRule="evenodd"
+                                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                  clipRule="evenodd"
+                                />
                               </svg>
                             )}
-                            <span className={`font-semibold ${isCompleted ? 'text-gray-700' : 'text-gray-900'}`}>{thought.message}</span>
+                            <span
+                              className={`font-semibold ${isCompleted ? 'text-gray-700' : 'text-gray-900'}`}
+                            >
+                              {thought.message}
+                            </span>
                           </div>
 
-                          {thought.data?.subQueries && thought.data.subQueries.length > 0 && (
-                            <div className="mt-3 pl-4 space-y-1.5 border-l-2 border-purple-300">
-                              {thought.data.subQueries.map((q: string, i: number) => (
-                                <div key={i} className="text-xs text-gray-700 leading-relaxed">
-                                  <span className="font-bold text-purple-700">{i + 1}.</span> {q}
-                                </div>
-                              ))}
-                            </div>
-                          )}
+                          {thought.data?.subQueries &&
+                            thought.data.subQueries.length > 0 && (
+                              <div className="mt-3 pl-4 space-y-1.5 border-l-2 border-purple-300">
+                                {thought.data.subQueries.map(
+                                  (q: string, i: number) => (
+                                    <div
+                                      key={i}
+                                      className="text-xs text-gray-700 leading-relaxed"
+                                    >
+                                      <span className="font-bold text-purple-700">
+                                        {i + 1}.
+                                      </span>{' '}
+                                      {q}
+                                    </div>
+                                  )
+                                )}
+                              </div>
+                            )}
 
                           {thought.data?.count !== undefined && (
                             <div className="mt-2 text-xs text-gray-600 italic">
@@ -620,33 +673,48 @@ export function ChatInterface({
                             </div>
                           )}
 
-                          {thought.data?.documents && thought.data.documents.length > 0 && (
-                            <div className="mt-3 pl-4 border-l-2 border-purple-300">
-                              <div className="text-xs font-semibold text-gray-700 mb-2">
-                                📚 Documents analysés ({thought.data.documents.length}) :
-                              </div>
-                              <div className="space-y-1.5 max-h-48 overflow-y-auto">
-                                {thought.data.documents.map((d: any, i: number) => (
-                                  <div key={i} className="flex items-start gap-2 text-xs">
-                                    <span className="text-purple-600 font-bold">•</span>
-                                    <div className="flex-1">
-                                      <div className="font-medium text-gray-800">{d.title}</div>
-                                      {d.score && (
-                                        <div className="text-gray-500 text-[10px]">
-                                          Score: {d.score.toFixed(1)}/10
+                          {thought.data?.documents &&
+                            thought.data.documents.length > 0 && (
+                              <div className="mt-3 pl-4 border-l-2 border-purple-300">
+                                <div className="text-xs font-semibold text-gray-700 mb-2">
+                                  📚 Documents analysés (
+                                  {thought.data.documents.length}) :
+                                </div>
+                                <div className="space-y-1.5 max-h-48 overflow-y-auto">
+                                  {thought.data.documents.map(
+                                    (d: any, i: number) => (
+                                      <div
+                                        key={i}
+                                        className="flex items-start gap-2 text-xs"
+                                      >
+                                        <span className="text-purple-600 font-bold">
+                                          •
+                                        </span>
+                                        <div className="flex-1">
+                                          <div className="font-medium text-gray-800">
+                                            {d.title}
+                                          </div>
+                                          {d.score && (
+                                            <div className="text-gray-500 text-[10px]">
+                                              Score: {d.score.toFixed(1)}/10
+                                            </div>
+                                          )}
+                                          {d.justification && (
+                                            <div className="text-gray-600 text-[10px] mt-0.5 italic">
+                                              {d.justification.substring(
+                                                0,
+                                                100
+                                              )}
+                                              ...
+                                            </div>
+                                          )}
                                         </div>
-                                      )}
-                                      {d.justification && (
-                                        <div className="text-gray-600 text-[10px] mt-0.5 italic">
-                                          {d.justification.substring(0, 100)}...
-                                        </div>
-                                      )}
-                                    </div>
-                                  </div>
-                                ))}
+                                      </div>
+                                    )
+                                  )}
+                                </div>
                               </div>
-                            </div>
-                          )}
+                            )}
                         </div>
                       )
                     })}

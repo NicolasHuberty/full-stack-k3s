@@ -11,8 +11,8 @@ async function testJUPORTALRSS() {
   const testFeeds = [
     {
       name: 'Paulienne Search Results',
-      url: 'https://juportal.be/moteur/Flux-RSS.rss?eNqFVMlu2zAQ/ZVA1yCAliiLfKJJ2qIzJgUuSHMKfMihQOEEKHoK8u8dSlZNiqVzk/geOcubeYeubbrP313VdgXVwlr+Y9DcGKFkscLjqiuurj8Of379fDse38aj2xNTc9oj3XJ/WnfF+3GEHwKYUxBW4KdHyq4YCfcBYa8ocBDr+Ik2YGAybr8I0QS4VMsEwtuDW4OgYfQQBSK3EvK3Pb7Rl3GWrW0jODAgz8XqgPjnF75SLnvzMnDGaYaxc8Zy2Dkt2JkRhTAcU5CcB/DjIoTE7mmVy9EzqHI6xJcCniLkCUqzSOGkTMIYJvKUk0EqrSCKEBaB/RF+HFk2h5lBck9MU0Bs/omZQXKNsj03lJgq6PRDCmeF8riz7tJ1hKPrYQFrgkrzLQGeGZUTgRGb7eOJgvPwDYNoGzKaaF2nFmJpa4WaEZlQ1MDHacIzIlliGIaqaVbQWMoEBbEXY3Acj7otyzKdlWEg23nh2wm/i2oAUJN3zQWEcC9AbHsbr3TYA9Or5/9ZzpKDiqHe33JQ1MucvbKJ/S05qAvKklPNMzYCF83MbQdIGosrOsmCvTxLcBctkR/g0Srxov+bV3kjABmvfpWfzn7xbwyblDHamgptrUpJC+NaRkrdM7FeN2s0eXRVR54yjnmNndq5QWlL/OlrXdbtTVXdVI/4WdbNfbH6+gu5YOOR'
-    }
+      url: 'https://juportal.be/moteur/Flux-RSS.rss?eNqFVMlu2zAQ/ZVA1yCAliiLfKJJ2qIzJgUuSHMKfMihQOEEKHoK8u8dSlZNiqVzk/geOcubeYeubbrP313VdgXVwlr+Y9DcGKFkscLjqiuurj8Of379fDse38aj2xNTc9oj3XJ/WnfF+3GEHwKYUxBW4KdHyq4YCfcBYa8ocBDr+Ik2YGAybr8I0QS4VMsEwtuDW4OgYfQQBSK3EvK3Pb7Rl3GWrW0jODAgz8XqgPjnF75SLnvzMnDGaYaxc8Zy2Dkt2JkRhTAcU5CcB/DjIoTE7mmVy9EzqHI6xJcCniLkCUqzSOGkTMIYJvKUk0EqrSCKEBaB/RF+HFk2h5lBck9MU0Bs/omZQXKNsj03lJgq6PRDCmeF8riz7tJ1hKPrYQFrgkrzLQGeGZUTgRGb7eOJgvPwDYNoGzKaaF2nFmJpa4WaEZlQ1MDHacIzIlliGIaqaVbQWMoEBbEXY3Acj7otyzKdlWEg23nh2wm/i2oAUJN3zQWEcC9AbHsbr3TYA9Or5/9ZzpKDiqHe33JQ1MucvbKJ/S05qAvKklPNMzYCF83MbQdIGosrOsmCvTxLcBctkR/g0Srxov+bV3kjABmvfpWfzn7xbwyblDHamgptrUpJC+NaRkrdM7FeN2s0eXRVR54yjnmNndq5QWlL/OlrXdbtTVXdVI/4WdbNfbH6+gu5YOOR',
+    },
   ]
 
   for (const feedInfo of testFeeds) {
@@ -34,8 +34,9 @@ async function testJUPORTALRSS() {
 
         // Try to extract ECLI
         const ecliPattern = /ECLI:[A-Z]{2}:[A-Z]+:\d{4}:[A-Z0-9.]+/
-        const match = (feed.items[0].title || '').match(ecliPattern) ||
-                     (feed.items[0].description || '').match(ecliPattern)
+        const match =
+          (feed.items[0].title || '').match(ecliPattern) ||
+          (feed.items[0].description || '').match(ecliPattern)
         if (match) {
           console.log(`    ECLI: ${match[0]}`)
         }

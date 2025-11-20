@@ -54,7 +54,9 @@ export async function POST(
       select: { organizationId: true },
     })
 
-    const orgIds = userOrgs.map((org: { organizationId: string }) => org.organizationId)
+    const orgIds = userOrgs.map(
+      (org: { organizationId: string }) => org.organizationId
+    )
 
     // Validate that all userIds are members of user's organizations
     const validUsers = await prisma.organizationMember.findMany({
@@ -67,7 +69,9 @@ export async function POST(
     })
 
     const validUserIds = validUsers.map((u: { userId: string }) => u.userId)
-    const invalidUserIds = userIds.filter((id: string) => !validUserIds.includes(id))
+    const invalidUserIds = userIds.filter(
+      (id: string) => !validUserIds.includes(id)
+    )
 
     if (invalidUserIds.length > 0) {
       return NextResponse.json(

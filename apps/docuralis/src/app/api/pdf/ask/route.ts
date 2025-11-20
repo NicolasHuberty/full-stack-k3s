@@ -25,16 +25,21 @@ async function extractFirstPages(
   numPages: number = 2
 ): Promise<string> {
   return new Promise((resolve, reject) => {
-    const pdfParser = new (PDFParser as unknown as new (arg1: null, arg2: boolean) => {
-      on: <T>(event: string, handler: (data: T) => void) => void;
-      parseBuffer: (buffer: Buffer) => void;
+    const pdfParser = new (PDFParser as unknown as new (
+      arg1: null,
+      arg2: boolean
+    ) => {
+      on: <T>(event: string, handler: (data: T) => void) => void
+      parseBuffer: (buffer: Buffer) => void
     })(null, true)
 
     pdfParser.on<{ parserError?: string }>('pdfParser_dataError', (errData) => {
       reject(new Error(`PDF parsing error: ${errData.parserError}`))
     })
 
-    pdfParser.on<{ Pages?: Array<{ Texts?: Array<{ R?: Array<{ T?: string }> }> }> }>('pdfParser_dataReady', (pdfData) => {
+    pdfParser.on<{
+      Pages?: Array<{ Texts?: Array<{ R?: Array<{ T?: string }> }> }>
+    }>('pdfParser_dataReady', (pdfData) => {
       try {
         let extractedText = ''
         const pages = pdfData.Pages || []
@@ -83,17 +88,15 @@ export async function POST(request: NextRequest) {
     const validatedData = askSchema.parse(body)
 
     // Get document metadata from database
-    let document:
-      | {
-          originalName: string
-          title: string | null
-          author: string | null
-          pageCount: number | null
-          wordCount: number | null
-          filename?: string
-          collectionId?: string
-        }
-      | null = null
+    let document: {
+      originalName: string
+      title: string | null
+      author: string | null
+      pageCount: number | null
+      wordCount: number | null
+      filename?: string
+      collectionId?: string
+    } | null = null
 
     // Check if it's a migrated document
     if (validatedData.documentId.startsWith('migrated_')) {
@@ -168,7 +171,7 @@ Selected Text (from page ${validatedData.currentPage}):
       {
         role: 'system',
         content:
-          'You are a helpful AI assistant analyzing a PDF document. You have access to the document\'s metadata, the first 2 pages for context, and a specific text selection the user made.',
+          "You are a helpful AI assistant analyzing a PDF document. You have access to the document's metadata, the first 2 pages for context, and a specific text selection the user made.",
       },
       {
         role: 'user',

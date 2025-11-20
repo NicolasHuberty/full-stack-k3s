@@ -15,6 +15,7 @@ const createCollectionSchema = z.object({
   chunkOverlap: z.number().min(0).max(1000).optional(),
 })
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function GET(_request: NextRequest) {
   try {
     const session = await auth()
@@ -26,11 +27,17 @@ export async function GET(_request: NextRequest) {
     const collections = await getUserCollections(session.user.id)
 
     // Convert BigInt to string for JSON serialization and add documentCount
-    const serializedCollections = collections.map((collection: { storageUsed: bigint; _count: { documents: number }; [key: string]: unknown }) => ({
-      ...collection,
-      storageUsed: collection.storageUsed.toString(),
-      documentCount: collection._count.documents,
-    }))
+    const serializedCollections = collections.map(
+      (collection: {
+        storageUsed: bigint
+        _count: { documents: number }
+        [key: string]: unknown
+      }) => ({
+        ...collection,
+        storageUsed: collection.storageUsed.toString(),
+        documentCount: collection._count.documents,
+      })
+    )
 
     return NextResponse.json({ collections: serializedCollections })
   } catch (error) {

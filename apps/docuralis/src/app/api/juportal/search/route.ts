@@ -7,10 +7,7 @@ export async function POST(request: NextRequest) {
     const session = await auth()
 
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const body = await request.json()
@@ -21,7 +18,7 @@ export async function POST(request: NextRequest) {
       keywords,
       ecli,
       caseNumber,
-      limit = 20
+      limit = 20,
     } = body
 
     // Build search parameters for JUPORTAL
@@ -50,38 +47,39 @@ export async function POST(request: NextRequest) {
           'Council of State judgments',
           'Courts of Appeal decisions',
           'Labour Courts rulings',
-          'First Instance Courts decisions'
+          'First Instance Courts decisions',
         ],
         searchOptions: {
           byECLI: 'Search using European Case Law Identifier',
           byCaseNumber: 'Search by case number',
           byDate: 'Filter by date range',
           byCourt: 'Filter by specific court',
-          byKeywords: 'Full-text search in decisions'
+          byKeywords: 'Full-text search in decisions',
         },
         accessMethods: [
           {
             method: 'Web Interface',
             url: 'https://juportal.be',
-            description: 'Manual search and download through web browser'
+            description: 'Manual search and download through web browser',
           },
           {
             method: 'RSS Feeds',
             description: 'Subscribe to court-specific RSS feeds for updates',
-            example: 'https://juportal.be/rss/{COURT_CODE}'
+            example: 'https://juportal.be/rss/{COURT_CODE}',
           },
           {
             method: 'ECLI API',
             url: 'https://ecli.openjustice.be',
-            description: 'Open-source API for ECLI-based access (may be limited)'
-          }
+            description:
+              'Open-source API for ECLI-based access (may be limited)',
+          },
         ],
         nextSteps: [
           '1. Contact SPF Justice (info@just.fgov.be) for official API access',
           '2. Use web scraping tools for automated data collection (check legal terms)',
           '3. Implement RSS feed parser for regular updates',
-          '4. Consider using the OpenJustice ECLI API as alternative'
-        ]
+          '4. Consider using the OpenJustice ECLI API as alternative',
+        ],
       },
       sampleSearch: {
         query: body,
@@ -92,7 +90,7 @@ export async function POST(request: NextRequest) {
             date: '2024-01-15',
             title: 'Criminal Law - Appeal in Cassation',
             summary: 'Decision regarding appeal procedures in criminal matters',
-            link: 'https://juportal.be/content/ECLI:BE:CASS:2024:ARR.20240115.1'
+            link: 'https://juportal.be/content/ECLI:BE:CASS:2024:ARR.20240115.1',
           },
           {
             ecli: 'ECLI:BE:CC:2024:001',
@@ -100,10 +98,10 @@ export async function POST(request: NextRequest) {
             date: '2024-01-10',
             title: 'Constitutional Review - Legislative Act',
             summary: 'Review of constitutionality of federal legislation',
-            link: 'https://juportal.be/content/ECLI:BE:CC:2024:001'
-          }
-        ]
-      }
+            link: 'https://juportal.be/content/ECLI:BE:CC:2024:001',
+          },
+        ],
+      },
     })
   } catch (error) {
     console.error('JUPORTAL search error:', error)

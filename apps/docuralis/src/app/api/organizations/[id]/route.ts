@@ -93,22 +93,33 @@ export async function GET(
       ...organization,
       storageUsed: organization.storageUsed.toString(),
       storageLimit: organization.storageLimit.toString(),
-      members: organization.members.map((member: { user: { email: string | null; [key: string]: unknown }; [key: string]: unknown }) => ({
-        ...member,
-        user: {
-          ...member.user,
-          storageUsed: member.user.storageUsed
-            ? member.user.storageUsed.toString()
-            : '0',
-          storageLimit: member.user.storageLimit
-            ? member.user.storageLimit.toString()
-            : '0',
-        },
-      })),
-      collections: organization.collections.map((collection: { storageUsed: bigint; _count: { documents: number }; [key: string]: unknown }) => ({
-        ...collection,
-        storageUsed: collection.storageUsed.toString(),
-      })),
+      members: organization.members.map(
+        (member: {
+          user: { email: string | null; [key: string]: unknown }
+          [key: string]: unknown
+        }) => ({
+          ...member,
+          user: {
+            ...member.user,
+            storageUsed: member.user.storageUsed
+              ? member.user.storageUsed.toString()
+              : '0',
+            storageLimit: member.user.storageLimit
+              ? member.user.storageLimit.toString()
+              : '0',
+          },
+        })
+      ),
+      collections: organization.collections.map(
+        (collection: {
+          storageUsed: bigint
+          _count: { documents: number }
+          [key: string]: unknown
+        }) => ({
+          ...collection,
+          storageUsed: collection.storageUsed.toString(),
+        })
+      ),
     }
 
     return NextResponse.json({ organization: serializedOrg })

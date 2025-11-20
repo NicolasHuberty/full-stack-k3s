@@ -8,7 +8,7 @@ export enum JobStatus {
   PROCESSING = 'PROCESSING',
   COMPLETED = 'COMPLETED',
   FAILED = 'FAILED',
-  CANCELLED = 'CANCELLED'
+  CANCELLED = 'CANCELLED',
 }
 
 export interface JobFilter {
@@ -76,16 +76,25 @@ export async function getJobStatistics(): Promise<JobStatistics> {
 
   let avgProcessingTimeMs = 0
   if (completedJobs.length > 0) {
-    const totalTime = completedJobs.reduce((sum: number, job: { startedAt: Date | null; completedAt: Date | null }) => {
-      if (job.startedAt && job.completedAt) {
-        return sum + (job.completedAt.getTime() - job.startedAt.getTime())
-      }
-      return sum
-    }, 0)
+    const totalTime = completedJobs.reduce(
+      (
+        sum: number,
+        job: { startedAt: Date | null; completedAt: Date | null }
+      ) => {
+        if (job.startedAt && job.completedAt) {
+          return sum + (job.completedAt.getTime() - job.startedAt.getTime())
+        }
+        return sum
+      },
+      0
+    )
     avgProcessingTimeMs = totalTime / completedJobs.length
   }
 
-  const total = (Object.values(statusCounts) as number[]).reduce((a, b) => a + b, 0)
+  const total = (Object.values(statusCounts) as number[]).reduce(
+    (a, b) => a + b,
+    0
+  )
   const successRate = total > 0 ? (statusCounts.completed / total) * 100 : 0
 
   return {
@@ -129,10 +138,10 @@ export async function listJobs(
   if (filter.dateFrom || filter.dateTo) {
     where.createdAt = {} as Record<string, unknown>
     if (filter.dateFrom) {
-      (where.createdAt as Record<string, unknown>).gte = filter.dateFrom
+      ;(where.createdAt as Record<string, unknown>).gte = filter.dateFrom
     }
     if (filter.dateTo) {
-      (where.createdAt as Record<string, unknown>).lte = filter.dateTo
+      ;(where.createdAt as Record<string, unknown>).lte = filter.dateTo
     }
   }
 

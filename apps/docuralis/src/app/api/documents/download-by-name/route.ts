@@ -13,7 +13,10 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { filename, collectionId } = body
     if (!filename) {
-      return NextResponse.json({ error: 'Filename is required' }, { status: 400 })
+      return NextResponse.json(
+        { error: 'Filename is required' },
+        { status: 400 }
+      )
     }
 
     // Use AWS S3 SDK for proper authentication
@@ -53,7 +56,7 @@ export async function POST(request: NextRequest) {
       try {
         const params = {
           Bucket: bucketName,
-          Key: path as string
+          Key: path as string,
         }
 
         const data = await s3.getObject(params).promise()
@@ -62,11 +65,12 @@ export async function POST(request: NextRequest) {
           const buffer = Buffer.from(data.Body as Uint8Array)
 
           // Check if it's actually a PDF (not HTML)
-          const isPDF = buffer.length > 4 &&
+          const isPDF =
+            buffer.length > 4 &&
             buffer[0] === 0x25 && // %
             buffer[1] === 0x50 && // P
             buffer[2] === 0x44 && // D
-            buffer[3] === 0x46    // F
+            buffer[3] === 0x46 // F
 
           if (isPDF) {
             pdfBuffer = buffer

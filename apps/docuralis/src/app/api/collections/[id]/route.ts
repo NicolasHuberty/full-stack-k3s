@@ -101,14 +101,19 @@ export async function GET(
     }
 
     // Add users with explicit permissions
-    accessStats.forEach((p: { user: { id: string; [key: string]: unknown }; permission: string }) => {
-      if (!userMap.has(p.user.id)) {
-        userMap.set(p.user.id, {
-          ...p.user,
-          permission: p.permission,
-        })
+    accessStats.forEach(
+      (p: {
+        user: { id: string; [key: string]: unknown }
+        permission: string
+      }) => {
+        if (!userMap.has(p.user.id)) {
+          userMap.set(p.user.id, {
+            ...p.user,
+            permission: p.permission,
+          })
+        }
       }
-    })
+    )
 
     // For ORGANIZATION visibility, add all organization members
     if (collection.visibility === 'ORGANIZATION' && collection.organizationId) {
@@ -129,14 +134,16 @@ export async function GET(
         },
       })
 
-      orgMembers.forEach((member: { user: { id: string; [key: string]: unknown } }) => {
-        if (!userMap.has(member.user.id)) {
-          userMap.set(member.user.id, {
-            ...member.user,
-            permission: 'VIEWER' as const, // Default permission for org members
-          })
+      orgMembers.forEach(
+        (member: { user: { id: string; [key: string]: unknown } }) => {
+          if (!userMap.has(member.user.id)) {
+            userMap.set(member.user.id, {
+              ...member.user,
+              permission: 'VIEWER' as const, // Default permission for org members
+            })
+          }
         }
-      })
+      )
     }
 
     accessUsers.push(...userMap.values())

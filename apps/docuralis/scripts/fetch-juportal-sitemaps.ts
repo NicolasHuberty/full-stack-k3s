@@ -117,7 +117,9 @@ function parseECLIDocument(urlXml: string): ECLIDocument | null {
 
     // Extract URLs by language
     const urls: { de?: string; fr?: string; nl?: string } = {}
-    const urlMatches = urlXml.match(/<ecli:identifier lang="([^"]+)" format="text\/html"[^>]*>([^<]+)</g)
+    const urlMatches = urlXml.match(
+      /<ecli:identifier lang="([^"]+)" format="text\/html"[^>]*>([^<]+)</g
+    )
     if (urlMatches) {
       for (const match of urlMatches) {
         const langMatch = match.match(/lang="([^"]+)"/)
@@ -155,7 +157,9 @@ function parseECLIDocument(urlXml: string): ECLIDocument | null {
 
     // Extract languages
     const languages: string[] = []
-    const languageMatches = urlXml.match(/<ecli:language languageType="authoritative">([^<]+)/g)
+    const languageMatches = urlXml.match(
+      /<ecli:language languageType="authoritative">([^<]+)/g
+    )
     if (languageMatches) {
       for (const match of languageMatches) {
         const langMatch = match.match(/>([^<]+)$/)
@@ -184,7 +188,9 @@ function parseECLIDocument(urlXml: string): ECLIDocument | null {
 
     // Extract abstract by language
     const abstract: { de?: string; fr?: string; nl?: string } = {}
-    const abstractMatches = urlXml.match(/<ecli:abstract lang="([^"]+)">([^<]+)/g)
+    const abstractMatches = urlXml.match(
+      /<ecli:abstract lang="([^"]+)">([^<]+)/g
+    )
     if (abstractMatches) {
       for (const match of abstractMatches) {
         const langMatch = match.match(/lang="([^"]+)"/)
@@ -197,7 +203,9 @@ function parseECLIDocument(urlXml: string): ECLIDocument | null {
 
     // Extract description by language
     const description: { de?: string; fr?: string; nl?: string } = {}
-    const descriptionMatches = urlXml.match(/<ecli:description lang="([^"]+)">([^<]+)/g)
+    const descriptionMatches = urlXml.match(
+      /<ecli:description lang="([^"]+)">([^<]+)/g
+    )
     if (descriptionMatches) {
       for (const match of descriptionMatches) {
         const langMatch = match.match(/lang="([^"]+)"/)
@@ -237,7 +245,7 @@ function parseECLIDocument(urlXml: string): ECLIDocument | null {
       abstract,
       description,
       issued,
-      references
+      references,
     }
   } catch (error) {
     console.error('Error parsing ECLI document XML:', error)
@@ -289,8 +297,8 @@ async function fetchAllJUPORTALDocuments(maxSitemaps = 5, maxDocuments = 1000) {
   let collection = await prisma.collection.findFirst({
     where: {
       name: 'JUPORTAL Complete Database',
-      ownerId: user.id
-    }
+      ownerId: user.id,
+    },
   })
 
   if (!collection) {
@@ -302,7 +310,7 @@ async function fetchAllJUPORTALDocuments(maxSitemaps = 5, maxDocuments = 1000) {
       ownerId: user.id,
       embeddingModel: 'text-embedding-3-small',
       chunkSize: 1000,
-      chunkOverlap: 200
+      chunkOverlap: 200,
     })
   }
 
@@ -324,7 +332,9 @@ async function fetchAllJUPORTALDocuments(maxSitemaps = 5, maxDocuments = 1000) {
   // Process sitemap indexes (limit to avoid overwhelming)
   for (let i = 0; i < Math.min(maxSitemaps, sitemapIndexUrls.length); i++) {
     const indexUrl = sitemapIndexUrls[i]
-    console.log(`\n=== Processing sitemap index ${i + 1}/${Math.min(maxSitemaps, sitemapIndexUrls.length)} ===`)
+    console.log(
+      `\n=== Processing sitemap index ${i + 1}/${Math.min(maxSitemaps, sitemapIndexUrls.length)} ===`
+    )
 
     // Get individual sitemap URLs from this index
     const sitemapUrls = await fetchSitemapIndex(indexUrl)
@@ -350,15 +360,21 @@ async function fetchAllJUPORTALDocuments(maxSitemaps = 5, maxDocuments = 1000) {
           const existingDoc = await prisma.document.findFirst({
             where: {
               collectionId: collection.id,
-              filename: filename
-            }
+              filename: filename,
+            },
           })
 
           if (!existingDoc) {
             const frenchUrl = doc.urls.fr || doc.urls.nl || doc.urls.de || ''
-            const abstract = doc.abstract.fr || doc.abstract.nl || doc.abstract.de || ''
-            const description = doc.description.fr || doc.description.nl || doc.description.de || ''
-            const subject = doc.subject.fr || doc.subject.nl || doc.subject.de || ''
+            const abstract =
+              doc.abstract.fr || doc.abstract.nl || doc.abstract.de || ''
+            const description =
+              doc.description.fr ||
+              doc.description.nl ||
+              doc.description.de ||
+              ''
+            const subject =
+              doc.subject.fr || doc.subject.nl || doc.subject.de || ''
 
             const metadata = {
               source: 'JUPORTAL_SITEMAP',
@@ -373,7 +389,7 @@ async function fetchAllJUPORTALDocuments(maxSitemaps = 5, maxDocuments = 1000) {
               abstract,
               description,
               references: doc.references,
-              urls: doc.urls
+              urls: doc.urls,
             }
 
             const document = await prisma.document.create({
@@ -381,15 +397,17 @@ async function fetchAllJUPORTALDocuments(maxSitemaps = 5, maxDocuments = 1000) {
                 filename: filename,
                 originalName: filename,
                 mimeType: 'text/html',
-                fileSize: BigInt(abstract.length + description.length + subject.length),
+                fileSize: BigInt(
+                  abstract.length + description.length + subject.length
+                ),
                 fileUrl: frenchUrl,
                 collectionId: collection.id,
                 uploadedById: user.id,
                 title: doc.ecli,
                 status: 'PENDING',
                 extractedText: `${abstract}\n\n${description}\n\nSubject: ${subject}`,
-                language: doc.languages[0] || 'fr'
-              }
+                language: doc.languages[0] || 'fr',
+              },
             })
 
             importedCount++
@@ -405,7 +423,7 @@ async function fetchAllJUPORTALDocuments(maxSitemaps = 5, maxDocuments = 1000) {
       }
 
       // Rate limiting - wait between sitemaps
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      await new Promise((resolve) => setTimeout(resolve, 1000))
 
       if (totalDocuments >= maxDocuments) break
     }
@@ -428,7 +446,9 @@ if (require.main === module) {
   console.log(`Configuration:`)
   console.log(`- Max sitemap indexes: ${maxSitemaps}`)
   console.log(`- Max documents: ${maxDocuments}`)
-  console.log(`- Use: bun run scripts/fetch-juportal-sitemaps.ts [maxSitemaps] [maxDocuments]\n`)
+  console.log(
+    `- Use: bun run scripts/fetch-juportal-sitemaps.ts [maxSitemaps] [maxDocuments]\n`
+  )
 
   fetchAllJUPORTALDocuments(maxSitemaps, maxDocuments)
     .then(() => {
@@ -441,4 +461,9 @@ if (require.main === module) {
     })
 }
 
-export { fetchAllJUPORTALDocuments, getAllSitemapUrls, fetchSitemap, fetchSitemapIndex }
+export {
+  fetchAllJUPORTALDocuments,
+  getAllSitemapUrls,
+  fetchSitemap,
+  fetchSitemapIndex,
+}

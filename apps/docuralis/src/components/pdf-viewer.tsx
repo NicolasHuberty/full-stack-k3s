@@ -2,7 +2,15 @@
 
 import { useState, useEffect, useRef } from 'react'
 import dynamic from 'next/dynamic'
-import { ChevronLeft, ChevronRight, X, Download, ZoomIn, ZoomOut, Sparkles } from 'lucide-react'
+import {
+  ChevronLeft,
+  ChevronRight,
+  X,
+  Download,
+  ZoomIn,
+  ZoomOut,
+  Sparkles,
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { AIBubble } from '@/components/pdf/ai-bubble'
 
@@ -11,22 +19,34 @@ import 'react-pdf/dist/Page/AnnotationLayer.css'
 import 'react-pdf/dist/Page/TextLayer.css'
 
 // Dynamically import react-pdf components to avoid SSR issues
-const Document = dynamic(() => import('react-pdf').then(mod => ({ default: mod.Document })), {
-  ssr: false,
-  loading: () => <div className="animate-pulse bg-gray-200 rounded w-full h-96" />
-})
+const Document = dynamic(
+  () => import('react-pdf').then((mod) => ({ default: mod.Document })),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="animate-pulse bg-gray-200 rounded w-full h-96" />
+    ),
+  }
+)
 
-const Page = dynamic(() => import('react-pdf').then(mod => ({ default: mod.Page })), {
-  ssr: false,
-  loading: () => <div className="animate-pulse bg-gray-200 rounded w-full h-96" />
-})
+const Page = dynamic(
+  () => import('react-pdf').then((mod) => ({ default: mod.Page })),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="animate-pulse bg-gray-200 rounded w-full h-96" />
+    ),
+  }
+)
 
 // Configure PDF.js worker when client-side
 if (typeof window !== 'undefined') {
-  import('react-pdf').then(({ pdfjs }) => {
-    // Use the exact version that react-pdf@10.2.0 depends on: pdfjs-dist@5.4.296
-    pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@5.4.296/build/pdf.worker.min.mjs`
-  }).catch(err => console.error('Failed to configure PDF.js worker:', err))
+  import('react-pdf')
+    .then(({ pdfjs }) => {
+      // Use the exact version that react-pdf@10.2.0 depends on: pdfjs-dist@5.4.296
+      pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@5.4.296/build/pdf.worker.min.mjs`
+    })
+    .catch((err) => console.error('Failed to configure PDF.js worker:', err))
 }
 
 interface PDFViewerProps {
@@ -38,7 +58,14 @@ interface PDFViewerProps {
   onClose: () => void
 }
 
-export function PDFViewer({ documentId, documentName, collectionId, initialPage, highlightText, onClose }: PDFViewerProps) {
+export function PDFViewer({
+  documentId,
+  documentName,
+  collectionId,
+  initialPage,
+  highlightText,
+  onClose,
+}: PDFViewerProps) {
   const [numPages, setNumPages] = useState<number>(0)
   const [pageNumber, setPageNumber] = useState<number>(1)
   const [scale, setScale] = useState<number>(1.0)
@@ -60,9 +87,14 @@ export function PDFViewer({ documentId, documentName, collectionId, initialPage,
   // Track page number changes and clear highlights when navigating away
   useEffect(() => {
     // Clear highlights from previous page when navigating
-    if (pageRef.current && highlightPageRef.current !== null && pageNumber !== highlightPageRef.current) {
-      const existingHighlights = pageRef.current.querySelectorAll('.pdf-highlight')
-      existingHighlights.forEach(el => {
+    if (
+      pageRef.current &&
+      highlightPageRef.current !== null &&
+      pageNumber !== highlightPageRef.current
+    ) {
+      const existingHighlights =
+        pageRef.current.querySelectorAll('.pdf-highlight')
+      existingHighlights.forEach((el) => {
         if (el instanceof HTMLElement) {
           el.style.removeProperty('background-color')
           el.classList.remove('pdf-highlight')
@@ -73,12 +105,24 @@ export function PDFViewer({ documentId, documentName, collectionId, initialPage,
 
   // Track initialPage changes and apply immediately if document is already loaded
   useEffect(() => {
-    const hasValidPage = initialPage !== null && initialPage !== undefined && !isNaN(initialPage) && initialPage > 0 && numPages > 0 && initialPage <= numPages
+    const hasValidPage =
+      initialPage !== null &&
+      initialPage !== undefined &&
+      !isNaN(initialPage) &&
+      initialPage > 0 &&
+      numPages > 0 &&
+      initialPage <= numPages
     if (hasValidPage) {
       setPageNumber(initialPage)
     }
     // Set the target page for highlighting if we have highlightText and initialPage
-    if (highlightText && initialPage !== null && initialPage !== undefined && !isNaN(initialPage) && initialPage > 0) {
+    if (
+      highlightText &&
+      initialPage !== null &&
+      initialPage !== undefined &&
+      !isNaN(initialPage) &&
+      initialPage > 0
+    ) {
       console.log('[PDFViewer] Setting highlight target page:', initialPage)
       highlightPageRef.current = initialPage
     }
@@ -145,7 +189,10 @@ export function PDFViewer({ documentId, documentName, collectionId, initialPage,
           pdfDataCopyRef.current = data.slice(0)
           setPdfData(data)
         } catch (idError) {
-          console.warn('Failed to load PDF by ID, trying fallback by name:', idError)
+          console.warn(
+            'Failed to load PDF by ID, trying fallback by name:',
+            idError
+          )
 
           // Fallback to download-by-name
           const response = await fetch(`/api/documents/download-by-name`, {
@@ -176,7 +223,12 @@ export function PDFViewer({ documentId, documentName, collectionId, initialPage,
     setNumPages(numPages)
 
     // Navigate to initial page if specified, otherwise start at page 1
-    const hasValidInitialPage = initialPage !== null && initialPage !== undefined && !isNaN(initialPage) && initialPage > 0 && initialPage <= numPages
+    const hasValidInitialPage =
+      initialPage !== null &&
+      initialPage !== undefined &&
+      !isNaN(initialPage) &&
+      initialPage > 0 &&
+      initialPage <= numPages
     const targetPage = hasValidInitialPage ? initialPage : 1
     if (targetPage !== pageNumber) {
       setPageNumber(targetPage)
@@ -190,27 +242,40 @@ export function PDFViewer({ documentId, documentName, collectionId, initialPage,
       hasPageRef: !!pageRef.current,
       highlightPageTarget: highlightPageRef.current,
       currentPage: pageNumber,
-      shouldHighlight: highlightText && pageRef.current && highlightPageRef.current !== null && pageNumber === highlightPageRef.current
+      shouldHighlight:
+        highlightText &&
+        pageRef.current &&
+        highlightPageRef.current !== null &&
+        pageNumber === highlightPageRef.current,
     })
 
     // Only highlight if:
     // 1. We have text to highlight
     // 2. We have a target page set
     // 3. We're currently on that target page
-    if (highlightText && pageRef.current && highlightPageRef.current !== null && pageNumber === highlightPageRef.current) {
+    if (
+      highlightText &&
+      pageRef.current &&
+      highlightPageRef.current !== null &&
+      pageNumber === highlightPageRef.current
+    ) {
       console.log('[PDFViewer] Starting highlight process for page', pageNumber)
       // Multiple attempts to ensure text layer is ready
       let attempts = 0
       const tryHighlight = () => {
         attempts++
-        const textLayer = pageRef.current?.querySelector('.react-pdf__Page__textContent')
+        const textLayer = pageRef.current?.querySelector(
+          '.react-pdf__Page__textContent'
+        )
 
         if (textLayer && textLayer.children.length > 0) {
           console.log('[PDFViewer] Text layer ready, highlighting...')
           highlightTextInPage()
           // Don't clear highlightPageRef - let it persist so highlights remain on re-renders
         } else if (attempts < 10) {
-          console.log(`[PDFViewer] Text layer not ready, attempt ${attempts}/10`)
+          console.log(
+            `[PDFViewer] Text layer not ready, attempt ${attempts}/10`
+          )
           setTimeout(tryHighlight, 200)
         }
       }
@@ -229,8 +294,9 @@ export function PDFViewer({ documentId, documentName, collectionId, initialPage,
     console.log('[PDFViewer] Text length:', highlightText.length)
 
     // Remove existing highlights
-    const existingHighlights = pageRef.current.querySelectorAll('.pdf-highlight')
-    existingHighlights.forEach(el => {
+    const existingHighlights =
+      pageRef.current.querySelectorAll('.pdf-highlight')
+    existingHighlights.forEach((el) => {
       if (el instanceof HTMLElement) {
         el.style.removeProperty('background-color')
         el.classList.remove('pdf-highlight')
@@ -238,14 +304,18 @@ export function PDFViewer({ documentId, documentName, collectionId, initialPage,
     })
 
     // Find and highlight text
-    const textLayer = pageRef.current.querySelector('.react-pdf__Page__textContent')
+    const textLayer = pageRef.current.querySelector(
+      '.react-pdf__Page__textContent'
+    )
     if (!textLayer) {
       console.log('[PDFViewer] ❌ No text layer found')
       return
     }
 
     // Get all text spans
-    const textElements = Array.from(textLayer.querySelectorAll('span')) as HTMLElement[]
+    const textElements = Array.from(
+      textLayer.querySelectorAll('span')
+    ) as HTMLElement[]
     console.log('[PDFViewer] Found', textElements.length, 'text elements')
 
     // Normalize function to handle punctuation and spacing
@@ -263,10 +333,13 @@ export function PDFViewer({ documentId, documentName, collectionId, initialPage,
     const normalizedSearchText = normalize(highlightText)
     const searchWords = normalizedSearchText
       .split(/\s+/)
-      .filter(w => w.length > 2)
+      .filter((w) => w.length > 2)
       .slice(0, 30)
 
-    console.log('[PDFViewer] Normalized search text:', normalizedSearchText.substring(0, 200))
+    console.log(
+      '[PDFViewer] Normalized search text:',
+      normalizedSearchText.substring(0, 200)
+    )
     console.log('[PDFViewer] Search words:', searchWords)
     console.log('[PDFViewer] Number of search words:', searchWords.length)
 
@@ -279,7 +352,7 @@ export function PDFViewer({ documentId, documentName, collectionId, initialPage,
     let fullText = ''
     const charToElement: HTMLElement[] = []
 
-    textElements.forEach(el => {
+    textElements.forEach((el) => {
       const text = normalize(el.textContent || '') // Normalize page text too
       for (let i = 0; i < text.length; i++) {
         charToElement.push(el)
@@ -289,14 +362,25 @@ export function PDFViewer({ documentId, documentName, collectionId, initialPage,
     })
 
     console.log('[PDFViewer] Full page text length:', fullText.length)
-    console.log('[PDFViewer] Full page text preview:', fullText.substring(0, 200))
+    console.log(
+      '[PDFViewer] Full page text preview:',
+      fullText.substring(0, 200)
+    )
 
     // For matching, remove ALL spaces to handle character-level spacing in PDFs
     const fullTextNoSpaces = fullText.replace(/\s+/g, '')
-    const searchTextNoSpaces = normalizedSearchText.replace(/\s+/g, '').substring(0, 500) // First 500 chars
+    const searchTextNoSpaces = normalizedSearchText
+      .replace(/\s+/g, '')
+      .substring(0, 500) // First 500 chars
 
-    console.log('[PDFViewer] Search text (no spaces):', searchTextNoSpaces.substring(0, 100))
-    console.log('[PDFViewer] Page text (no spaces) preview:', fullTextNoSpaces.substring(0, 200))
+    console.log(
+      '[PDFViewer] Search text (no spaces):',
+      searchTextNoSpaces.substring(0, 100)
+    )
+    console.log(
+      '[PDFViewer] Page text (no spaces) preview:',
+      fullTextNoSpaces.substring(0, 200)
+    )
 
     // Use a sliding window to find the best match, allowing for small differences
     // We'll look for the position where the most characters match
@@ -327,7 +411,14 @@ export function PDFViewer({ documentId, documentName, collectionId, initialPage,
       }
     }
 
-    console.log('[PDFViewer] Best match score:', bestMatchScore, '/', searchLen, '=', (bestMatchScore / searchLen * 100).toFixed(1) + '%')
+    console.log(
+      '[PDFViewer] Best match score:',
+      bestMatchScore,
+      '/',
+      searchLen,
+      '=',
+      ((bestMatchScore / searchLen) * 100).toFixed(1) + '%'
+    )
     console.log('[PDFViewer] Match index:', bestMatchIndex)
 
     let bestStart = -1
@@ -344,7 +435,8 @@ export function PDFViewer({ documentId, documentName, collectionId, initialPage,
             bestStart = i
           }
           charsCountedNoSpace++
-          if (charsCountedNoSpace === bestMatchIndex + 300) { // Highlight ~300 chars
+          if (charsCountedNoSpace === bestMatchIndex + 300) {
+            // Highlight ~300 chars
             bestEnd = i
             break
           }
@@ -357,14 +449,20 @@ export function PDFViewer({ documentId, documentName, collectionId, initialPage,
         found: true,
         start: bestStart,
         end: bestEnd,
-        matchedText: fullText.substring(bestStart, Math.min(bestEnd, bestStart + 200))
+        matchedText: fullText.substring(
+          bestStart,
+          Math.min(bestEnd, bestStart + 200)
+        ),
       })
     } else {
       console.log('[PDFViewer] Best match result:', {
         found: false,
         start: -1,
         end: -1,
-        reason: 'Match score too low: ' + (bestMatchScore / searchLen * 100).toFixed(1) + '%'
+        reason:
+          'Match score too low: ' +
+          ((bestMatchScore / searchLen) * 100).toFixed(1) +
+          '%',
       })
     }
 
@@ -372,7 +470,11 @@ export function PDFViewer({ documentId, documentName, collectionId, initialPage,
     if (bestStart >= 0 && bestEnd > bestStart) {
       const matchedElements = new Set<HTMLElement>()
 
-      for (let i = bestStart; i < Math.min(bestEnd, charToElement.length); i++) {
+      for (
+        let i = bestStart;
+        i < Math.min(bestEnd, charToElement.length);
+        i++
+      ) {
         if (charToElement[i]) {
           matchedElements.add(charToElement[i])
         }
@@ -382,12 +484,20 @@ export function PDFViewer({ documentId, documentName, collectionId, initialPage,
 
       // Apply highlighting
       if (matchedElements.size > 0) {
-        matchedElements.forEach(element => {
-          element.style.setProperty('background-color', 'rgba(255, 235, 59, 0.4)', 'important')
+        matchedElements.forEach((element) => {
+          element.style.setProperty(
+            'background-color',
+            'rgba(255, 235, 59, 0.4)',
+            'important'
+          )
           element.classList.add('pdf-highlight')
         })
 
-        console.log('[PDFViewer] ✅ Highlighting applied to', matchedElements.size, 'elements')
+        console.log(
+          '[PDFViewer] ✅ Highlighting applied to',
+          matchedElements.size,
+          'elements'
+        )
 
         // Scroll to first highlight
         const firstElement = Array.from(matchedElements)[0]
@@ -398,14 +508,15 @@ export function PDFViewer({ documentId, documentName, collectionId, initialPage,
               const elementRect = firstElement.getBoundingClientRect()
               const containerRect = scrollContainer.getBoundingClientRect()
 
-              const scrollTop = scrollContainer.scrollTop +
+              const scrollTop =
+                scrollContainer.scrollTop +
                 (elementRect.top - containerRect.top) -
-                (containerRect.height / 2) +
-                (elementRect.height / 2)
+                containerRect.height / 2 +
+                elementRect.height / 2
 
               scrollContainer.scrollTo({
                 top: scrollTop,
-                behavior: 'smooth'
+                behavior: 'smooth',
               })
               console.log('[PDFViewer] Scrolled to highlight')
             }
@@ -452,7 +563,9 @@ export function PDFViewer({ documentId, documentName, collectionId, initialPage,
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 border-b">
             <div className="flex items-center gap-4">
-              <h2 className="text-lg font-semibold truncate max-w-md">{documentName}</h2>
+              <h2 className="text-lg font-semibold truncate max-w-md">
+                {documentName}
+              </h2>
               <span className="text-sm text-gray-500">
                 Page {pageNumber} of {numPages || '-'}
               </span>
@@ -483,9 +596,9 @@ export function PDFViewer({ documentId, documentName, collectionId, initialPage,
               <div className="w-px h-4 bg-gray-200 mx-1" />
               <Button
                 onClick={() => setShowAIBubble(!showAIBubble)}
-                variant={showAIBubble ? "secondary" : "ghost"}
+                variant={showAIBubble ? 'secondary' : 'ghost'}
                 size="sm"
-                className={showAIBubble ? "bg-blue-50 text-blue-600" : ""}
+                className={showAIBubble ? 'bg-blue-50 text-blue-600' : ''}
               >
                 <Sparkles className="h-4 w-4" />
               </Button>
@@ -524,7 +637,9 @@ export function PDFViewer({ documentId, documentName, collectionId, initialPage,
                     <div className="animate-pulse bg-gray-200 rounded w-full h-96" />
                   }
                   error={
-                    <div className="text-red-600 p-4">Failed to load PDF document</div>
+                    <div className="text-red-600 p-4">
+                      Failed to load PDF document
+                    </div>
                   }
                 >
                   <Page

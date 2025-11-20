@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma'
 export enum CollectionPermissionLevel {
   VIEWER = 'VIEWER',
   EDITOR = 'EDITOR',
-  ADMIN = 'ADMIN'
+  ADMIN = 'ADMIN',
 }
 
 export type Permission = 'read' | 'write' | 'delete' | 'manage'
@@ -223,7 +223,9 @@ export async function getUserCollections(userId: string) {
       select: { organizationId: true },
     })
 
-    const orgIds = userOrgs.map((o: { organizationId: string }) => o.organizationId)
+    const orgIds = userOrgs.map(
+      (o: { organizationId: string }) => o.organizationId
+    )
 
     // Find all collections the user can access
     const collections = await prisma.collection.findMany({

@@ -29,7 +29,8 @@ export default async function RootLayout({
       <body
         className="antialiased"
         style={{
-          [`${fontVariables.sans}` as string]: 'system-ui, -apple-system, sans-serif',
+          [`${fontVariables.sans}` as string]:
+            'system-ui, -apple-system, sans-serif',
           [`${fontVariables.mono}` as string]: 'ui-monospace, monospace',
         }}
       >

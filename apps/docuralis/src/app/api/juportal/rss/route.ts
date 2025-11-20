@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/auth'
-import { fetchRSSFeed, JUPORTAL_RSS_FEEDS } from '@/../scripts/fetch-juportal-rss'
+import {
+  fetchRSSFeed,
+  JUPORTAL_RSS_FEEDS,
+} from '@/../scripts/fetch-juportal-rss'
 import { prisma } from '@/lib/prisma'
 
 export async function GET(request: NextRequest) {
@@ -8,10 +11,7 @@ export async function GET(request: NextRequest) {
     const session = await auth()
 
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const searchParams = request.nextUrl.searchParams
@@ -20,12 +20,15 @@ export async function GET(request: NextRequest) {
     if (!feedUrl) {
       // Return available predefined feeds
       return NextResponse.json({
-        availableFeeds: Object.entries(JUPORTAL_RSS_FEEDS).map(([name, url]) => ({
-          name,
-          url,
-          description: `JUPORTAL RSS feed for ${name}`
-        })),
-        message: 'Provide a feed URL parameter to fetch documents from a specific RSS feed'
+        availableFeeds: Object.entries(JUPORTAL_RSS_FEEDS).map(
+          ([name, url]) => ({
+            name,
+            url,
+            description: `JUPORTAL RSS feed for ${name}`,
+          })
+        ),
+        message:
+          'Provide a feed URL parameter to fetch documents from a specific RSS feed',
       })
     }
 
@@ -36,7 +39,7 @@ export async function GET(request: NextRequest) {
       feedUrl,
       documents,
       count: documents.length,
-      message: `Found ${documents.length} jurisprudence documents`
+      message: `Found ${documents.length} jurisprudence documents`,
     })
   } catch (error) {
     console.error('JUPORTAL RSS API error:', error)
@@ -52,10 +55,7 @@ export async function POST(request: NextRequest) {
     const session = await auth()
 
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const body = await request.json()
@@ -86,13 +86,13 @@ export async function POST(request: NextRequest) {
               members: {
                 some: {
                   userId: session.user.id,
-                  isActive: true
-                }
-              }
-            }
-          }
-        ]
-      }
+                  isActive: true,
+                },
+              },
+            },
+          },
+        ],
+      },
     })
 
     if (!collection) {
@@ -116,8 +116,8 @@ export async function POST(request: NextRequest) {
         const existingDoc = await prisma.document.findFirst({
           where: {
             collectionId: collection.id,
-            filename: filename
-          }
+            filename: filename,
+          },
         })
 
         if (!existingDoc) {
@@ -132,29 +132,29 @@ export async function POST(request: NextRequest) {
               uploadedById: session.user.id,
               title: doc.title || doc.ecli || 'Untitled',
               status: 'PENDING',
-              extractedText: doc.contentEncoded || doc.description
-            }
+              extractedText: doc.contentEncoded || doc.description,
+            },
           })
 
           results.push({
             ecli: doc.ecli,
             title: doc.title,
             documentId: document.id,
-            status: 'imported'
+            status: 'imported',
           })
         } else {
           results.push({
             ecli: doc.ecli,
             title: doc.title,
             documentId: existingDoc.id,
-            status: 'exists'
+            status: 'exists',
           })
         }
       } catch (error) {
         errors.push({
           ecli: doc.ecli || doc.guid,
           title: doc.title,
-          error: error instanceof Error ? error.message : 'Unknown error'
+          error: error instanceof Error ? error.message : 'Unknown error',
         })
       }
     }
@@ -166,10 +166,10 @@ export async function POST(request: NextRequest) {
       errors,
       summary: {
         total: documents.length,
-        imported: results.filter(r => r.status === 'imported').length,
-        existing: results.filter(r => r.status === 'exists').length,
-        failed: errors.length
-      }
+        imported: results.filter((r) => r.status === 'imported').length,
+        existing: results.filter((r) => r.status === 'exists').length,
+        failed: errors.length,
+      },
     })
   } catch (error) {
     console.error('JUPORTAL RSS import error:', error)

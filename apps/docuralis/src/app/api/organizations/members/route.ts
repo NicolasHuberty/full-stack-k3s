@@ -5,6 +5,7 @@ import { prisma } from '@/lib/prisma'
 /**
  * Get all organization members that the current user can share with
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function GET(_request: NextRequest) {
   try {
     const session = await auth()
@@ -22,7 +23,9 @@ export async function GET(_request: NextRequest) {
       select: { organizationId: true },
     })
 
-    const orgIds = userOrgs.map((org: { organizationId: string }) => org.organizationId)
+    const orgIds = userOrgs.map(
+      (org: { organizationId: string }) => org.organizationId
+    )
 
     if (orgIds.length === 0) {
       return NextResponse.json({ members: [] })
@@ -58,11 +61,13 @@ export async function GET(_request: NextRequest) {
 
     // Deduplicate by user ID
     const uniqueMembers = new Map()
-    members.forEach((member: { user: { id: string; [key: string]: unknown } }) => {
-      if (!uniqueMembers.has(member.user.id)) {
-        uniqueMembers.set(member.user.id, member.user)
+    members.forEach(
+      (member: { user: { id: string; [key: string]: unknown } }) => {
+        if (!uniqueMembers.has(member.user.id)) {
+          uniqueMembers.set(member.user.id, member.user)
+        }
       }
-    })
+    )
 
     return NextResponse.json({ members: Array.from(uniqueMembers.values()) })
   } catch (error) {

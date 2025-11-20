@@ -360,7 +360,6 @@ export class DocumentProcessor {
           storageUsed: { decrement: document.fileSize },
         },
       })
-
     } catch (error) {
       console.error('Failed to delete document:', error)
       throw error

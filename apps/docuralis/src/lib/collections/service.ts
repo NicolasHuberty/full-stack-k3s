@@ -7,7 +7,7 @@ import { hasCollectionAccess, canCreateOrgCollection } from './permissions'
 export enum CollectionVisibility {
   PRIVATE = 'PRIVATE',
   ORGANIZATION = 'ORGANIZATION',
-  PUBLIC = 'PUBLIC'
+  PUBLIC = 'PUBLIC',
 }
 
 export interface CreateCollectionInput {

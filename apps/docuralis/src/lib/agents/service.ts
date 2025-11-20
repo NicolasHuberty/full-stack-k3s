@@ -87,9 +87,12 @@ export class AgentService {
 
       // Use streaming to get intermediate steps
       let result: AgentState | undefined
-      const streamEvents: Array<{ node: string; data: Record<string, unknown> }> = []
+      const streamEvents: Array<{
+        node: string
+        data: Record<string, unknown>
+      }> = []
       const stream = await graph.stream(initialState, {
-        streamMode: 'updates' // Explicitly request updates mode
+        streamMode: 'updates', // Explicitly request updates mode
       })
 
       for await (const event of stream) {
@@ -217,55 +220,137 @@ export class AgentService {
         },
       })
 
-  
-
       // Create multiple mappings for flexible lookup
-      const filenameToDocMap = new Map<string, { id: string; originalName: string; filename: string }>()
+      const filenameToDocMap = new Map<
+        string,
+        { id: string; originalName: string; filename: string }
+      >()
 
-      documents.forEach((d: { id: string; originalName: string; filename: string }) => {
-        const docData = { id: d.id, originalName: d.originalName, filename: d.filename }
+      documents.forEach(
+        (d: { id: string; originalName: string; filename: string }) => {
+          const docData = {
+            id: d.id,
+            originalName: d.originalName,
+            filename: d.filename,
+          }
 
-        // Map by full filename
-        filenameToDocMap.set(d.filename, docData)
+          // Map by full filename
+          filenameToDocMap.set(d.filename, docData)
 
-        // Map by filename without path and query params
-        const baseFilename = d.filename.split('/').pop()?.split('?')[0]
-        if (baseFilename) {
-          filenameToDocMap.set(baseFilename, docData)
+          // Map by filename without path and query params
+          const baseFilename = d.filename.split('/').pop()?.split('?')[0]
+          if (baseFilename) {
+            filenameToDocMap.set(baseFilename, docData)
+          }
+
+          // Map by filename without query params only
+          const filenameWithoutQuery = d.filename.split('?')[0]
+          if (filenameWithoutQuery !== d.filename) {
+            filenameToDocMap.set(filenameWithoutQuery, docData)
+          }
+
+          // Map by originalName (CRITICAL for migrated docs)
+          if (d.originalName) {
+            filenameToDocMap.set(d.originalName, docData)
+            // Also map originalName without extension
+            const nameWithoutExt = d.originalName.replace(/\.[^/.]+$/, '')
+            filenameToDocMap.set(nameWithoutExt, docData)
+          }
         }
-
-        // Map by filename without query params only
-        const filenameWithoutQuery = d.filename.split('?')[0]
-        if (filenameWithoutQuery !== d.filename) {
-          filenameToDocMap.set(filenameWithoutQuery, docData)
-        }
-
-        // Map by originalName (CRITICAL for migrated docs)
-        if (d.originalName) {
-          filenameToDocMap.set(d.originalName, docData)
-          // Also map originalName without extension
-          const nameWithoutExt = d.originalName.replace(/\.[^/.]+$/, '')
-          filenameToDocMap.set(nameWithoutExt, docData)
-        }
-      })
+      )
 
       // Build sources from relevant documents with proper format for frontend
-      const sources = result.relevantDocs.map((doc: DocumentChunk, index: number) => {
-        // First check if we have documentId in metadata (new approach)
-        if (doc.metadata.documentId) {
-          // We have the document ID directly from the vector search
-          const docInfo = documents.find((d: { id: string }) => d.id === doc.metadata.documentId)
+      const sources = result.relevantDocs.map(
+        (doc: DocumentChunk, index: number) => {
+          // First check if we have documentId in metadata (new approach)
+          if (doc.metadata.documentId) {
+            // We have the document ID directly from the vector search
+            const docInfo = documents.find(
+              (d: { id: string }) => d.id === doc.metadata.documentId
+            )
 
-          // Build MinIO URL directly
-          const minioUrl = docInfo?.filename
+            // Build MinIO URL directly
+            const minioUrl = docInfo?.filename
+              ? docInfo.filename.startsWith(collectionId)
+                ? `https://minio.docuralis.com/${BUCKET_NAME}/${docInfo.filename}`
+                : `https://minio.docuralis.com/${BUCKET_NAME}/${collectionId}/${docInfo.filename}`
+              : null
+
+            return {
+              documentId: doc.metadata.documentId,
+              documentName:
+                docInfo?.originalName ||
+                doc.metadata.title ||
+                doc.metadata.source,
+              documentUrl: minioUrl, // Add direct MinIO URL
+              collectionId: collectionId, // Add collection ID for API calls
+              content: doc.pageContent,
+              score:
+                doc.metadata.pertinenceScore || doc.metadata.similarity || 0,
+              justification: doc.metadata.justification,
+              pageNumber: doc.metadata.pageNumber || null, // Include page number
+              metadata: {
+                pageNumber: doc.metadata.pageNumber || null, // Also include in metadata for compatibility
+              },
+            }
+          }
+
+          // Fallback to filename lookup (old approach for backward compatibility)
+          const source = doc.metadata.source
+          const cleanSource = source.split('?')[0] // Remove query params
+          const baseSource = cleanSource.split('/').pop() || cleanSource // Get just filename
+
+          // Try multiple lookup strategies
+          const docInfo =
+            filenameToDocMap.get(source) ||
+            filenameToDocMap.get(cleanSource) ||
+            filenameToDocMap.get(baseSource) ||
+            filenameToDocMap.get(doc.metadata.title)
+
+          if (!docInfo) {
+            console.warn(
+              `[AgentService] ⚠️  Could not find document for source: "${source}" (clean: "${cleanSource}", base: "${baseSource}", title: "${doc.metadata.title}")`
+            )
+            console.warn(
+              `   Available keys in map: ${Array.from(filenameToDocMap.keys()).slice(0, 5).join(', ')}...`
+            )
+
+            // For migrated documents without DB records, try to construct MinIO URL from source
+            let fallbackUrl = null
+            if (baseSource && !baseSource.includes('Unknown')) {
+              // Try to construct MinIO URL from the source filename
+              fallbackUrl = `https://minio.docuralis.com/${BUCKET_NAME}/${collectionId}/${baseSource}`
+            }
+
+            // Generate a fallback ID that's unique but indicates migration
+            const fallbackId = `migrated_${index}_${Date.now()}`
+            return {
+              documentId: fallbackId,
+              documentName: doc.metadata.title || baseSource,
+              documentUrl: fallbackUrl, // Add fallback URL
+              collectionId: collectionId, // Add collection ID for API calls
+              content: doc.pageContent,
+              score:
+                doc.metadata.pertinenceScore || doc.metadata.similarity || 0,
+              justification: doc.metadata.justification,
+              pageNumber: doc.metadata.pageNumber || null, // Include page number
+              metadata: {
+                pageNumber: doc.metadata.pageNumber || null, // Also include in metadata for compatibility
+              },
+            }
+          }
+
+          // Build MinIO URL for found document
+          // The filename might already include the path, so check if it starts with collectionId
+          const minioUrl = docInfo.filename
             ? docInfo.filename.startsWith(collectionId)
               ? `https://minio.docuralis.com/${BUCKET_NAME}/${docInfo.filename}`
               : `https://minio.docuralis.com/${BUCKET_NAME}/${collectionId}/${docInfo.filename}`
             : null
 
           return {
-            documentId: doc.metadata.documentId,
-            documentName: docInfo?.originalName || doc.metadata.title || doc.metadata.source,
+            documentId: docInfo.id,
+            documentName: docInfo.originalName || doc.metadata.title,
             documentUrl: minioUrl, // Add direct MinIO URL
             collectionId: collectionId, // Add collection ID for API calls
             content: doc.pageContent,
@@ -277,72 +362,7 @@ export class AgentService {
             },
           }
         }
-
-        // Fallback to filename lookup (old approach for backward compatibility)
-        const source = doc.metadata.source
-        const cleanSource = source.split('?')[0] // Remove query params
-        const baseSource = cleanSource.split('/').pop() || cleanSource // Get just filename
-
-        // Try multiple lookup strategies
-        const docInfo =
-          filenameToDocMap.get(source) ||
-          filenameToDocMap.get(cleanSource) ||
-          filenameToDocMap.get(baseSource) ||
-          filenameToDocMap.get(doc.metadata.title)
-
-        if (!docInfo) {
-          console.warn(
-            `[AgentService] ⚠️  Could not find document for source: "${source}" (clean: "${cleanSource}", base: "${baseSource}", title: "${doc.metadata.title}")`
-          )
-          console.warn(`   Available keys in map: ${Array.from(filenameToDocMap.keys()).slice(0, 5).join(', ')}...`)
-
-          // For migrated documents without DB records, try to construct MinIO URL from source
-          let fallbackUrl = null
-          if (baseSource && !baseSource.includes('Unknown')) {
-            // Try to construct MinIO URL from the source filename
-            fallbackUrl = `https://minio.docuralis.com/${BUCKET_NAME}/${collectionId}/${baseSource}`
-          }
-
-          // Generate a fallback ID that's unique but indicates migration
-          const fallbackId = `migrated_${index}_${Date.now()}`
-          return {
-            documentId: fallbackId,
-            documentName: doc.metadata.title || baseSource,
-            documentUrl: fallbackUrl, // Add fallback URL
-            collectionId: collectionId, // Add collection ID for API calls
-            content: doc.pageContent,
-            score: doc.metadata.pertinenceScore || doc.metadata.similarity || 0,
-            justification: doc.metadata.justification,
-            pageNumber: doc.metadata.pageNumber || null, // Include page number
-            metadata: {
-              pageNumber: doc.metadata.pageNumber || null, // Also include in metadata for compatibility
-            },
-          }
-        }
-
-        // Build MinIO URL for found document
-        // The filename might already include the path, so check if it starts with collectionId
-        const minioUrl = docInfo.filename
-          ? docInfo.filename.startsWith(collectionId)
-            ? `https://minio.docuralis.com/${BUCKET_NAME}/${docInfo.filename}`
-            : `https://minio.docuralis.com/${BUCKET_NAME}/${collectionId}/${docInfo.filename}`
-          : null
-
-        return {
-          documentId: docInfo.id,
-          documentName: docInfo.originalName || doc.metadata.title,
-          documentUrl: minioUrl, // Add direct MinIO URL
-          collectionId: collectionId, // Add collection ID for API calls
-          content: doc.pageContent,
-          score: doc.metadata.pertinenceScore || doc.metadata.similarity || 0,
-          justification: doc.metadata.justification,
-          pageNumber: doc.metadata.pageNumber || null, // Include page number
-          metadata: {
-            pageNumber: doc.metadata.pageNumber || null, // Also include in metadata for compatibility
-          },
-        }
-      })
-
+      )
 
       const missingDocs = sources.filter((s) => !s.documentId)
       if (missingDocs.length > 0) {

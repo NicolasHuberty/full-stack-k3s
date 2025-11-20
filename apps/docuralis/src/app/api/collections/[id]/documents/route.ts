@@ -200,10 +200,12 @@ export async function GET(
       : null
 
     // Convert BigInt to string
-    const serializedDocuments = paginatedDocuments.map((doc: { fileSize: bigint; [key: string]: unknown }) => ({
-      ...doc,
-      fileSize: doc.fileSize.toString(),
-    }))
+    const serializedDocuments = paginatedDocuments.map(
+      (doc: { fileSize: bigint; [key: string]: unknown }) => ({
+        ...doc,
+        fileSize: doc.fileSize.toString(),
+      })
+    )
 
     return NextResponse.json({
       documents: serializedDocuments,

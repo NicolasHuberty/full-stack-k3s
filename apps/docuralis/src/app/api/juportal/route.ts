@@ -162,18 +162,14 @@ export async function POST(request: NextRequest) {
           // Create document in database
           const document = await prisma.document.create({
             data: {
-              name: ecli,
+              filename: `${ecli}.json`,
               originalName: `${ecli}.json`,
               mimeType: 'application/json',
-              size: JSON.stringify(data).length,
+              fileSize: BigInt(JSON.stringify(data).length),
+              fileUrl: `${ECLI_API_BASE}/ecli/${ecli}`,
               collectionId,
               uploadedById: session.user.id,
-              metadata: {
-                source: 'JUPORTAL',
-                ecli,
-                court: ecli.split(':')[2],
-                year: ecli.split(':')[3],
-              },
+              title: ecli,
               status: 'PENDING',
             },
           })

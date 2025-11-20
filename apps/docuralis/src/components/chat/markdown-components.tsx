@@ -44,130 +44,67 @@ export function getCustomMarkdownComponents(
 
   return {
     // Headings with proper styling
-    h1: ({
-      children,
-      ...props
-    }: {
-      children: ReactNode
-      [key: string]: unknown
-    }) => (
+    h1: (props: any) => (
       <h1
         className="text-2xl font-bold mt-6 mb-4 text-gray-900 border-b pb-2"
         {...props}
-      >
-        {children}
-      </h1>
+      />
     ),
-    h2: ({
-      children,
-      ...props
-    }: {
-      children: ReactNode
-      [key: string]: unknown
-    }) => (
-      <h2 className="text-xl font-bold mt-5 mb-3 text-gray-900" {...props}>
-        {children}
-      </h2>
+    h2: (props: any) => (
+      <h2 className="text-xl font-bold mt-5 mb-3 text-gray-900" {...props} />
     ),
-    h3: ({
-      children,
-      ...props
-    }: {
-      children: ReactNode
-      [key: string]: unknown
-    }) => (
-      <h3 className="text-lg font-semibold mt-4 mb-2 text-gray-900" {...props}>
-        {children}
-      </h3>
+    h3: (props: any) => (
+      <h3 className="text-lg font-semibold mt-4 mb-2 text-gray-900" {...props} />
     ),
-    h4: ({
-      children,
-      ...props
-    }: {
-      children: ReactNode
-      [key: string]: unknown
-    }) => (
+    h4: (props: any) => (
       <h4
         className="text-base font-semibold mt-3 mb-2 text-gray-800"
         {...props}
-      >
-        {children}
-      </h4>
+      />
     ),
 
     // Custom text renderer to detect and transform PDF references
-    p: ({
-      children,
-      ...htmlProps
-    }: {
-      children: ReactNode
-      [key: string]: unknown
-    }) => {
+    p: (props: any) => {
+      const { children, ...htmlProps } = props
       const processChildren = (children: ReactNode): ReactNode => {
         if (typeof children === 'string') {
           // Match patterns like:
           // 1. <filename.pdf> or <IT0012930_003.pdf>
-          // 2. <document 1> or <document 2> (legacy format)
-          const pdfRegex =
-            /&lt;([^&]+\.pdf)&gt;|<([^<]+\.pdf)>|&lt;document\s+(\d+)&gt;|<document\s+(\d+)>/gi
-          const parts = []
-          let lastIndex = 0
-          let match
+          // 2. Document 1, Document 2, etc.
+          const parts = children.split(/(<[^>]+\.pdf>|Document \d+)/g)
 
-          while ((match = pdfRegex.exec(children)) !== null) {
-            // Add text before the match
-            if (match.index > lastIndex) {
-              parts.push(children.substring(lastIndex, match.index))
-            }
-
-            // Determine the filename
-            let filename: string | null = null
-
-            if (match[1] || match[2]) {
-              // Direct PDF filename
-              filename = match[1] || match[2]
-            } else if (match[3] || match[4]) {
-              // Document number - try to map to actual filename
-              const docNum = parseInt(match[3] || match[4], 10)
-              filename = getFilenameFromDocNumber(docNum)
-
-              // Fallback to displaying the document number if no mapping found
-              if (!filename) {
-                filename = `Document ${docNum}`
-              }
-            }
-
-            if (filename) {
-              parts.push(
+          return parts.map((part, index) => {
+            // Check if this part is a PDF reference in <filename.pdf> format
+            const pdfMatch = part.match(/^<([^>]+\.pdf)>$/)
+            if (pdfMatch) {
+              const filename = pdfMatch[1]
+              return (
                 <PDFReference
-                  key={`pdf-${match.index}`}
+                  key={`pdf-${index}`}
                   filename={filename}
-                  onClick={() => componentProps.onPdfClick(filename!)}
+                  onClick={() => componentProps.onPdfClick(filename)}
                 />
               )
             }
 
-            lastIndex = match.index + match[0].length
-          }
+            // Check if this part is a "Document N" reference
+            const docMatch = part.match(/^Document (\d+)$/)
+            if (docMatch) {
+              const docNumber = parseInt(docMatch[1])
+              const filename = getFilenameFromDocNumber(docNumber)
 
-          // Add remaining text
-          if (lastIndex < children.length) {
-            parts.push(children.substring(lastIndex))
-          }
-
-          // If we found any matches, return the processed parts
-          if (parts.length > 0) {
-            return parts
-          }
-        }
-
-        // Handle arrays of children
-        if (Array.isArray(children)) {
-          return children.map((child, index) => {
-            if (typeof child === 'string') {
-              return processChildren(child)
+              if (filename) {
+                return (
+                  <PDFReference
+                    key={`doc-${index}`}
+                    filename={filename}
+                    onClick={() => componentProps.onPdfClick(filename)}
+                  />
+                )
+              }
             }
-            return child
+
+            return part
           })
         }
 
@@ -175,158 +112,85 @@ export function getCustomMarkdownComponents(
       }
 
       return (
-        <p className="mb-4 leading-7 text-gray-700" {...htmlProps}>
+        <p className="mb-4 text-gray-700 leading-relaxed" {...htmlProps}>
           {processChildren(children)}
         </p>
       )
     },
 
-    // Strong/Bold text
-    strong: ({
-      children,
-      ...props
-    }: {
-      children: ReactNode
-      [key: string]: unknown
-    }) => (
-      <strong className="font-bold text-gray-900" {...props}>
-        {children}
-      </strong>
+    // Text formatting
+    strong: (props: any) => (
+      <strong className="font-bold text-gray-900" {...props} />
     ),
 
-    // Emphasis/Italic
-    em: ({
-      children,
-      ...props
-    }: {
-      children: ReactNode
-      [key: string]: unknown
-    }) => (
-      <em className="italic text-gray-800" {...props}>
-        {children}
-      </em>
+    // Emphasis
+    em: (props: any) => (
+      <em className="italic text-gray-700" {...props} />
     ),
 
-    // Unordered lists
-    ul: ({
-      children,
-      ...props
-    }: {
-      children: ReactNode
-      [key: string]: unknown
-    }) => (
-      <ul className="list-disc list-outside ml-6 mb-4 space-y-2" {...props}>
-        {children}
-      </ul>
+    // Lists
+    ul: (props: any) => (
+      <ul className="list-disc list-inside my-4 space-y-2" {...props} />
     ),
-
-    // Ordered lists
-    ol: ({
-      children,
-      ...props
-    }: {
-      children: ReactNode
-      [key: string]: unknown
-    }) => (
-      <ol className="list-decimal list-outside ml-6 mb-4 space-y-2" {...props}>
-        {children}
-      </ol>
+    ol: (props: any) => (
+      <ol className="list-decimal list-inside my-4 space-y-2" {...props} />
     ),
-
-    // List items
-    li: ({
-      children,
-      ...props
-    }: {
-      children: ReactNode
-      [key: string]: unknown
-    }) => (
-      <li className="text-gray-700 leading-7" {...props}>
-        {children}
-      </li>
+    li: (props: any) => (
+      <li className="text-gray-700" {...props} />
     ),
 
     // Blockquotes
-    blockquote: ({
-      children,
-      ...props
-    }: {
-      children: ReactNode
-      [key: string]: unknown
-    }) => (
+    blockquote: (props: any) => (
       <blockquote
         className="border-l-4 border-blue-500 pl-4 py-2 mb-4 italic bg-gray-50 text-gray-700"
         {...props}
-      >
-        {children}
-      </blockquote>
+      />
     ),
 
     // Horizontal rules
-    hr: (props: { [key: string]: unknown }) => (
+    hr: (props: any) => (
       <hr className="my-6 border-t border-gray-300" {...props} />
     ),
 
     // Links
-    a: ({
-      children,
-      href,
-      ...props
-    }: {
-      children: ReactNode
-      href?: string
-      [key: string]: unknown
-    }) => (
+    a: (props: any) => (
       <a
-        href={href}
+        {...props}
         className="text-blue-600 hover:text-blue-800 underline"
         target="_blank"
         rel="noopener noreferrer"
-        {...props}
-      >
-        {children}
-      </a>
+      />
     ),
 
     // Also handle inline code that might contain PDF references
-    code: ({
-      children,
-      className,
-      ...htmlProps
-    }: {
-      children: ReactNode
-      className?: string
-      [key: string]: unknown
-    }) => {
-      const inline = !className
-      const text = String(children)
-
-      // Check if it's a PDF filename in inline code
-      if (inline && /\.pdf$/i.test(text.trim())) {
+    code: (props: any) => {
+      const { children, className, ...htmlProps } = props
+      // Check if it's a code block (has language class)
+      if (className && className.includes('language-')) {
         return (
-          <PDFReference
-            filename={text.trim()}
-            onClick={() => componentProps.onPdfClick(text.trim())}
-          />
-        )
-      }
-
-      // Inline code styling
-      if (inline) {
-        return (
-          <code
-            className="bg-gray-100 text-red-600 px-1.5 py-0.5 rounded text-sm font-mono"
-            {...htmlProps}
-          >
+          <code className={`${className} text-sm`} {...htmlProps}>
             {children}
           </code>
         )
       }
 
-      // Code blocks
+      // For inline code, check for PDF references
+      if (typeof children === 'string' && children.includes('.pdf')) {
+        const pdfMatch = children.match(/^([^.]+\.pdf)$/)
+        if (pdfMatch) {
+          const filename = pdfMatch[1]
+          return (
+            <PDFReference
+              filename={filename}
+              onClick={() => componentProps.onPdfClick(filename)}
+            />
+          )
+        }
+      }
+
       return (
         <code
-          className={`${className} block bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto my-4`}
+          className="bg-gray-100 text-gray-800 px-1.5 py-0.5 rounded text-sm font-mono"
           {...htmlProps}
         >
           {children}
@@ -334,17 +198,12 @@ export function getCustomMarkdownComponents(
       )
     },
 
-    // Pre blocks (for code blocks)
-    pre: ({
-      children,
-      ...props
-    }: {
-      children: ReactNode
-      [key: string]: unknown
-    }) => (
-      <pre className="mb-4 overflow-x-auto" {...props}>
-        {children}
-      </pre>
+    // Code blocks
+    pre: (props: any) => (
+      <pre
+        className="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto my-4"
+        {...props}
+      />
     ),
   }
 }

@@ -149,16 +149,16 @@ export async function GET(
 
     // Determine sort order
     let orderBy: {
-      createdAt?: string
-      originalName?: string
-      fileSize?: string
+      createdAt?: 'asc' | 'desc'
+      originalName?: 'asc' | 'desc'
+      fileSize?: 'asc' | 'desc'
     } = { createdAt: 'desc' }
     if (sort === 'name') {
-      orderBy = { originalName: order }
+      orderBy = { originalName: order as 'asc' | 'desc' }
     } else if (sort === 'size') {
-      orderBy = { fileSize: order }
+      orderBy = { fileSize: order as 'asc' | 'desc' }
     } else if (sort === 'date') {
-      orderBy = { createdAt: order }
+      orderBy = { createdAt: order as 'asc' | 'desc' }
     }
 
     // Get total count for the current filter

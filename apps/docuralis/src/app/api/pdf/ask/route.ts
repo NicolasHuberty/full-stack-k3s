@@ -25,8 +25,7 @@ async function extractFirstPages(
   numPages: number = 2
 ): Promise<string> {
   return new Promise((resolve, reject) => {
-    // @ts-expect-error - PDFParser constructor typing issue
-    const pdfParser = new PDFParser(null, true)
+    const pdfParser = new (PDFParser as any)(null, true)
 
     pdfParser.on('pdfParser_dataError', (errData: { parserError: string }) => {
       reject(new Error(`PDF parsing error: ${errData.parserError}`))

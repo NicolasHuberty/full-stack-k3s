@@ -85,7 +85,7 @@ async function findAndDownloadPDF(
         pdfBuffer[0] === 0x25 && // %
         pdfBuffer[1] === 0x50 && // P
         pdfBuffer[2] === 0x44 && // D
-        pdfBuffer[3] === 0x46    // F
+        pdfBuffer[3] === 0x46 // F
 
       if (isPDF) {
         console.log(`  ✓ Found PDF at: ${path}`)
@@ -122,8 +122,10 @@ async function migrateJurisprudenceDocuments() {
     },
   })
 
-  console.log(`Found ${jurisprudenceCollections.length} jurisprudence collections:`)
-  jurisprudenceCollections.forEach(col => {
+  console.log(
+    `Found ${jurisprudenceCollections.length} jurisprudence collections:`
+  )
+  jurisprudenceCollections.forEach((col) => {
     console.log(`  - ${col.name} (${col.id})`)
   })
   console.log('')
@@ -134,7 +136,7 @@ async function migrateJurisprudenceDocuments() {
 
   for (const collection of jurisprudenceCollections) {
     console.log(`\n📚 Processing collection: ${collection.name}`)
-    console.log('=' .repeat(60))
+    console.log('='.repeat(60))
 
     // Create collection subdirectory
     const collectionDir = path.join(
@@ -192,8 +194,9 @@ async function migrateJurisprudenceDocuments() {
         console.log(`\n📄 Processing: ${doc.title || doc.filename}`)
 
         // Extract ECLI if present
-        const ecli = doc.title?.match(/ECLI:[A-Z]{2}:[A-Z]+:\d{4}:[A-Z0-9.]+/)?.[0] ||
-                    doc.filename?.match(/ECLI:[A-Z]{2}:[A-Z]+:\d{4}:[A-Z0-9.]+/)?.[0]
+        const ecli =
+          doc.title?.match(/ECLI:[A-Z]{2}:[A-Z]+:\d{4}:[A-Z0-9.]+/)?.[0] ||
+          doc.filename?.match(/ECLI:[A-Z]{2}:[A-Z]+:\d{4}:[A-Z0-9.]+/)?.[0]
 
         // Create safe filename
         const safeFilename = (ecli || doc.id)
@@ -228,15 +231,13 @@ async function migrateJurisprudenceDocuments() {
 
         // Save extracted text if available
         if (doc.extractedText) {
-          const textFilename = doc.mimeType === 'text/html'
-            ? 'content.html'
-            : 'content.txt'
+          const textFilename =
+            doc.mimeType === 'text/html' ? 'content.html' : 'content.txt'
 
-          await fs.writeFile(
-            path.join(docDir, textFilename),
-            doc.extractedText
+          await fs.writeFile(path.join(docDir, textFilename), doc.extractedText)
+          console.log(
+            `  ✓ Saved extracted text (${doc.extractedText.length} chars)`
           )
-          console.log(`  ✓ Saved extracted text (${doc.extractedText.length} chars)`)
         }
 
         // Try to download and save PDF
@@ -247,11 +248,10 @@ async function migrateJurisprudenceDocuments() {
         )
 
         if (pdfBuffer) {
-          await fs.writeFile(
-            path.join(docDir, 'document.pdf'),
-            pdfBuffer
+          await fs.writeFile(path.join(docDir, 'document.pdf'), pdfBuffer)
+          console.log(
+            `  ✓ Saved PDF (${(pdfBuffer.length / 1024).toFixed(1)} KB)`
           )
-          console.log(`  ✓ Saved PDF (${(pdfBuffer.length / 1024).toFixed(1)} KB)`)
         } else {
           console.log(`  ⚠ No PDF found`)
         }
@@ -277,14 +277,10 @@ ${'='.repeat(50)}
 ${doc.extractedText || 'No text available'}
 `
 
-        await fs.writeFile(
-          path.join(docDir, 'SUMMARY.txt'),
-          summary
-        )
+        await fs.writeFile(path.join(docDir, 'SUMMARY.txt'), summary)
 
         successfulExports++
         console.log(`  ✅ Successfully exported`)
-
       } catch (error) {
         failedExports++
         console.error(`  ❌ Failed to export document ${doc.id}:`, error)

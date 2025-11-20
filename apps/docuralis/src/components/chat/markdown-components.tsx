@@ -42,24 +42,24 @@ export function getCustomMarkdownComponents(
     return chunk.documentName || chunk.metadata?.title || null
   }
 
+  /* eslint-disable @typescript-eslint/no-explicit-any */
   return {
     // Headings with proper styling
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     h1: (props: any) => (
       <h1
         className="text-2xl font-bold mt-6 mb-4 text-gray-900 border-b pb-2"
         {...props}
       />
     ),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     h2: (props: any) => (
       <h2 className="text-xl font-bold mt-5 mb-3 text-gray-900" {...props} />
     ),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     h3: (props: any) => (
-      <h3 className="text-lg font-semibold mt-4 mb-2 text-gray-900" {...props} />
+      <h3
+        className="text-lg font-semibold mt-4 mb-2 text-gray-900"
+        {...props}
+      />
     ),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     h4: (props: any) => (
       <h4
         className="text-base font-semibold mt-3 mb-2 text-gray-800"
@@ -68,7 +68,6 @@ export function getCustomMarkdownComponents(
     ),
 
     // Custom text renderer to detect and transform PDF references
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     p: (props: any) => {
       const { children, ...htmlProps } = props
       const processChildren = (children: ReactNode): ReactNode => {
@@ -124,33 +123,23 @@ export function getCustomMarkdownComponents(
     },
 
     // Text formatting
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     strong: (props: any) => (
       <strong className="font-bold text-gray-900" {...props} />
     ),
 
     // Emphasis
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    em: (props: any) => (
-      <em className="italic text-gray-700" {...props} />
-    ),
+    em: (props: any) => <em className="italic text-gray-700" {...props} />,
 
     // Lists
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ul: (props: any) => (
       <ul className="list-disc list-inside my-4 space-y-2" {...props} />
     ),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ol: (props: any) => (
       <ol className="list-decimal list-inside my-4 space-y-2" {...props} />
     ),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    li: (props: any) => (
-      <li className="text-gray-700" {...props} />
-    ),
+    li: (props: any) => <li className="text-gray-700" {...props} />,
 
     // Blockquotes
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     blockquote: (props: any) => (
       <blockquote
         className="border-l-4 border-blue-500 pl-4 py-2 mb-4 italic bg-gray-50 text-gray-700"
@@ -159,13 +148,11 @@ export function getCustomMarkdownComponents(
     ),
 
     // Horizontal rules
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     hr: (props: any) => (
       <hr className="my-6 border-t border-gray-300" {...props} />
     ),
 
     // Links
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     a: (props: any) => (
       <a
         {...props}
@@ -176,7 +163,6 @@ export function getCustomMarkdownComponents(
     ),
 
     // Also handle inline code that might contain PDF references
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     code: (props: any) => {
       const { children, className, ...htmlProps } = props
       // Check if it's a code block (has language class)
@@ -213,7 +199,6 @@ export function getCustomMarkdownComponents(
     },
 
     // Code blocks
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     pre: (props: any) => (
       <pre
         className="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto my-4"

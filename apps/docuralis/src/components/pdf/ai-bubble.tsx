@@ -119,7 +119,7 @@ export function AIBubble({
             </p>
             <div className="bg-white rounded-md p-3 border border-gray-200 shadow-sm">
               <p className="text-sm text-gray-700 line-clamp-6 italic leading-relaxed border-l-2 border-blue-300 pl-2">
-                "{selectedText}"
+                &ldquo;{selectedText}&rdquo;
               </p>
             </div>
           </div>

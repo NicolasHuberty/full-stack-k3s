@@ -1,7 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/auth'
 import { listJobs, JobFilter, JobListOptions } from '@/lib/admin/jobs'
-import { JobStatus } from '@prisma/client'
+
+// Define JobStatus enum (from Prisma schema)
+export enum JobStatus {
+  QUEUED = 'QUEUED',
+  PROCESSING = 'PROCESSING',
+  COMPLETED = 'COMPLETED',
+  FAILED = 'FAILED',
+  CANCELLED = 'CANCELLED'
+}
 
 /**
  * Convert BigInt values to strings for JSON serialization

@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
             break
           }
         }
-      } catch (pathError: any) {
+      } catch {
         continue // Try next path
       }
     }

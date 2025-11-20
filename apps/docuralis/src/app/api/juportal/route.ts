@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/app/api/auth/options'
+import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
 
 const ECLI_API_BASE = 'https://ecli.openjustice.be'
@@ -8,7 +7,7 @@ const JUPORTAL_BASE = 'https://juportal.be'
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const session = await auth()
 
     if (!session?.user?.id) {
       return NextResponse.json(
@@ -43,7 +42,7 @@ export async function GET(request: NextRequest) {
     } else {
       // Search for documents (this is a placeholder as the actual JUPORTAL search API is not documented)
       // In production, you would need to integrate with the actual JUPORTAL search API
-      const searchCriteria: any = {}
+      const searchCriteria: Record<string, unknown> = {}
 
       if (court) searchCriteria.court = court
       if (year) searchCriteria.year = year
@@ -95,7 +94,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const session = await auth()
 
     if (!session?.user?.id) {
       return NextResponse.json(

@@ -4,7 +4,17 @@ import Parser from 'rss-parser'
 import { prisma } from '../src/lib/prisma'
 import { createCollection } from '../src/lib/collections/service'
 
-const parser = new Parser({
+const parser = new Parser<Record<string, unknown>, {
+  title?: string;
+  link?: string;
+  pubDate?: string;
+  description?: string;
+  guid?: string;
+  creator?: string;
+  subject?: string;
+  dcDate?: string;
+  contentEncoded?: string;
+}>({
   customFields: {
     item: [
       ['dc:creator', 'creator'],

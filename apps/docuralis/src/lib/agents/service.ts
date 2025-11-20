@@ -14,7 +14,7 @@ export class AgentService {
     sessionId?: string,
     onProgress?: (event: {
       type: 'decompose' | 'retrieve' | 'grade' | 'generate' | 'complete'
-      data?: any
+      data?: Record<string, unknown>
     }) => void
   ): Promise<{
     answer: string
@@ -87,7 +87,7 @@ export class AgentService {
 
       // Use streaming to get intermediate steps
       let result: AgentState | undefined
-      const streamEvents: Array<{ node: string; data: any }> = []
+      const streamEvents: Array<{ node: string; data: Record<string, unknown> }> = []
       const stream = await graph.stream(initialState, {
         streamMode: 'updates' // Explicitly request updates mode
       })
@@ -133,7 +133,7 @@ export class AgentService {
               data: {
                 count: nodeData.relevantDocs.length,
                 message: `Analyse de la pertinence : ${nodeData.relevantDocs.length} documents retenus`,
-                documents: nodeData.relevantDocs.map((d: any) => ({
+                documents: nodeData.relevantDocs.map((d: DocumentChunk) => ({
                   title: d.metadata.title,
                   score: d.metadata.pertinenceScore || d.metadata.similarity,
                   justification: d.metadata.justification,
@@ -222,7 +222,7 @@ export class AgentService {
       // Create multiple mappings for flexible lookup
       const filenameToDocMap = new Map<string, { id: string; originalName: string; filename: string }>()
 
-      documents.forEach((d) => {
+      documents.forEach((d: { id: string; originalName: string; filename: string }) => {
         const docData = { id: d.id, originalName: d.originalName, filename: d.filename }
 
         // Map by full filename
@@ -254,7 +254,7 @@ export class AgentService {
         // First check if we have documentId in metadata (new approach)
         if (doc.metadata.documentId) {
           // We have the document ID directly from the vector search
-          const docInfo = documents.find((d) => d.id === doc.metadata.documentId)
+          const docInfo = documents.find((d: { id: string }) => d.id === doc.metadata.documentId)
 
           // Build MinIO URL directly
           const minioUrl = docInfo?.filename

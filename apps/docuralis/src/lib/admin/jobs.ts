@@ -1,6 +1,15 @@
 import { prisma } from '@/lib/prisma'
 import { getQueueStats } from '@/lib/queue/pgboss'
-import { JobStatus, Prisma } from '@prisma/client'
+import { Prisma } from '@prisma/client'
+
+// Define JobStatus enum (from Prisma schema)
+export enum JobStatus {
+  QUEUED = 'QUEUED',
+  PROCESSING = 'PROCESSING',
+  COMPLETED = 'COMPLETED',
+  FAILED = 'FAILED',
+  CANCELLED = 'CANCELLED'
+}
 
 export interface JobFilter {
   status?: JobStatus | JobStatus[]
@@ -41,7 +50,7 @@ export async function getJobStatistics(): Promise<JobStatistics> {
   ])
 
   const statusCounts = counts.reduce(
-    (acc, curr) => {
+    (acc: Record<string, number>, curr: { status: string; _count: number }) => {
       acc[curr.status.toLowerCase()] = curr._count
       return acc
     },
@@ -67,7 +76,7 @@ export async function getJobStatistics(): Promise<JobStatistics> {
 
   let avgProcessingTimeMs = 0
   if (completedJobs.length > 0) {
-    const totalTime = completedJobs.reduce((sum, job) => {
+    const totalTime = completedJobs.reduce((sum: number, job: { startedAt: Date | null; completedAt: Date | null }) => {
       if (job.startedAt && job.completedAt) {
         return sum + (job.completedAt.getTime() - job.startedAt.getTime())
       }
@@ -76,7 +85,7 @@ export async function getJobStatistics(): Promise<JobStatistics> {
     avgProcessingTimeMs = totalTime / completedJobs.length
   }
 
-  const total = Object.values(statusCounts).reduce((a, b) => a + b, 0)
+  const total = (Object.values(statusCounts) as number[]).reduce((a, b) => a + b, 0)
   const successRate = total > 0 ? (statusCounts.completed / total) * 100 : 0
 
   return {
@@ -105,7 +114,7 @@ export async function listJobs(
     orderDir = 'desc',
   } = options
 
-  const where: Prisma.ProcessingJobWhereInput = {}
+  const where: Record<string, unknown> = {}
 
   // Status filter
   if (filter.status) {
@@ -118,12 +127,12 @@ export async function listJobs(
 
   // Date range filter
   if (filter.dateFrom || filter.dateTo) {
-    where.createdAt = {}
+    where.createdAt = {} as Record<string, unknown>
     if (filter.dateFrom) {
-      where.createdAt.gte = filter.dateFrom
+      (where.createdAt as Record<string, unknown>).gte = filter.dateFrom
     }
     if (filter.dateTo) {
-      where.createdAt.lte = filter.dateTo
+      (where.createdAt as Record<string, unknown>).lte = filter.dateTo
     }
   }
 
@@ -386,7 +395,7 @@ export async function getJobProcessingTimeline(days: number = 7) {
   // Group by day and status
   const timeline: Record<string, Record<JobStatus, number>> = {}
 
-  jobs.forEach((job) => {
+  jobs.forEach((job: { createdAt: Date; status: string }) => {
     const day = job.createdAt.toISOString().split('T')[0]
     if (!timeline[day]) {
       timeline[day] = {
@@ -394,9 +403,10 @@ export async function getJobProcessingTimeline(days: number = 7) {
         PROCESSING: 0,
         COMPLETED: 0,
         FAILED: 0,
+        CANCELLED: 0,
       }
     }
-    timeline[day][job.status]++
+    timeline[day][job.status as JobStatus]++
   })
 
   return Object.entries(timeline).map(([date, counts]) => ({

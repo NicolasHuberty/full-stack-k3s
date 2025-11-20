@@ -1,3 +1,4 @@
+import React from 'react'
 import { FileText, ExternalLink } from 'lucide-react'
 
 interface PDFReferenceProps {
@@ -37,30 +38,30 @@ export function getCustomMarkdownComponents(
 
   return {
     // Headings with proper styling
-    h1: ({ children, ...props }: any) => (
+    h1: ({ children, ...props }: React.HTMLAttributes<HTMLHeadingElement>) => (
       <h1 className="text-2xl font-bold mt-6 mb-4 text-gray-900 border-b pb-2" {...props}>
         {children}
       </h1>
     ),
-    h2: ({ children, ...props }: any) => (
+    h2: ({ children, ...props }: React.HTMLAttributes<HTMLHeadingElement>) => (
       <h2 className="text-xl font-bold mt-5 mb-3 text-gray-900" {...props}>
         {children}
       </h2>
     ),
-    h3: ({ children, ...props }: any) => (
+    h3: ({ children, ...props }: React.HTMLAttributes<HTMLHeadingElement>) => (
       <h3 className="text-lg font-semibold mt-4 mb-2 text-gray-900" {...props}>
         {children}
       </h3>
     ),
-    h4: ({ children, ...props }: any) => (
+    h4: ({ children, ...props }: React.HTMLAttributes<HTMLHeadingElement>) => (
       <h4 className="text-base font-semibold mt-3 mb-2 text-gray-800" {...props}>
         {children}
       </h4>
     ),
 
     // Custom text renderer to detect and transform PDF references
-    p: ({ children, ...htmlProps }: any) => {
-      const processChildren = (children: any): any => {
+    p: ({ children, ...htmlProps }: React.HTMLAttributes<HTMLParagraphElement>) => {
+      const processChildren = (children: React.ReactNode): React.ReactNode => {
         if (typeof children === 'string') {
           // Match patterns like:
           // 1. <filename.pdf> or <IT0012930_003.pdf>
@@ -134,54 +135,54 @@ export function getCustomMarkdownComponents(
     },
 
     // Strong/Bold text
-    strong: ({ children, ...props }: any) => (
+    strong: ({ children, ...props }: React.HTMLAttributes<HTMLElement>) => (
       <strong className="font-bold text-gray-900" {...props}>
         {children}
       </strong>
     ),
 
     // Emphasis/Italic
-    em: ({ children, ...props }: any) => (
+    em: ({ children, ...props }: React.HTMLAttributes<HTMLElement>) => (
       <em className="italic text-gray-800" {...props}>
         {children}
       </em>
     ),
 
     // Unordered lists
-    ul: ({ children, ...props }: any) => (
+    ul: ({ children, ...props }: React.HTMLAttributes<HTMLUListElement>) => (
       <ul className="list-disc list-outside ml-6 mb-4 space-y-2" {...props}>
         {children}
       </ul>
     ),
 
     // Ordered lists
-    ol: ({ children, ...props }: any) => (
+    ol: ({ children, ...props }: React.HTMLAttributes<HTMLOListElement>) => (
       <ol className="list-decimal list-outside ml-6 mb-4 space-y-2" {...props}>
         {children}
       </ol>
     ),
 
     // List items
-    li: ({ children, ...props }: any) => (
+    li: ({ children, ...props }: React.HTMLAttributes<HTMLLIElement>) => (
       <li className="text-gray-700 leading-7" {...props}>
         {children}
       </li>
     ),
 
     // Blockquotes
-    blockquote: ({ children, ...props }: any) => (
+    blockquote: ({ children, ...props }: React.HTMLAttributes<HTMLQuoteElement>) => (
       <blockquote className="border-l-4 border-blue-500 pl-4 py-2 mb-4 italic bg-gray-50 text-gray-700" {...props}>
         {children}
       </blockquote>
     ),
 
     // Horizontal rules
-    hr: (props: any) => (
+    hr: (props: React.HTMLAttributes<HTMLHRElement>) => (
       <hr className="my-6 border-t border-gray-300" {...props} />
     ),
 
     // Links
-    a: ({ children, href, ...props }: any) => (
+    a: ({ children, href, ...props }: React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
       <a
         href={href}
         className="text-blue-600 hover:text-blue-800 underline"
@@ -194,7 +195,7 @@ export function getCustomMarkdownComponents(
     ),
 
     // Also handle inline code that might contain PDF references
-    code: ({ children, className, ...htmlProps }: any) => {
+    code: ({ children, className, ...htmlProps }: React.HTMLAttributes<HTMLElement> & { className?: string }) => {
       const inline = !className
       const text = String(children)
 
@@ -226,7 +227,7 @@ export function getCustomMarkdownComponents(
     },
 
     // Pre blocks (for code blocks)
-    pre: ({ children, ...props }: any) => (
+    pre: ({ children, ...props }: React.HTMLAttributes<HTMLPreElement>) => (
       <pre className="mb-4 overflow-x-auto" {...props}>
         {children}
       </pre>

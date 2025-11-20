@@ -11,10 +11,10 @@ interface ECLIDocument {
   court: string
   year: string
   content?: string
-  metadata?: any
+  metadata?: Record<string, unknown>
 }
 
-async function fetchECLIDocument(ecli: string): Promise<any> {
+async function fetchECLIDocument(ecli: string): Promise<Record<string, unknown> | null> {
   try {
     const response = await fetch(`${ECLI_API_BASE}/ecli/${ecli}`, {
       headers: {

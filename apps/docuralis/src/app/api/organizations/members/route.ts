@@ -22,7 +22,7 @@ export async function GET(_request: NextRequest) {
       select: { organizationId: true },
     })
 
-    const orgIds = userOrgs.map((org) => org.organizationId)
+    const orgIds = userOrgs.map((org: { organizationId: string }) => org.organizationId)
 
     if (orgIds.length === 0) {
       return NextResponse.json({ members: [] })
@@ -58,7 +58,7 @@ export async function GET(_request: NextRequest) {
 
     // Deduplicate by user ID
     const uniqueMembers = new Map()
-    members.forEach((member) => {
+    members.forEach((member: { user: { id: string; [key: string]: unknown } }) => {
       if (!uniqueMembers.has(member.user.id)) {
         uniqueMembers.set(member.user.id, member.user)
       }

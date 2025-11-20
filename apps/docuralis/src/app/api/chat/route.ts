@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
         const writer = stream.writable.getWriter()
 
         // Helper to send SSE event
-        const sendEvent = async (event: string, data: any) => {
+        const sendEvent = async (event: string, data: unknown) => {
           try {
             const message = `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`
             await writer.write(encoder.encode(message))

@@ -23,9 +23,10 @@ const Page = dynamic(() => import('react-pdf').then(mod => ({ default: mod.Page 
 
 // Configure PDF.js worker when client-side
 if (typeof window !== 'undefined') {
-  const { pdfjs } = require('react-pdf')
-  // Use the exact version that react-pdf@10.2.0 depends on: pdfjs-dist@5.4.296
-  pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@5.4.296/build/pdf.worker.min.mjs`
+  import('react-pdf').then(({ pdfjs }) => {
+    // Use the exact version that react-pdf@10.2.0 depends on: pdfjs-dist@5.4.296
+    pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@5.4.296/build/pdf.worker.min.mjs`
+  }).catch(err => console.error('Failed to configure PDF.js worker:', err))
 }
 
 interface PDFViewerProps {

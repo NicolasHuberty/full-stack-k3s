@@ -25,13 +25,16 @@ async function extractFirstPages(
   numPages: number = 2
 ): Promise<string> {
   return new Promise((resolve, reject) => {
-    const pdfParser = new (PDFParser as any)(null, true)
+    const pdfParser = new (PDFParser as unknown as new (arg1: null, arg2: boolean) => {
+      on: <T>(event: string, handler: (data: T) => void) => void;
+      parseBuffer: (buffer: Buffer) => void;
+    })(null, true)
 
-    pdfParser.on('pdfParser_dataError', (errData: any) => {
+    pdfParser.on<{ parserError?: string }>('pdfParser_dataError', (errData) => {
       reject(new Error(`PDF parsing error: ${errData.parserError}`))
     })
 
-    pdfParser.on('pdfParser_dataReady', (pdfData: any) => {
+    pdfParser.on<{ Pages?: Array<{ Texts?: Array<{ R?: Array<{ T?: string }> }> }> }>('pdfParser_dataReady', (pdfData) => {
       try {
         let extractedText = ''
         const pages = pdfData.Pages || []
@@ -43,7 +46,7 @@ async function extractFirstPages(
 
           extractedText += `\n--- Page ${i + 1} ---\n`
 
-          texts.forEach((text: any) => {
+          texts.forEach((text: { R?: Array<{ T?: string }> }) => {
             try {
               const encoded = text.R?.[0]?.T || ''
               if (encoded) {

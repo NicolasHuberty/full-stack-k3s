@@ -101,7 +101,7 @@ export async function GET(
     }
 
     // Add users with explicit permissions
-    accessStats.forEach((p) => {
+    accessStats.forEach((p: { user: { id: string; [key: string]: unknown }; permission: string }) => {
       if (!userMap.has(p.user.id)) {
         userMap.set(p.user.id, {
           ...p.user,
@@ -129,7 +129,7 @@ export async function GET(
         },
       })
 
-      orgMembers.forEach((member) => {
+      orgMembers.forEach((member: { user: { id: string; [key: string]: unknown } }) => {
         if (!userMap.has(member.user.id)) {
           userMap.set(member.user.id, {
             ...member.user,

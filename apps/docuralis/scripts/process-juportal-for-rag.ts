@@ -153,7 +153,7 @@ async function createLegalDomainTags(collectionId: string) {
   return tags
 }
 
-function detectLegalDomain(document: any): string[] {
+function detectLegalDomain(document: { title?: string; extractedText?: string }): string[] {
   const text = `${document.title} ${document.extractedText}`.toLowerCase()
   const domains = []
 

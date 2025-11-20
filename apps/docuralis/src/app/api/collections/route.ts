@@ -26,7 +26,7 @@ export async function GET(_request: NextRequest) {
     const collections = await getUserCollections(session.user.id)
 
     // Convert BigInt to string for JSON serialization and add documentCount
-    const serializedCollections = collections.map((collection) => ({
+    const serializedCollections = collections.map((collection: { storageUsed: bigint; _count: { documents: number }; [key: string]: unknown }) => ({
       ...collection,
       storageUsed: collection.storageUsed.toString(),
       documentCount: collection._count.documents,

@@ -93,7 +93,7 @@ export async function GET(
       ...organization,
       storageUsed: organization.storageUsed.toString(),
       storageLimit: organization.storageLimit.toString(),
-      members: organization.members.map((member) => ({
+      members: organization.members.map((member: { user: { email: string | null; [key: string]: unknown }; [key: string]: unknown }) => ({
         ...member,
         user: {
           ...member.user,
@@ -105,7 +105,7 @@ export async function GET(
             : '0',
         },
       })),
-      collections: organization.collections.map((collection) => ({
+      collections: organization.collections.map((collection: { storageUsed: bigint; _count: { documents: number }; [key: string]: unknown }) => ({
         ...collection,
         storageUsed: collection.storageUsed.toString(),
       })),

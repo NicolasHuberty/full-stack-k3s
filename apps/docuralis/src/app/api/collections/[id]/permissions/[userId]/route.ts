@@ -41,7 +41,7 @@ export async function PUT(
 
     const isOwner = collection.ownerId === session.user.id
     const hasAdminPermission = collection.permissions.some(
-      (p) => p.userId === session.user.id && p.permission === 'ADMIN'
+      (p: { userId: string; permission: string }) => p.userId === session.user.id && p.permission === 'ADMIN'
     )
 
     if (!isOwner && !hasAdminPermission) {
@@ -113,7 +113,7 @@ export async function DELETE(
 
     const isOwner = collection.ownerId === session.user.id
     const hasAdminPermission = collection.permissions.some(
-      (p) => p.userId === session.user.id && p.permission === 'ADMIN'
+      (p: { userId: string; permission: string }) => p.userId === session.user.id && p.permission === 'ADMIN'
     )
 
     if (!isOwner && !hasAdminPermission) {

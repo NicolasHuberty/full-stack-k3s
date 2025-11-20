@@ -125,8 +125,7 @@ export async function GET(
     const status = searchParams.get('status')
 
     // Build where clause
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const where: any = { collectionId }
+    const where: Record<string, unknown> = { collectionId }
 
     // Exact filename match takes precedence over search
     if (filename) {
@@ -148,7 +147,7 @@ export async function GET(
     }
 
     // Determine sort order
-    let orderBy: any = { createdAt: 'desc' }
+    let orderBy: Record<string, unknown> = { createdAt: 'desc' }
     if (sort === 'name') {
       orderBy = { originalName: order }
     } else if (sort === 'size') {
@@ -201,7 +200,7 @@ export async function GET(
       : null
 
     // Convert BigInt to string
-    const serializedDocuments = paginatedDocuments.map((doc) => ({
+    const serializedDocuments = paginatedDocuments.map((doc: { fileSize: bigint; [key: string]: unknown }) => ({
       ...doc,
       fileSize: doc.fileSize.toString(),
     }))

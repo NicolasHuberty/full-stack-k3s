@@ -29,7 +29,7 @@ export async function GET(_request: NextRequest) {
     const organizations = await getOrganizationsByUserId(session.user.id)
 
     // Convert BigInt to string for JSON serialization
-    const serializedOrgs = organizations.map((org) => ({
+    const serializedOrgs = organizations.map((org: { storageUsed: bigint; storageLimit: bigint; [key: string]: unknown }) => ({
       ...org,
       storageUsed: org.storageUsed.toString(),
       storageLimit: org.storageLimit.toString(),
@@ -68,12 +68,12 @@ export async function POST(request: NextRequest) {
       ...organization,
       storageUsed: organization.storageUsed.toString(),
       storageLimit: organization.storageLimit.toString(),
-      members: organization.members.map((member) => ({
+      members: organization.members.map((member: { user: { storageUsed: bigint | null; storageLimit: bigint | null; [key: string]: unknown }; [key: string]: unknown }) => ({
         ...member,
         user: {
           ...member.user,
-          storageUsed: member.user.storageUsed.toString(),
-          storageLimit: member.user.storageLimit.toString(),
+          storageUsed: member.user.storageUsed ? member.user.storageUsed.toString() : '0',
+          storageLimit: member.user.storageLimit ? member.user.storageLimit.toString() : '0',
         },
       })),
     }

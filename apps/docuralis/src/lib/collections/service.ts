@@ -1,8 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { prisma } from '@/lib/prisma'
 import { getQdrantClient } from '@/lib/vector/qdrant'
-import { CollectionVisibility } from '@prisma/client'
 import { hasCollectionAccess, canCreateOrgCollection } from './permissions'
+
+// Define CollectionVisibility enum (from Prisma schema)
+export enum CollectionVisibility {
+  PRIVATE = 'PRIVATE',
+  ORGANIZATION = 'ORGANIZATION',
+  PUBLIC = 'PUBLIC'
+}
 
 export interface CreateCollectionInput {
   name: string

@@ -1,5 +1,11 @@
 import { prisma } from '@/lib/prisma'
-import { CollectionPermissionLevel } from '@prisma/client'
+
+// Define CollectionPermissionLevel enum (from Prisma schema)
+export enum CollectionPermissionLevel {
+  VIEWER = 'VIEWER',
+  EDITOR = 'EDITOR',
+  ADMIN = 'ADMIN'
+}
 
 export type Permission = 'read' | 'write' | 'delete' | 'manage'
 
@@ -50,7 +56,7 @@ export async function hasCollectionAccess(
       requiredPermission === 'read'
     ) {
       const isMember = collection.organization?.members.some(
-        (m) => m.userId === userId
+        (m: { userId: string }) => m.userId === userId
       )
       if (isMember && collection.allowPublicRead) {
         return true
@@ -59,7 +65,7 @@ export async function hasCollectionAccess(
 
     // Check explicit permissions
     const userPermission = collection.permissions.find(
-      (p) => p.userId === userId
+      (p: { userId: string; permission: string }) => p.userId === userId
     )
     if (userPermission) {
       return hasPermissionLevel(userPermission.permission, requiredPermission)
@@ -68,7 +74,7 @@ export async function hasCollectionAccess(
     // Organization admins/owners have full access to org collections
     if (collection.organizationId) {
       const member = collection.organization?.members.find(
-        (m) => m.userId === userId
+        (m: { userId: string; role: string }) => m.userId === userId
       )
       if (member && (member.role === 'OWNER' || member.role === 'ADMIN')) {
         return true
@@ -217,7 +223,7 @@ export async function getUserCollections(userId: string) {
       select: { organizationId: true },
     })
 
-    const orgIds = userOrgs.map((o) => o.organizationId)
+    const orgIds = userOrgs.map((o: { organizationId: string }) => o.organizationId)
 
     // Find all collections the user can access
     const collections = await prisma.collection.findMany({

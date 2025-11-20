@@ -97,7 +97,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
           // Check if this OAuth account is already linked
           const accountExists = existingUser.accounts.find(
-            (acc) =>
+            (acc: { provider: string; providerAccountId: string }) =>
               acc.provider === account.provider &&
               acc.providerAccountId === account.providerAccountId
           )

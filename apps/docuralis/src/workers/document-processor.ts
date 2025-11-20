@@ -135,7 +135,7 @@ async function processDocumentJob(job: {
       await prisma.processingJob.update({
         where: { documentId },
         data: {
-          metadata: metadata as Prisma.JsonObject,
+          metadata: metadata as Record<string, unknown>,
           currentStep: 'text_extracted',
         },
       })
@@ -182,7 +182,7 @@ async function processDocumentJob(job: {
       await prisma.processingJob.update({
         where: { documentId },
         data: {
-          metadata: metadata as Prisma.JsonObject,
+          metadata: metadata as Record<string, unknown>,
           currentStep: 'chunks_created',
         },
       })
@@ -195,7 +195,7 @@ async function processDocumentJob(job: {
         orderBy: { chunkIndex: 'asc' },
       })
 
-      chunksWithTokens = dbChunks.map((chunk) => ({
+      chunksWithTokens = dbChunks.map((chunk: { content: string; chunkIndex: number; startChar: number | null; endChar: number | null; tokenCount: number | null }) => ({
         content: chunk.content,
         index: chunk.chunkIndex,
         startChar: chunk.startChar || 0,
@@ -210,7 +210,7 @@ async function processDocumentJob(job: {
       logger.info('Step 3: Generating embeddings', { documentId })
 
       const embeddingService = getEmbeddingService()
-      const chunkTexts = chunksWithTokens.map((c) => c.content)
+      const chunkTexts = chunksWithTokens.map((c: { content: string }) => c.content)
 
       const result = await embeddingService.generateBatchEmbeddings(
         chunkTexts,
@@ -230,7 +230,7 @@ async function processDocumentJob(job: {
       await prisma.processingJob.update({
         where: { documentId },
         data: {
-          metadata: metadata as Prisma.JsonObject,
+          metadata: metadata as Record<string, unknown>,
           currentStep: 'embeddings_generated',
         },
       })
@@ -241,7 +241,7 @@ async function processDocumentJob(job: {
 
       // Need to regenerate embeddings for storage (we don't store them in DB)
       const embeddingService = getEmbeddingService()
-      const chunkTexts = chunksWithTokens.map((c) => c.content)
+      const chunkTexts = chunksWithTokens.map((c: { content: string }) => c.content)
 
       const result = await embeddingService.generateBatchEmbeddings(
         chunkTexts,
@@ -261,7 +261,7 @@ async function processDocumentJob(job: {
       })
 
       const qdrant = getQdrantClient()
-      const vectorData = documentChunks.map((chunk, index) => ({
+      const vectorData = documentChunks.map((chunk: { id: string; chunkIndex: number; content: string; startPage: number | null; endPage: number | null }, index: number) => ({
         id: chunk.id,
         vector: embeddings[index],
         payload: {
@@ -286,7 +286,7 @@ async function processDocumentJob(job: {
 
       // Update chunks with vector IDs
       await Promise.all(
-        documentChunks.map((chunk) =>
+        documentChunks.map((chunk: { id: string }) =>
           prisma.documentChunk.update({
             where: { id: chunk.id },
             data: { vectorId: chunk.id },
@@ -304,7 +304,7 @@ async function processDocumentJob(job: {
       await prisma.processingJob.update({
         where: { documentId },
         data: {
-          metadata: metadata as Prisma.JsonObject,
+          metadata: metadata as Record<string, unknown>,
           currentStep: 'vectors_stored',
         },
       })
@@ -367,7 +367,7 @@ async function processDocumentJob(job: {
           status: 'FAILED',
           error: errorMessage,
           failedAt: new Date(),
-          metadata: metadata as Prisma.JsonObject,
+          metadata: metadata as Record<string, unknown>,
         },
       })
     }

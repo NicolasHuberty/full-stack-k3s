@@ -356,18 +356,18 @@ export async function getCollectionStats(collectionId: string, userId: string) {
 
     // Calculate statistics
     const totalChunks = collection.documents.reduce(
-      (sum, doc) => sum + doc.totalChunks,
+      (sum: number, doc: { totalChunks: number }) => sum + doc.totalChunks,
       0
     )
 
     const documentsByStatus = {
-      pending: collection.documents.filter((d) => d.status === 'PENDING')
+      pending: collection.documents.filter((d: { status: string }) => d.status === 'PENDING')
         .length,
-      processing: collection.documents.filter((d) => d.status === 'PROCESSING')
+      processing: collection.documents.filter((d: { status: string }) => d.status === 'PROCESSING')
         .length,
-      completed: collection.documents.filter((d) => d.status === 'COMPLETED')
+      completed: collection.documents.filter((d: { status: string }) => d.status === 'COMPLETED')
         .length,
-      failed: collection.documents.filter((d) => d.status === 'FAILED').length,
+      failed: collection.documents.filter((d: { status: string }) => d.status === 'FAILED').length,
     }
 
     return {

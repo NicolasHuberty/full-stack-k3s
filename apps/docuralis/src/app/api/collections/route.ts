@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/auth'
-import { createCollection } from '@/lib/collections/service'
+import { createCollection, CollectionVisibility } from '@/lib/collections/service'
 import { getUserCollections } from '@/lib/collections/permissions'
 import { z } from 'zod'
 
 const createCollectionSchema = z.object({
   name: z.string().min(1, 'Collection name is required'),
   description: z.string().optional(),
-  visibility: z.enum(['PRIVATE', 'ORGANIZATION', 'PUBLIC']).optional(),
+  visibility: z.nativeEnum(CollectionVisibility).optional(),
   allowPublicRead: z.boolean().optional(),
   organizationId: z.string().optional(),
   embeddingModel: z.string().optional(),

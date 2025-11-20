@@ -2,7 +2,7 @@
 
 import Parser from 'rss-parser'
 import { prisma } from '../src/lib/prisma'
-import { createCollection } from '../src/lib/collections/service'
+import { createCollection, CollectionVisibility } from '../src/lib/collections/service'
 
 const parser = new Parser<
   Record<string, unknown>,
@@ -109,7 +109,7 @@ async function fetchAllJUPORTALFeeds() {
     collection = await createCollection({
       name: 'JUPORTAL Jurisprudence RSS',
       description: 'Belgian case law from JUPORTAL RSS feeds',
-      visibility: 'PRIVATE',
+      visibility: CollectionVisibility.PRIVATE,
       ownerId: userId,
       embeddingModel: 'text-embedding-3-small',
       chunkSize: 1000,

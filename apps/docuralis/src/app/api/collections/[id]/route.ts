@@ -4,6 +4,7 @@ import {
   getCollection,
   updateCollection,
   deleteCollection,
+  CollectionVisibility,
 } from '@/lib/collections/service'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
@@ -11,7 +12,7 @@ import { z } from 'zod'
 const updateCollectionSchema = z.object({
   name: z.string().min(1).optional(),
   description: z.string().optional(),
-  visibility: z.enum(['PRIVATE', 'ORGANIZATION', 'PUBLIC']).optional(),
+  visibility: z.nativeEnum(CollectionVisibility).optional(),
   allowPublicRead: z.boolean().optional(),
   embeddingModel: z.string().optional(),
   chunkSize: z.number().min(100).max(4000).optional(),

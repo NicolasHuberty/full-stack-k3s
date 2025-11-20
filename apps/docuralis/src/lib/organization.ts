@@ -377,7 +377,7 @@ export async function getOrganizationsByUserId(userId: string) {
     },
   })
 
-  return memberships.map((m) => ({
+  return memberships.map((m: { organization: { [key: string]: unknown }; role: string; joinedAt: Date }) => ({
     ...m.organization,
     role: m.role,
     joinedAt: m.joinedAt,
@@ -401,6 +401,6 @@ export async function checkUserPermission(
     return false
   }
 
-  const roleHierarchy = { OWNER: 4, ADMIN: 3, MEMBER: 2, VIEWER: 1 }
+  const roleHierarchy: Record<string, number> = { OWNER: 4, ADMIN: 3, MEMBER: 2, VIEWER: 1 }
   return roleHierarchy[member.role] >= roleHierarchy[requiredRole]
 }

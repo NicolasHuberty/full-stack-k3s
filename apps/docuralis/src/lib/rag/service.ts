@@ -107,25 +107,41 @@ export class RAGService {
         select: { id: true, originalName: true },
       })
 
-      const docMap = new Map(documents.map((d) => [d.id, d.originalName]))
+      const docMap = new Map(documents.map((d: { id: string; originalName: string }) => [d.id, d.originalName]))
 
       // Format results
-      const chunks = results.map((result) => ({
-        id: result.id,
-        content: result.payload.content,
-        score: result.score,
-        documentId: result.payload.documentId,
-        documentName: docMap.get(result.payload.documentId) || 'Unknown',
-        chunkIndex: result.payload.chunkIndex,
-        pageNumber:
-          result.payload.page_number || result.payload.pageNumber || null,
+      const chunks = results.map((result): {
+        id: string
+        content: string
+        score: number
+        documentId: string
+        documentName: string
+        chunkIndex: number
+        pageNumber: number | null
         metadata: {
+          pageNumber: number | null
+          title: string
+          source: string
+        }
+      } => {
+        const documentName = (docMap.get(result.payload.documentId) || 'Unknown') as string
+        return {
+          id: result.id,
+          content: result.payload.content,
+          score: result.score,
+          documentId: result.payload.documentId,
+          documentName,
+          chunkIndex: result.payload.chunkIndex,
           pageNumber:
             result.payload.page_number || result.payload.pageNumber || null,
-          title: docMap.get(result.payload.documentId) || 'Unknown',
-          source: docMap.get(result.payload.documentId) || 'Unknown',
-        },
-      }))
+          metadata: {
+            pageNumber:
+              result.payload.page_number || result.payload.pageNumber || null,
+            title: (docMap.get(result.payload.documentId) || 'Unknown') as string,
+            source: (docMap.get(result.payload.documentId) || 'Unknown') as string,
+          },
+        }
+      })
 
       return { chunks }
     } catch (error) {
@@ -353,7 +369,7 @@ ${context}`,
       // Check if user is owner or has shared access
       const isOwner = session.userId === userId
       const hasSharedAccess = session.sharedWith.some(
-        (s) => s.userId === userId
+        (s: { userId: string }) => s.userId === userId
       )
 
       if (!isOwner && !hasSharedAccess) {
@@ -575,8 +591,8 @@ export async function searchDocuments(
       select: { id: true, startPage: true, endPage: true },
     })
 
-    const docMap = new Map(
-      documents.map((d) => [
+    const docMap = new Map<string, { id: string; title: string; source: string; originalName: string }>(
+      documents.map((d: { id: string; originalName: string; filename: string }) => [
         d.id,
         {
           id: d.id,
@@ -587,7 +603,9 @@ export async function searchDocuments(
       ])
     )
 
-    const chunkMap = new Map(chunks.map((c) => [c.id, c]))
+    const chunkMap = new Map<string, { id: string; startPage: number | null; endPage: number | null }>(
+      chunks.map((c: { id: string; startPage: number | null; endPage: number | null }) => [c.id, c])
+    )
 
     // Format results to match Emate structure
     return results.map((result) => {

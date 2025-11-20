@@ -453,7 +453,6 @@ export class DocumentProcessor {
         job: document.processingJob,
       }
     } catch (error) {
-      console.error('Failed to get processing status:', error)
       throw error
     }
   }

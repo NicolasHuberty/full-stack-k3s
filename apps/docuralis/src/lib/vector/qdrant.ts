@@ -30,8 +30,8 @@ export interface DocumentChunkVector {
     chunkIndex: number
     content: string
     documentName?: string
-    page_number?: number  // Direct page number field (for migrated documents)
-    pageNumber?: number   // Alternative naming
+    page_number?: number // Direct page number field (for migrated documents)
+    pageNumber?: number // Alternative naming
     metadata?: Record<string, any>
   }
 }
@@ -45,8 +45,8 @@ export interface SearchResult {
     chunkIndex: number
     content: string
     documentName?: string
-    page_number?: number  // Direct page number field (for migrated documents)
-    pageNumber?: number   // Alternative naming
+    page_number?: number // Direct page number field (for migrated documents)
+    pageNumber?: number // Alternative naming
     metadata?: Record<string, any>
   }
 }
@@ -305,7 +305,7 @@ class QdrantService {
           score: mappedResults[0].score,
           payloadKeys: Object.keys(mappedResults[0].payload),
           pageNumber: mappedResults[0].payload.page_number,
-          fullPayload: mappedResults[0].payload
+          fullPayload: mappedResults[0].payload,
         })
       }
 

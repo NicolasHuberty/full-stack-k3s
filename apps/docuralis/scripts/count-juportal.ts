@@ -4,7 +4,11 @@
  * Count total JUPORTAL documents available
  */
 
-import { getAllSitemapUrls, fetchSitemapIndex, fetchSitemap } from './fetch-juportal-sitemaps'
+import {
+  getAllSitemapUrls,
+  fetchSitemapIndex,
+  fetchSitemap,
+} from './fetch-juportal-sitemaps'
 
 async function countJUPORTALDocuments() {
   console.log('🔍 Counting JUPORTAL documents...\n')
@@ -40,13 +44,12 @@ async function countJUPORTALDocuments() {
         }
 
         // Add small delay to be respectful
-        await new Promise(resolve => setTimeout(resolve, 500))
+        await new Promise((resolve) => setTimeout(resolve, 500))
       }
 
       totalDocuments += indexDocuments
       processedIndexes++
       console.log(`  Total documents in this index: ${indexDocuments}`)
-
     } catch (error) {
       console.error(`  Error processing index: ${error}`)
     }
@@ -67,13 +70,18 @@ async function countJUPORTALDocuments() {
   console.log(`Documents found in sample: ${totalDocuments}`)
   console.log(`Average documents per index: ${Math.round(avgDocsPerIndex)}`)
   console.log(`Average documents per sitemap: ${Math.round(avgDocsPerSitemap)}`)
-  console.log(`\n🎯 ESTIMATED TOTAL DOCUMENTS: ~${estimatedTotal.toLocaleString()}`)
+  console.log(
+    `\n🎯 ESTIMATED TOTAL DOCUMENTS: ~${estimatedTotal.toLocaleString()}`
+  )
 
   console.log('\n📅 Date range covered:')
-  const dates = sitemapIndexUrls.map(url => {
-    const match = url.match(/(\d{4}\/\d{2}\/\d{2})/)
-    return match ? match[1] : null
-  }).filter(Boolean).sort()
+  const dates = sitemapIndexUrls
+    .map((url) => {
+      const match = url.match(/(\d{4}\/\d{2}\/\d{2})/)
+      return match ? match[1] : null
+    })
+    .filter(Boolean)
+    .sort()
 
   if (dates.length > 0) {
     console.log(`From: ${dates[0]} to ${dates[dates.length - 1]}`)
@@ -89,7 +97,7 @@ async function countJUPORTALDocuments() {
     totalSitemaps,
     documentsInSample: totalDocuments,
     avgDocsPerIndex: Math.round(avgDocsPerIndex),
-    estimatedTotal
+    estimatedTotal,
   }
 }
 

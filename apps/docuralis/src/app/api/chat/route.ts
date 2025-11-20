@@ -33,7 +33,8 @@ export async function POST(request: NextRequest) {
     if (validatedData.agentId && validatedData.collectionId) {
       // Check if client wants streaming (via Accept header or query param)
       const acceptHeader = request.headers.get('accept')
-      const wantsStream = acceptHeader?.includes('text/event-stream') ||
+      const wantsStream =
+        acceptHeader?.includes('text/event-stream') ||
         request.nextUrl.searchParams.get('stream') === 'true'
 
       const agentService = getAgentService()
@@ -45,7 +46,7 @@ export async function POST(request: NextRequest) {
         const writer = stream.writable.getWriter()
 
         // Helper to send SSE event
-        const sendEvent = async (event: string, data: any) => {
+        const sendEvent = async (event: string, data: unknown) => {
           try {
             const message = `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`
             await writer.write(encoder.encode(message))
@@ -55,94 +56,94 @@ export async function POST(request: NextRequest) {
           }
         }
 
-          // Execute agent with streaming in background
-          ; (async () => {
-            try {
-              const agentResult = await agentService.executeAgent(
-                validatedData.agentId!,
-                validatedData.message,
-                session.user.id,
-                validatedData.collectionId!,
-                validatedData.actionState || undefined,
-                validatedData.sessionId || undefined,
-                // Progress callback for streaming
-                async (progress) => {
-                  try {
-                    await sendEvent('progress', progress)
-                  } catch (e) {
-                    console.error('[SSE] Failed to send progress event:', e)
-                  }
+        // Execute agent with streaming in background
+        ;(async () => {
+          try {
+            const agentResult = await agentService.executeAgent(
+              validatedData.agentId!,
+              validatedData.message,
+              session.user.id,
+              validatedData.collectionId!,
+              validatedData.actionState || undefined,
+              validatedData.sessionId || undefined,
+              // Progress callback for streaming
+              async (progress) => {
+                try {
+                  await sendEvent('progress', progress)
+                } catch (e) {
+                  console.error('[SSE] Failed to send progress event:', e)
                 }
-              )
-              // Get or create session
-              let chatSession
-              if (validatedData.sessionId) {
-                chatSession = await prisma.chatSession.findUnique({
-                  where: { id: validatedData.sessionId },
-                })
               }
-
-              if (!chatSession) {
-                chatSession = await prisma.chatSession.create({
-                  data: {
-                    userId: session.user.id,
-                    collectionId: validatedData.collectionId!,
-                    agentId: validatedData.agentId!,
-                    title: validatedData.message.substring(0, 100),
-                  },
-                })
-              }
-
-              // Save user message
-              await prisma.chatMessage.create({
-                data: {
-                  sessionId: chatSession.id,
-                  role: 'USER',
-                  content: validatedData.message,
-                  agentId: validatedData.agentId!,
-                  modelUsed: validatedData.model,
-                  actionState: validatedData.actionState
-                    ? JSON.parse(JSON.stringify(validatedData.actionState))
-                    : undefined,
-                },
+            )
+            // Get or create session
+            let chatSession
+            if (validatedData.sessionId) {
+              chatSession = await prisma.chatSession.findUnique({
+                where: { id: validatedData.sessionId },
               })
-
-              // Save assistant message
-              await prisma.chatMessage.create({
-                data: {
-                  sessionId: chatSession.id,
-                  role: 'ASSISTANT',
-                  content: agentResult.answer,
-                  documentChunks: JSON.parse(JSON.stringify(agentResult.sources)),
-                  agentId: validatedData.agentId!,
-                  modelUsed: validatedData.model,
-                  actionState: validatedData.actionState
-                    ? JSON.parse(JSON.stringify(validatedData.actionState))
-                    : undefined,
-                  promptTokens: agentResult.inputTokens,
-                  completionTokens: agentResult.outputTokens,
-                },
-              })
-
-              // Send final result
-              await sendEvent('complete', {
-                sessionId: chatSession.id,
-                message: agentResult.answer,
-                chunks: agentResult.sources,
-                usage: {
-                  promptTokens: agentResult.inputTokens,
-                  completionTokens: agentResult.outputTokens,
-                  totalTokens: agentResult.inputTokens + agentResult.outputTokens,
-                },
-              })
-            } catch (error) {
-              await sendEvent('error', {
-                message: error instanceof Error ? error.message : 'Unknown error',
-              })
-            } finally {
-              await writer.close()
             }
-          })()
+
+            if (!chatSession) {
+              chatSession = await prisma.chatSession.create({
+                data: {
+                  userId: session.user.id,
+                  collectionId: validatedData.collectionId!,
+                  agentId: validatedData.agentId!,
+                  title: validatedData.message.substring(0, 100),
+                },
+              })
+            }
+
+            // Save user message
+            await prisma.chatMessage.create({
+              data: {
+                sessionId: chatSession.id,
+                role: 'USER',
+                content: validatedData.message,
+                agentId: validatedData.agentId!,
+                modelUsed: validatedData.model,
+                actionState: validatedData.actionState
+                  ? JSON.parse(JSON.stringify(validatedData.actionState))
+                  : undefined,
+              },
+            })
+
+            // Save assistant message
+            await prisma.chatMessage.create({
+              data: {
+                sessionId: chatSession.id,
+                role: 'ASSISTANT',
+                content: agentResult.answer,
+                documentChunks: JSON.parse(JSON.stringify(agentResult.sources)),
+                agentId: validatedData.agentId!,
+                modelUsed: validatedData.model,
+                actionState: validatedData.actionState
+                  ? JSON.parse(JSON.stringify(validatedData.actionState))
+                  : undefined,
+                promptTokens: agentResult.inputTokens,
+                completionTokens: agentResult.outputTokens,
+              },
+            })
+
+            // Send final result
+            await sendEvent('complete', {
+              sessionId: chatSession.id,
+              message: agentResult.answer,
+              chunks: agentResult.sources,
+              usage: {
+                promptTokens: agentResult.inputTokens,
+                completionTokens: agentResult.outputTokens,
+                totalTokens: agentResult.inputTokens + agentResult.outputTokens,
+              },
+            })
+          } catch (error) {
+            await sendEvent('error', {
+              message: error instanceof Error ? error.message : 'Unknown error',
+            })
+          } finally {
+            await writer.close()
+          }
+        })()
 
         return new Response(stream.readable, {
           headers: {

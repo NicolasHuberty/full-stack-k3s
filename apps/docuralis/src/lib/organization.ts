@@ -182,7 +182,6 @@ export async function resendInvitationEmail(invitationId: string) {
   return invitation
 }
 
-
 /**
  * Cancel/Delete a pending organization invitation
  * @param invitationId - The ID of the invitation to cancel
@@ -206,7 +205,6 @@ export async function cancelInvitation(invitationId: string) {
 }
 
 export async function acceptInvitation(token: string, userId: string) {
-
   // Find invitation
   const invitation = await prisma.organizationInvitation.findUnique({
     where: { token },

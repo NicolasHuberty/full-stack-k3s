@@ -8,16 +8,16 @@ async function testECLIAPI() {
   const testCases = [
     {
       name: 'Council of State',
-      ecli: 'ECLI:BE:RVSCDE:2020:247.760'
+      ecli: 'ECLI:BE:RVSCDE:2020:247.760',
     },
     {
       name: 'Constitutional Court',
-      ecli: 'ECLI:BE:CC:2020:141'
+      ecli: 'ECLI:BE:CC:2020:141',
     },
     {
       name: 'Court of Cassation',
-      ecli: 'ECLI:BE:CASS:2021:ARR.20211125.1'
-    }
+      ecli: 'ECLI:BE:CASS:2021:ARR.20211125.1',
+    },
   ]
 
   for (const test of testCases) {
@@ -27,11 +27,13 @@ async function testECLIAPI() {
       // Test JSON endpoint
       const jsonResponse = await fetch(`${ECLI_API_BASE}/ecli/${test.ecli}`, {
         headers: {
-          'Accept': 'application/json'
-        }
+          Accept: 'application/json',
+        },
       })
 
-      console.log(`  JSON Response: ${jsonResponse.status} ${jsonResponse.statusText}`)
+      console.log(
+        `  JSON Response: ${jsonResponse.status} ${jsonResponse.statusText}`
+      )
 
       if (jsonResponse.ok) {
         const data = await jsonResponse.json()
@@ -41,12 +43,13 @@ async function testECLIAPI() {
       // Test HTML endpoint
       const htmlResponse = await fetch(`${ECLI_API_BASE}/ecli/${test.ecli}`, {
         headers: {
-          'Accept': 'text/html'
-        }
+          Accept: 'text/html',
+        },
       })
 
-      console.log(`  HTML Response: ${htmlResponse.status} ${htmlResponse.statusText}`)
-
+      console.log(
+        `  HTML Response: ${htmlResponse.status} ${htmlResponse.statusText}`
+      )
     } catch (error) {
       console.error(`  Error: ${error}`)
     }
@@ -58,7 +61,9 @@ async function testECLIAPI() {
   console.log('Testing base API endpoint...')
   try {
     const baseResponse = await fetch(ECLI_API_BASE)
-    console.log(`Base API Response: ${baseResponse.status} ${baseResponse.statusText}`)
+    console.log(
+      `Base API Response: ${baseResponse.status} ${baseResponse.statusText}`
+    )
   } catch (error) {
     console.error(`Error accessing base API: ${error}`)
   }

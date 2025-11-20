@@ -12,7 +12,7 @@
 
 import { prisma } from '../src/lib/prisma'
 import { createCollection } from '../src/lib/collections/service'
-import { fetchAllJUPORTALDocuments, getAllSitemapUrls } from './fetch-juportal-sitemaps'
+import { fetchAllJUPORTALDocuments } from './fetch-juportal-sitemaps'
 
 interface LegalDomain {
   name: string
@@ -22,40 +22,73 @@ interface LegalDomain {
 
 const LEGAL_DOMAINS: LegalDomain[] = [
   {
-    name: "Constitutional Law",
-    keywords: ["constitutional", "grondwettelijk", "verfassungsrecht", "arbitrage", "GHCC"],
-    color: "#8B5CF6"
+    name: 'Constitutional Law',
+    keywords: [
+      'constitutional',
+      'grondwettelijk',
+      'verfassungsrecht',
+      'arbitrage',
+      'GHCC',
+    ],
+    color: '#8B5CF6',
   },
   {
-    name: "Civil Law",
-    keywords: ["civil", "burgerlijk", "zivilrecht", "contract", "responsabilité", "aansprakelijkheid"],
-    color: "#059669"
+    name: 'Civil Law',
+    keywords: [
+      'civil',
+      'burgerlijk',
+      'zivilrecht',
+      'contract',
+      'responsabilité',
+      'aansprakelijkheid',
+    ],
+    color: '#059669',
   },
   {
-    name: "Criminal Law",
-    keywords: ["criminal", "strafrecht", "pénal", "cassation", "CASS"],
-    color: "#DC2626"
+    name: 'Criminal Law',
+    keywords: ['criminal', 'strafrecht', 'pénal', 'cassation', 'CASS'],
+    color: '#DC2626',
   },
   {
-    name: "Administrative Law",
-    keywords: ["administrative", "administratief", "verwaltungsrecht", "conseil d'état", "RVSCE"],
-    color: "#2563EB"
+    name: 'Administrative Law',
+    keywords: [
+      'administrative',
+      'administratief',
+      'verwaltungsrecht',
+      "conseil d'état",
+      'RVSCE',
+    ],
+    color: '#2563EB',
   },
   {
-    name: "Commercial Law",
-    keywords: ["commercial", "handelsgerechtshof", "handelsrecht", "enterprise", "société", "vennootschap"],
-    color: "#7C2D12"
+    name: 'Commercial Law',
+    keywords: [
+      'commercial',
+      'handelsgerechtshof',
+      'handelsrecht',
+      'enterprise',
+      'société',
+      'vennootschap',
+    ],
+    color: '#7C2D12',
   },
   {
-    name: "Labour Law",
-    keywords: ["labour", "arbeidsrecht", "arbeidsgerecht", "social", "emploi", "werkgelegenheid"],
-    color: "#B45309"
+    name: 'Labour Law',
+    keywords: [
+      'labour',
+      'arbeidsrecht',
+      'arbeidsgerecht',
+      'social',
+      'emploi',
+      'werkgelegenheid',
+    ],
+    color: '#B45309',
   },
   {
-    name: "Tax Law",
-    keywords: ["tax", "fiscal", "belasting", "steuer", "douane", "TVA"],
-    color: "#BE123C"
-  }
+    name: 'Tax Law',
+    keywords: ['tax', 'fiscal', 'belasting', 'steuer', 'douane', 'TVA'],
+    color: '#BE123C',
+  },
 ]
 
 async function createLawyerAgent(userId: string, collectionId: string) {
@@ -63,7 +96,7 @@ async function createLawyerAgent(userId: string, collectionId: string) {
 
   const agent = await prisma.agent.create({
     data: {
-      name: "Belgian Jurisprudence Expert",
+      name: 'Belgian Jurisprudence Expert',
       description: `Specialized AI lawyer with complete knowledge of Belgian jurisprudence from JUPORTAL database (400,000+ court decisions from 1958-2025).
 
 Expert in:
@@ -73,8 +106,8 @@ Expert in:
 - All Belgian court levels and jurisdictions
 
 Provides accurate legal analysis based on actual case law with precise ECLI citations.`,
-      icon: "Scale",
-      status: "ACTIVE",
+      icon: 'Scale',
+      status: 'ACTIVE',
       systemPrompt: `You are a Belgian legal expert with access to the complete JUPORTAL jurisprudence database containing over 400,000 court decisions from 1958 to 2025.
 
 **Your Knowledge Base:**
@@ -110,10 +143,10 @@ Provides accurate legal analysis based on actual case law with precise ECLI cita
 
 Remember: You have access to the most comprehensive collection of Belgian case law available. Use this knowledge to provide authoritative legal guidance.`,
       temperature: 0.1, // Low temperature for legal accuracy
-      model: "gpt-4o",
+      model: 'gpt-4o',
       createdAt: new Date(),
-      updatedAt: new Date()
-    }
+      updatedAt: new Date(),
+    },
   })
 
   // Link agent to jurisprudence collection
@@ -125,9 +158,9 @@ Remember: You have access to the most comprehensive collection of Belgian case l
       actionState: {
         jurisprudence_mode: true,
         citation_mode: true,
-        multilingual_mode: true
-      }
-    }
+        multilingual_mode: true,
+      },
+    },
   })
 
   console.log(`✅ Created lawyer agent: ${agent.name} (${agent.id})`)
@@ -143,8 +176,8 @@ async function createLegalDomainTags(collectionId: string) {
       data: {
         name: domain.name,
         color: domain.color,
-        collectionId: collectionId
-      }
+        collectionId: collectionId,
+      },
     })
     tags.push(tag)
     console.log(`   Created tag: ${domain.name}`)
@@ -153,7 +186,10 @@ async function createLegalDomainTags(collectionId: string) {
   return tags
 }
 
-function detectLegalDomain(document: any): string[] {
+function detectLegalDomain(document: {
+  title?: string
+  extractedText?: string
+}): string[] {
   const text = `${document.title} ${document.extractedText}`.toLowerCase()
   const domains = []
 
@@ -166,7 +202,7 @@ function detectLegalDomain(document: any): string[] {
     }
   }
 
-  return domains.length > 0 ? domains : ["General Law"]
+  return domains.length > 0 ? domains : ['General Law']
 }
 
 async function enhancedJurisprudenceProcessing() {
@@ -183,12 +219,13 @@ async function enhancedJurisprudenceProcessing() {
   // Create specialized jurisprudence collection
   const collection = await createCollection({
     name: 'Belgian Jurisprudence - Complete Database',
-    description: 'Complete Belgian court decisions from JUPORTAL (400,000+ documents, 1958-2025). Includes Constitutional Court, Court of Cassation, Council of State, and all Belgian courts with full ECLI metadata.',
+    description:
+      'Complete Belgian court decisions from JUPORTAL (400,000+ documents, 1958-2025). Includes Constitutional Court, Court of Cassation, Council of State, and all Belgian courts with full ECLI metadata.',
     visibility: 'ORGANIZATION', // Share with legal team
     ownerId: user.id,
     embeddingModel: 'text-embedding-3-small',
     chunkSize: 1500, // Larger chunks for legal context
-    chunkOverlap: 300 // More overlap for legal coherence
+    chunkOverlap: 300, // More overlap for legal coherence
   })
 
   console.log(`📚 Created collection: ${collection.name} (${collection.id})`)
@@ -208,17 +245,19 @@ async function enhancedJurisprudenceProcessing() {
   // Get imported documents to tag them
   const documents = await prisma.document.findMany({
     where: { collectionId: collection.id },
-    include: { tags: true }
+    include: { tags: true },
   })
 
-  console.log(`\n🏷️ Auto-tagging ${documents.length} documents by legal domain...`)
+  console.log(
+    `\n🏷️ Auto-tagging ${documents.length} documents by legal domain...`
+  )
 
   // Get all tags for this collection
   const allTags = await prisma.collectionTag.findMany({
-    where: { collectionId: collection.id }
+    where: { collectionId: collection.id },
   })
 
-  const tagMap = new Map(allTags.map(tag => [tag.name, tag.id]))
+  const tagMap = new Map(allTags.map((tag) => [tag.name, tag.id]))
 
   let taggedCount = 0
   for (const document of documents) {
@@ -231,16 +270,16 @@ async function enhancedJurisprudenceProcessing() {
         const existingTag = await prisma.documentTag.findFirst({
           where: {
             documentId: document.id,
-            tagId: tagId
-          }
+            tagId: tagId,
+          },
         })
 
         if (!existingTag) {
           await prisma.documentTag.create({
             data: {
               documentId: document.id,
-              tagId: tagId
-            }
+              tagId: tagId,
+            },
           })
         }
       }
@@ -263,7 +302,7 @@ async function enhancedJurisprudenceProcessing() {
   return {
     collection,
     documentCount: documents.length,
-    tagCount: LEGAL_DOMAINS.length
+    tagCount: LEGAL_DOMAINS.length,
   }
 }
 
@@ -272,7 +311,9 @@ if (require.main === module) {
   enhancedJurisprudenceProcessing()
     .then((result) => {
       console.log('\n✅ Setup completed successfully!')
-      console.log(`Your lawyer agent now has access to ${result.documentCount} Belgian court decisions!`)
+      console.log(
+        `Your lawyer agent now has access to ${result.documentCount} Belgian court decisions!`
+      )
       process.exit(0)
     })
     .catch((error) => {

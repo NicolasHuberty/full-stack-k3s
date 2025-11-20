@@ -29,12 +29,14 @@ jest.mock('next/navigation', () => ({
 describe('RegisterPage Component', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    // Mock navigator.language
-    Object.defineProperty(window.navigator, 'language', {
-      writable: true,
-      configurable: true,
-      value: 'en-US',
-    })
+    // Mock navigator.language if window is available
+    if (typeof window !== 'undefined') {
+      Object.defineProperty(window.navigator, 'language', {
+        writable: true,
+        configurable: true,
+        value: 'en-US',
+      })
+    }
   })
 
   it('should render registration form', () => {

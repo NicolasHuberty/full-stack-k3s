@@ -148,7 +148,11 @@ export async function GET(
     }
 
     // Determine sort order
-    let orderBy: any = { createdAt: 'desc' }
+    let orderBy: {
+      createdAt?: string
+      originalName?: string
+      fileSize?: string
+    } = { createdAt: 'desc' }
     if (sort === 'name') {
       orderBy = { originalName: order }
     } else if (sort === 'size') {

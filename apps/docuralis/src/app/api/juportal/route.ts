@@ -1,20 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/app/api/auth/options'
+import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
 
 const ECLI_API_BASE = 'https://ecli.openjustice.be'
-const JUPORTAL_BASE = 'https://juportal.be'
+// const JUPORTAL_BASE = 'https://juportal.be'
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const session = await auth()
 
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const searchParams = request.nextUrl.searchParams
@@ -27,8 +23,8 @@ export async function GET(request: NextRequest) {
       // Fetch specific ECLI document
       const response = await fetch(`${ECLI_API_BASE}/ecli/${ecli}`, {
         headers: {
-          'Accept': 'application/json'
-        }
+          Accept: 'application/json',
+        },
       })
 
       if (!response.ok) {
@@ -43,7 +39,7 @@ export async function GET(request: NextRequest) {
     } else {
       // Search for documents (this is a placeholder as the actual JUPORTAL search API is not documented)
       // In production, you would need to integrate with the actual JUPORTAL search API
-      const searchCriteria: any = {}
+      const searchCriteria: Record<string, string> = {}
 
       if (court) searchCriteria.court = court
       if (year) searchCriteria.year = year
@@ -55,33 +51,37 @@ export async function GET(request: NextRequest) {
           court: 'Court of Cassation',
           year: '2023',
           title: 'Criminal Law - Appeal',
-          date: '2023-11-25'
+          date: '2023-11-25',
         },
         {
           ecli: 'ECLI:BE:CC:2023:141',
           court: 'Constitutional Court',
           year: '2023',
           title: 'Constitutional Review',
-          date: '2023-10-15'
+          date: '2023-10-15',
         },
         {
           ecli: 'ECLI:BE:GHARB:2023:ARR.20230318.2',
           court: 'Court of Appeal Brussels',
           year: '2023',
           title: 'Civil Law - Contract Dispute',
-          date: '2023-03-18'
-        }
-      ].filter(item => {
-        if (court && !item.court.toLowerCase().includes(court.toLowerCase())) return false
-        if (year && item.year !== year) return false
-        return true
-      }).slice(0, limit)
+          date: '2023-03-18',
+        },
+      ]
+        .filter((item) => {
+          if (court && !item.court.toLowerCase().includes(court.toLowerCase()))
+            return false
+          if (year && item.year !== year) return false
+          return true
+        })
+        .slice(0, limit)
 
       return NextResponse.json({
         results: sampleResults,
         total: sampleResults.length,
         limit,
-        message: 'Note: This is sample data. Full JUPORTAL integration requires official API access.'
+        message:
+          'Note: This is sample data. Full JUPORTAL integration requires official API access.',
       })
     }
   } catch (error) {
@@ -95,13 +95,10 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const session = await auth()
 
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const body = await request.json()
@@ -132,13 +129,13 @@ export async function POST(request: NextRequest) {
               members: {
                 some: {
                   userId: session.user.id,
-                  isActive: true
-                }
-              }
-            }
-          }
-        ]
-      }
+                  isActive: true,
+                },
+              },
+            },
+          },
+        ],
+      },
     })
 
     if (!collection) {
@@ -155,8 +152,8 @@ export async function POST(request: NextRequest) {
       try {
         const response = await fetch(`${ECLI_API_BASE}/ecli/${ecli}`, {
           headers: {
-            'Accept': 'application/json'
-          }
+            Accept: 'application/json',
+          },
         })
 
         if (response.ok) {
@@ -175,29 +172,29 @@ export async function POST(request: NextRequest) {
                 source: 'JUPORTAL',
                 ecli,
                 court: ecli.split(':')[2],
-                year: ecli.split(':')[3]
+                year: ecli.split(':')[3],
               },
-              status: 'PENDING'
-            }
+              status: 'PENDING',
+            },
           })
 
           results.push({
             ecli,
             documentId: document.id,
-            status: 'success'
+            status: 'success',
           })
 
           // TODO: Queue document for processing (embedding generation)
         } else {
           errors.push({
             ecli,
-            error: `HTTP ${response.status}`
+            error: `HTTP ${response.status}`,
           })
         }
       } catch (error) {
         errors.push({
           ecli,
-          error: error instanceof Error ? error.message : 'Unknown error'
+          error: error instanceof Error ? error.message : 'Unknown error',
         })
       }
     }
@@ -207,7 +204,7 @@ export async function POST(request: NextRequest) {
       errors,
       total: eclis.length,
       imported: results.length,
-      failed: errors.length
+      failed: errors.length,
     })
   } catch (error) {
     console.error('JUPORTAL import error:', error)

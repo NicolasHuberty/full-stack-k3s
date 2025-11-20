@@ -29,6 +29,7 @@ bun run scripts/fetch-juportal-rss.ts
 ### What was discovered:
 
 From `robots.txt`:
+
 ```
 Disallow: /
 User-agent: DG_JUSTICE_CRAWLER
@@ -38,16 +39,19 @@ Allow: /
 **14,467 sitemap indexes** available, each containing multiple individual sitemaps with full ECLI metadata.
 
 ### Quick Count:
+
 ```bash
 bun run scripts/count-juportal.ts
 ```
 
 ### Small Test (50 documents):
+
 ```bash
 bun run scripts/fetch-juportal-sitemaps.ts 1 50
 ```
 
 ### Production Import (All 200k+ documents):
+
 ```bash
 # Conservative approach
 bun run scripts/fetch-all-juportal.ts 0 500 2000
@@ -59,6 +63,7 @@ bun run scripts/fetch-all-juportal.ts 0 500 2000
 ```
 
 ### Resume Interrupted Import:
+
 ```bash
 # The script automatically resumes from where it left off
 bun run scripts/fetch-all-juportal.ts
@@ -81,12 +86,14 @@ curl https://juportal.just.fgov.be/content/ViewDecision.php?id=ECLI:BE:CASS:2024
 From sitemaps, each document includes:
 
 ### Basic Info:
+
 - **ECLI**: European Case Law Identifier
 - **Court**: Constitutional Court, Cassation, Council of State, etc.
 - **Date**: Decision date
 - **Languages**: FR, NL, DE (multilingual)
 
 ### Rich Metadata:
+
 - **Subject**: Legal domain (constitutional, civil, criminal, etc.)
 - **Abstract**: Case summary in multiple languages
 - **Description**: Detailed case information
@@ -95,6 +102,7 @@ From sitemaps, each document includes:
 - **Type**: Decision type (Judgment, ruling, etc.)
 
 ### Access URLs:
+
 - **French**: `https://juportal.just.fgov.be/content/ViewDecision.php?id={ECLI}&lang=fr`
 - **Dutch**: `https://juportal.just.fgov.be/content/ViewDecision.php?id={ECLI}&lang=nl`
 - **German**: `https://juportal.just.fgov.be/content/ViewDecision.php?id={ECLI}&lang=de`
@@ -123,17 +131,20 @@ CREATE TABLE Document (
 ## Performance & Ethics
 
 ### Rate Limiting:
+
 - **2-second delays** between batches
 - **500 documents** per batch
 - **Respectful scraping** practices
 
 ### Legal Compliance:
+
 - ✅ **Public domain** documents
 - ✅ **Official government data**
 - ✅ **Academic/research use**
 - ❌ **Commercial redistribution** (check terms)
 
 ### Expected Timeline:
+
 - **200,000 documents** ÷ **500/batch** × **2 seconds** = ~11 hours
 - **Resume capability** if interrupted
 - **Progress tracking** saved to disk
@@ -143,11 +154,13 @@ CREATE TABLE Document (
 The sitemaps include decisions from:
 
 ### High Courts:
+
 - **Constitutional Court** (GHCC)
 - **Court of Cassation** (CASS)
 - **Council of State** (RVSCE)
 
 ### Regional Courts:
+
 - **Courts of Appeal**: Brussels, Antwerp, Ghent, Liege, Mons
 - **Labour Courts**: All regions
 - **First Instance Courts**: All jurisdictions
@@ -155,20 +168,23 @@ The sitemaps include decisions from:
 - **Administrative Courts**: Public law
 
 ### Date Range:
+
 - **From**: 1980s (earliest digitized decisions)
 - **To**: Current (daily updates via sitemaps)
 
 ## Use Cases
 
 ### Legal Research:
+
 ```javascript
 // Search imported documents
-const contracts = await searchDocuments("contrat de vente")
-const torts = await searchDocuments("responsabilité civile")
-const constitutional = await searchDocuments("constitutional court")
+const contracts = await searchDocuments('contrat de vente')
+const torts = await searchDocuments('responsabilité civile')
+const constitutional = await searchDocuments('constitutional court')
 ```
 
 ### AI Legal Assistant:
+
 ```javascript
 // RAG (Retrieval Augmented Generation)
 const context = await findRelevantCases(userQuery)
@@ -176,6 +192,7 @@ const response = await generateLegalAdvice(userQuery, context)
 ```
 
 ### Compliance Monitoring:
+
 ```javascript
 // Track new decisions
 const newDecisions = await getRecentDecisions(lastWeek)
@@ -185,16 +202,19 @@ const relevantUpdates = await filterByPracticeArea(newDecisions)
 ## Next Steps
 
 1. **Run the counter** to see exact numbers:
+
    ```bash
    bun run scripts/count-juportal.ts
    ```
 
 2. **Start production import**:
+
    ```bash
    bun run scripts/fetch-all-juportal.ts 0 500 2000
    ```
 
 3. **Monitor progress**:
+
    ```bash
    tail -f juportal-import.log
    ```
@@ -217,6 +237,7 @@ const relevantUpdates = await filterByPracticeArea(newDecisions)
 ## Robot Respect 🤖
 
 The `robots.txt` shows:
+
 - General crawling is **disallowed** for most bots
 - Only `DG_JUSTICE_CRAWLER` has full access
 - But **sitemaps are public** and meant for indexing

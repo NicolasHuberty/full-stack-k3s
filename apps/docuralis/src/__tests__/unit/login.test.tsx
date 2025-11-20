@@ -4,7 +4,9 @@ import { signIn } from 'next-auth/react'
 import LoginPage from '@/app/login/page'
 
 // Mock next-auth
-jest.mock('next-auth/react')
+jest.mock('next-auth/react', () => ({
+  signIn: jest.fn(),
+}))
 const mockSignIn = signIn as jest.MockedFunction<typeof signIn>
 
 // Mock next/navigation

@@ -1,4 +1,5 @@
 import { FileText, ExternalLink } from 'lucide-react'
+import { ReactNode } from 'react'
 
 interface PDFReferenceProps {
   filename: string
@@ -20,7 +21,10 @@ export function PDFReference({ filename, onClick }: PDFReferenceProps) {
 
 interface CustomMarkdownComponentsProps {
   onPdfClick: (filename: string) => void
-  documentChunks?: Array<{ documentName?: string; metadata?: { title?: string } }>
+  documentChunks?: Array<{
+    documentName?: string
+    metadata?: { title?: string }
+  }>
 }
 
 export function getCustomMarkdownComponents(
@@ -28,7 +32,10 @@ export function getCustomMarkdownComponents(
 ) {
   // Helper to map document numbers to filenames
   const getFilenameFromDocNumber = (docNum: number): string | null => {
-    if (!componentProps.documentChunks || !componentProps.documentChunks[docNum - 1]) {
+    if (
+      !componentProps.documentChunks ||
+      !componentProps.documentChunks[docNum - 1]
+    ) {
       return null
     }
     const chunk = componentProps.documentChunks[docNum - 1]
@@ -37,35 +44,72 @@ export function getCustomMarkdownComponents(
 
   return {
     // Headings with proper styling
-    h1: ({ children, ...props }: any) => (
-      <h1 className="text-2xl font-bold mt-6 mb-4 text-gray-900 border-b pb-2" {...props}>
+    h1: ({
+      children,
+      ...props
+    }: {
+      children: ReactNode
+      [key: string]: unknown
+    }) => (
+      <h1
+        className="text-2xl font-bold mt-6 mb-4 text-gray-900 border-b pb-2"
+        {...props}
+      >
         {children}
       </h1>
     ),
-    h2: ({ children, ...props }: any) => (
+    h2: ({
+      children,
+      ...props
+    }: {
+      children: ReactNode
+      [key: string]: unknown
+    }) => (
       <h2 className="text-xl font-bold mt-5 mb-3 text-gray-900" {...props}>
         {children}
       </h2>
     ),
-    h3: ({ children, ...props }: any) => (
+    h3: ({
+      children,
+      ...props
+    }: {
+      children: ReactNode
+      [key: string]: unknown
+    }) => (
       <h3 className="text-lg font-semibold mt-4 mb-2 text-gray-900" {...props}>
         {children}
       </h3>
     ),
-    h4: ({ children, ...props }: any) => (
-      <h4 className="text-base font-semibold mt-3 mb-2 text-gray-800" {...props}>
+    h4: ({
+      children,
+      ...props
+    }: {
+      children: ReactNode
+      [key: string]: unknown
+    }) => (
+      <h4
+        className="text-base font-semibold mt-3 mb-2 text-gray-800"
+        {...props}
+      >
         {children}
       </h4>
     ),
 
     // Custom text renderer to detect and transform PDF references
-    p: ({ children, ...htmlProps }: any) => {
-      const processChildren = (children: any): any => {
+    p: ({
+      children,
+      ...htmlProps
+    }: {
+      children: ReactNode
+      [key: string]: unknown
+    }) => {
+      const processChildren = (children: ReactNode): ReactNode => {
         if (typeof children === 'string') {
           // Match patterns like:
           // 1. <filename.pdf> or <IT0012930_003.pdf>
           // 2. <document 1> or <document 2> (legacy format)
-          const pdfRegex = /&lt;([^&]+\.pdf)&gt;|<([^<]+\.pdf)>|&lt;document\s+(\d+)&gt;|<document\s+(\d+)>/gi
+          const pdfRegex =
+            /&lt;([^&]+\.pdf)&gt;|<([^<]+\.pdf)>|&lt;document\s+(\d+)&gt;|<document\s+(\d+)>/gi
           const parts = []
           let lastIndex = 0
           let match
@@ -119,7 +163,7 @@ export function getCustomMarkdownComponents(
 
         // Handle arrays of children
         if (Array.isArray(children)) {
-          return children.map((child, i) => {
+          return children.map((child, index) => {
             if (typeof child === 'string') {
               return processChildren(child)
             }
@@ -130,58 +174,109 @@ export function getCustomMarkdownComponents(
         return children
       }
 
-      return <p className="mb-4 leading-7 text-gray-700" {...htmlProps}>{processChildren(children)}</p>
+      return (
+        <p className="mb-4 leading-7 text-gray-700" {...htmlProps}>
+          {processChildren(children)}
+        </p>
+      )
     },
 
     // Strong/Bold text
-    strong: ({ children, ...props }: any) => (
+    strong: ({
+      children,
+      ...props
+    }: {
+      children: ReactNode
+      [key: string]: unknown
+    }) => (
       <strong className="font-bold text-gray-900" {...props}>
         {children}
       </strong>
     ),
 
     // Emphasis/Italic
-    em: ({ children, ...props }: any) => (
+    em: ({
+      children,
+      ...props
+    }: {
+      children: ReactNode
+      [key: string]: unknown
+    }) => (
       <em className="italic text-gray-800" {...props}>
         {children}
       </em>
     ),
 
     // Unordered lists
-    ul: ({ children, ...props }: any) => (
+    ul: ({
+      children,
+      ...props
+    }: {
+      children: ReactNode
+      [key: string]: unknown
+    }) => (
       <ul className="list-disc list-outside ml-6 mb-4 space-y-2" {...props}>
         {children}
       </ul>
     ),
 
     // Ordered lists
-    ol: ({ children, ...props }: any) => (
+    ol: ({
+      children,
+      ...props
+    }: {
+      children: ReactNode
+      [key: string]: unknown
+    }) => (
       <ol className="list-decimal list-outside ml-6 mb-4 space-y-2" {...props}>
         {children}
       </ol>
     ),
 
     // List items
-    li: ({ children, ...props }: any) => (
+    li: ({
+      children,
+      ...props
+    }: {
+      children: ReactNode
+      [key: string]: unknown
+    }) => (
       <li className="text-gray-700 leading-7" {...props}>
         {children}
       </li>
     ),
 
     // Blockquotes
-    blockquote: ({ children, ...props }: any) => (
-      <blockquote className="border-l-4 border-blue-500 pl-4 py-2 mb-4 italic bg-gray-50 text-gray-700" {...props}>
+    blockquote: ({
+      children,
+      ...props
+    }: {
+      children: ReactNode
+      [key: string]: unknown
+    }) => (
+      <blockquote
+        className="border-l-4 border-blue-500 pl-4 py-2 mb-4 italic bg-gray-50 text-gray-700"
+        {...props}
+      >
         {children}
       </blockquote>
     ),
 
     // Horizontal rules
-    hr: (props: any) => (
+    hr: (props: { [key: string]: unknown }) => (
       <hr className="my-6 border-t border-gray-300" {...props} />
     ),
 
     // Links
-    a: ({ children, href, ...props }: any) => (
+    a: ({
+      children,
+      href,
+      ...props
+    }: {
+      children: ReactNode
+      href?: string
+      [key: string]: unknown
+    }) => (
       <a
         href={href}
         className="text-blue-600 hover:text-blue-800 underline"
@@ -194,7 +289,15 @@ export function getCustomMarkdownComponents(
     ),
 
     // Also handle inline code that might contain PDF references
-    code: ({ children, className, ...htmlProps }: any) => {
+    code: ({
+      children,
+      className,
+      ...htmlProps
+    }: {
+      children: ReactNode
+      className?: string
+      [key: string]: unknown
+    }) => {
       const inline = !className
       const text = String(children)
 
@@ -211,7 +314,10 @@ export function getCustomMarkdownComponents(
       // Inline code styling
       if (inline) {
         return (
-          <code className="bg-gray-100 text-red-600 px-1.5 py-0.5 rounded text-sm font-mono" {...htmlProps}>
+          <code
+            className="bg-gray-100 text-red-600 px-1.5 py-0.5 rounded text-sm font-mono"
+            {...htmlProps}
+          >
             {children}
           </code>
         )
@@ -219,14 +325,23 @@ export function getCustomMarkdownComponents(
 
       // Code blocks
       return (
-        <code className={`${className} block bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto my-4`} {...htmlProps}>
+        <code
+          className={`${className} block bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto my-4`}
+          {...htmlProps}
+        >
           {children}
         </code>
       )
     },
 
     // Pre blocks (for code blocks)
-    pre: ({ children, ...props }: any) => (
+    pre: ({
+      children,
+      ...props
+    }: {
+      children: ReactNode
+      [key: string]: unknown
+    }) => (
       <pre className="mb-4 overflow-x-auto" {...props}>
         {children}
       </pre>

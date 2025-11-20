@@ -117,9 +117,11 @@ export class RAGService {
         documentId: result.payload.documentId,
         documentName: docMap.get(result.payload.documentId) || 'Unknown',
         chunkIndex: result.payload.chunkIndex,
-        pageNumber: result.payload.page_number || result.payload.pageNumber || null,
+        pageNumber:
+          result.payload.page_number || result.payload.pageNumber || null,
         metadata: {
-          pageNumber: result.payload.page_number || result.payload.pageNumber || null,
+          pageNumber:
+            result.payload.page_number || result.payload.pageNumber || null,
           title: docMap.get(result.payload.documentId) || 'Unknown',
           source: docMap.get(result.payload.documentId) || 'Unknown',
         },
@@ -175,7 +177,6 @@ export class RAGService {
       if (params.collectionId || session.collectionId) {
         const collectionId = params.collectionId || session.collectionId
 
-
         // Check access
         const hasAccess = await hasCollectionAccess(
           params.userId,
@@ -199,7 +200,11 @@ export class RAGService {
           ...chunk,
           // Ensure page number is at top level for frontend compatibility
           pageNumber: chunk.metadata?.pageNumber || chunk.pageNumber || null,
-          documentName: chunk.metadata?.title || chunk.metadata?.source || chunk.documentName || 'Unknown Document',
+          documentName:
+            chunk.metadata?.title ||
+            chunk.metadata?.source ||
+            chunk.documentName ||
+            'Unknown Document',
           content: chunk.pageContent || chunk.content,
         }))
 
@@ -211,7 +216,6 @@ export class RAGService {
                 `[${i + 1}] From "${chunk.documentName}":\n${chunk.content}`
             )
             .join('\n\n')
-
         } else {
           console.warn('No relevant chunks found in collection!')
         }
@@ -395,7 +399,7 @@ ${context}`,
           ...(collectionId && { collectionId }),
         }
       }
-      
+
       const sessions = await prisma.chatSession.findMany({
         where: whereClause,
         include: {
@@ -583,9 +587,7 @@ export async function searchDocuments(
       ])
     )
 
-    const chunkMap = new Map(
-      chunks.map((c) => [c.id, c])
-    )
+    const chunkMap = new Map(chunks.map((c) => [c.id, c]))
 
     // Format results to match Emate structure
     return results.map((result) => {
@@ -593,14 +595,15 @@ export async function searchDocuments(
       const chunk = chunkMap.get(result.id)
 
       // Get page number from vector payload (direct or in metadata), then fallback to database chunk info
-      const pageNumber = result.payload.page_number ||  // Direct field (for migrated documents)
-                          result.payload.pageNumber ||   // Alternative naming
-                          result.payload.metadata?.pageNumber ||  // In metadata object (new documents)
-                          result.payload.metadata?.page_number ||  // Alternative naming in metadata
-                          chunk?.startPage ||  // Database fallback
-                          chunk?.endPage ||
-                          result.payload.chunkIndex ||
-                          0
+      const pageNumber =
+        result.payload.page_number || // Direct field (for migrated documents)
+        result.payload.pageNumber || // Alternative naming
+        result.payload.metadata?.pageNumber || // In metadata object (new documents)
+        result.payload.metadata?.page_number || // Alternative naming in metadata
+        chunk?.startPage || // Database fallback
+        chunk?.endPage ||
+        result.payload.chunkIndex ||
+        0
 
       return {
         pageContent: result.payload.content,

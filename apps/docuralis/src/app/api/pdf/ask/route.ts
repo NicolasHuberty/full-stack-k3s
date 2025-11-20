@@ -25,44 +25,50 @@ async function extractFirstPages(
   numPages: number = 2
 ): Promise<string> {
   return new Promise((resolve, reject) => {
-    const pdfParser = new (PDFParser as any)(null, true)
+    // @ts-expect-error - PDFParser constructor typing issue
+    const pdfParser = new PDFParser(null, true)
 
-    pdfParser.on('pdfParser_dataError', (errData: any) => {
+    pdfParser.on('pdfParser_dataError', (errData: { parserError: string }) => {
       reject(new Error(`PDF parsing error: ${errData.parserError}`))
     })
 
-    pdfParser.on('pdfParser_dataReady', (pdfData: any) => {
-      try {
-        let extractedText = ''
-        const pages = pdfData.Pages || []
-        const pagesToExtract = Math.min(numPages, pages.length)
+    pdfParser.on(
+      'pdfParser_dataReady',
+      (pdfData: {
+        Pages?: Array<{ Texts?: Array<{ R?: Array<{ T?: string }> }> }>
+      }) => {
+        try {
+          let extractedText = ''
+          const pages = pdfData.Pages || []
+          const pagesToExtract = Math.min(numPages, pages.length)
 
-        for (let i = 0; i < pagesToExtract; i++) {
-          const page = pages[i]
-          const texts = page.Texts || []
+          for (let i = 0; i < pagesToExtract; i++) {
+            const page = pages[i]
+            const texts = page.Texts || []
 
-          extractedText += `\n--- Page ${i + 1} ---\n`
+            extractedText += `\n--- Page ${i + 1} ---\n`
 
-          texts.forEach((text: any) => {
-            try {
-              const encoded = text.R?.[0]?.T || ''
-              if (encoded) {
-                const decoded = decodeURIComponent(encoded)
-                extractedText += decoded + ' '
+            texts.forEach((text) => {
+              try {
+                const encoded = text.R?.[0]?.T || ''
+                if (encoded) {
+                  const decoded = decodeURIComponent(encoded)
+                  extractedText += decoded + ' '
+                }
+              } catch {
+                const rawText = text.R?.[0]?.T || ''
+                extractedText += rawText + ' '
               }
-            } catch {
-              const rawText = text.R?.[0]?.T || ''
-              extractedText += rawText + ' '
-            }
-          })
-          extractedText += '\n'
-        }
+            })
+            extractedText += '\n'
+          }
 
-        resolve(extractedText.trim())
-      } catch (error) {
-        reject(error)
+          resolve(extractedText.trim())
+        } catch (error) {
+          reject(error)
+        }
       }
-    })
+    )
 
     pdfParser.parseBuffer(pdfBuffer)
   })
@@ -80,17 +86,15 @@ export async function POST(request: NextRequest) {
     const validatedData = askSchema.parse(body)
 
     // Get document metadata from database
-    let document:
-      | {
-          originalName: string
-          title: string | null
-          author: string | null
-          pageCount: number | null
-          wordCount: number | null
-          filename?: string
-          collectionId?: string
-        }
-      | null = null
+    let document: {
+      originalName: string
+      title: string | null
+      author: string | null
+      pageCount: number | null
+      wordCount: number | null
+      filename?: string
+      collectionId?: string
+    } | null = null
 
     // Check if it's a migrated document
     if (validatedData.documentId.startsWith('migrated_')) {
@@ -165,7 +169,7 @@ Selected Text (from page ${validatedData.currentPage}):
       {
         role: 'system',
         content:
-          'You are a helpful AI assistant analyzing a PDF document. You have access to the document\'s metadata, the first 2 pages for context, and a specific text selection the user made.',
+          "You are a helpful AI assistant analyzing a PDF document. You have access to the document's metadata, the first 2 pages for context, and a specific text selection the user made.",
       },
       {
         role: 'user',

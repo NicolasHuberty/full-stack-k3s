@@ -291,10 +291,11 @@ export default function SettingsPage() {
                   return (
                     <div
                       key={plan.type}
-                      className={`relative rounded-lg border-2 p-6 transition-all ${isCurrentPlan
+                      className={`relative rounded-lg border-2 p-6 transition-all ${
+                        isCurrentPlan
                           ? 'border-primary bg-primary/5'
                           : 'border-border hover:border-primary/50'
-                        }`}
+                      }`}
                     >
                       {isCurrentPlan && (
                         <div className="absolute top-4 right-4">

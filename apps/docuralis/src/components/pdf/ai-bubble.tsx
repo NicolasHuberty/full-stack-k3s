@@ -119,7 +119,7 @@ export function AIBubble({
             </p>
             <div className="bg-white rounded-md p-3 border border-gray-200 shadow-sm">
               <p className="text-sm text-gray-700 line-clamp-6 italic leading-relaxed border-l-2 border-blue-300 pl-2">
-                "{selectedText}"
+                &quot;{selectedText}&quot;
               </p>
             </div>
           </div>
@@ -138,18 +138,20 @@ export function AIBubble({
               <div className="bg-gradient-to-br from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-4">
                 <div className="flex items-center gap-2 mb-2">
                   <Sparkles className="h-4 w-4 text-blue-600" />
-                  <p className="text-xs font-bold text-blue-900 uppercase tracking-wider">AI Answer</p>
+                  <p className="text-xs font-bold text-blue-900 uppercase tracking-wider">
+                    AI Answer
+                  </p>
                 </div>
-                <p className="text-sm text-gray-800 whitespace-pre-wrap leading-relaxed">{answer}</p>
+                <p className="text-sm text-gray-800 whitespace-pre-wrap leading-relaxed">
+                  {answer}
+                </p>
               </div>
             )}
           </div>
         )}
 
         {/* Question Input Area - Pushed to bottom if content is short, but scrolls if long */}
-        <div className="px-4 py-4">
-          {/* Spacer if needed */}
-        </div>
+        <div className="px-4 py-4">{/* Spacer if needed */}</div>
       </div>
 
       {/* Fixed Bottom Input Section */}
@@ -163,7 +165,11 @@ export function AIBubble({
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder={selectedText ? "Ask about this selection..." : "Ask about this document..."}
+            placeholder={
+              selectedText
+                ? 'Ask about this selection...'
+                : 'Ask about this document...'
+            }
             className="w-full min-h-[80px] text-sm resize-none pr-10 pb-10"
             disabled={isLoading}
           />

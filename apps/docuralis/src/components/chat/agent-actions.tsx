@@ -92,7 +92,9 @@ export function AgentActions({
 
       // Then fetch and auto-select agents
       try {
-        const agentsResponse = await fetch(`/api/collections/${collectionId}/agents`)
+        const agentsResponse = await fetch(
+          `/api/collections/${collectionId}/agents`
+        )
         if (agentsResponse.ok) {
           const agentsData = await agentsResponse.json()
           const activeAgents = agentsData.filter(
@@ -107,8 +109,11 @@ export function AgentActions({
 
             setSelectedAgent(firstAgent.agent.id)
             setActionState(initialActionState)
-            onAgentChange?.(firstAgent.agent.id, initialActionState, defaultModelName)
-
+            onAgentChange?.(
+              firstAgent.agent.id,
+              initialActionState,
+              defaultModelName
+            )
           } else {
             // No active agents - start with no agent (default behavior)
             setSelectedAgent(null)
@@ -131,7 +136,7 @@ export function AgentActions({
     if (selectedAgent === agentId) {
       setSelectedAgent(null)
       setActionState({})
-      onAgentChange?.(null, {}, selectedModel)  // null means no agent
+      onAgentChange?.(null, {}, selectedModel) // null means no agent
     } else {
       // Select the new agent
       setSelectedAgent(agentId)
@@ -328,11 +333,13 @@ export function AgentActions({
 
         {/* Status indicator */}
         <div className="ml-auto flex items-center gap-2">
-          <Badge variant={selectedAgent ? "default" : "secondary"} className="text-xs">
+          <Badge
+            variant={selectedAgent ? 'default' : 'secondary'}
+            className="text-xs"
+          >
             {selectedAgent
               ? `Using: ${activeAgent?.agent.name || 'Agent'}`
-              : 'Default Chat (No Agent)'
-            }
+              : 'Default Chat (No Agent)'}
           </Badge>
         </div>
       </div>

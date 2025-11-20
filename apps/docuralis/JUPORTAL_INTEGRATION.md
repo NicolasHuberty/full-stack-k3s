@@ -44,16 +44,19 @@ There's an open-source ECLI API available at https://ecli.openjustice.be, but it
 ### Command Line Scripts
 
 #### 1. Test RSS Feed Access
+
 ```bash
 bun run scripts/test-juportal-rss.ts
 ```
 
 #### 2. Import Documents from RSS
+
 ```bash
 bun run scripts/fetch-juportal-rss.ts
 ```
 
 This script will:
+
 - Get an existing user from the database
 - Create a "JUPORTAL Jurisprudence RSS" collection if it doesn't exist
 - Fetch documents from the configured RSS feeds
@@ -62,6 +65,7 @@ This script will:
 ### API Endpoints
 
 #### 1. Get RSS Feed Information
+
 ```
 GET /api/juportal/rss
 ```
@@ -69,6 +73,7 @@ GET /api/juportal/rss
 Returns available predefined feeds and their descriptions.
 
 #### 2. Fetch Documents from RSS Feed
+
 ```
 GET /api/juportal/rss?url={RSS_FEED_URL}
 ```
@@ -76,6 +81,7 @@ GET /api/juportal/rss?url={RSS_FEED_URL}
 Fetches and returns documents from a specific RSS feed without importing them.
 
 #### 3. Import RSS Feed into Collection
+
 ```
 POST /api/juportal/rss
 Content-Type: application/json
@@ -91,6 +97,7 @@ Imports documents from the RSS feed into your specified collection.
 ### Response Format
 
 Documents include:
+
 - **ECLI**: European Case Law Identifier
 - **Title**: Case title
 - **Link**: Direct link to JUPORTAL document
@@ -122,6 +129,7 @@ curl -X POST http://localhost:3000/api/juportal/rss \
 ### 3. Use in Your Application
 
 Once imported, the documents will be:
+
 - Searchable through your collection
 - Available for AI-powered analysis
 - Integrated with your document management system
@@ -140,6 +148,7 @@ You can create RSS feeds for specific legal domains:
 ## Data Structure
 
 Each imported document contains:
+
 - **filename**: ECLI identifier + .html
 - **title**: Case title or ECLI if no title
 - **fileUrl**: Direct link to JUPORTAL
@@ -156,6 +165,7 @@ Each imported document contains:
 ## Next Steps
 
 After importing documents:
+
 1. Process them for embeddings (vector search)
 2. Set up automated imports for specific searches
 3. Create specialized collections by legal domain
@@ -164,6 +174,7 @@ After importing documents:
 ## Contact
 
 For official API access to JUPORTAL, contact:
+
 - **SPF Justice**: info@just.fgov.be
 - **JUPORTAL Support**: Through the official website
 

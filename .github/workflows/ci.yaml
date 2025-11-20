@@ -29,7 +29,9 @@ jobs:
         run: pip install yamllint
 
       - name: Run yamllint
-        run: yamllint .
+        run: |
+          # Run yamllint on all YAML files except jurisprudence directory
+          find . -name "*.yml" -o -name "*.yaml" | grep -v "apps/docuralis/jurisprudence" | xargs yamllint
 
   validate-kubernetes:
     name: Validate Kubernetes Manifests

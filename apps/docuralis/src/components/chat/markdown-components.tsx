@@ -20,10 +20,12 @@ export function PDFReference({ filename, onClick }: PDFReferenceProps) {
 }
 
 interface CustomMarkdownComponentsProps {
-  onPdfClick: (filename: string) => void
+  onPdfClick: (filename: string, pageNumber?: number) => void
   documentChunks?: Array<{
     documentName?: string
-    metadata?: { title?: string }
+    documentId?: string
+    pageNumber?: number
+    metadata?: { title?: string; pageNumber?: number }
   }>
 }
 
@@ -40,6 +42,47 @@ export function getCustomMarkdownComponents(
     }
     const chunk = componentProps.documentChunks[docNum - 1]
     return chunk.documentName || chunk.metadata?.title || null
+  }
+
+  // Helper to get page number from document chunks
+  const getPageFromDocNumber = (docNum: number): number | null => {
+    if (
+      !componentProps.documentChunks ||
+      !componentProps.documentChunks[docNum - 1]
+    ) {
+      return null
+    }
+    const chunk = componentProps.documentChunks[docNum - 1]
+    const pageNumber = chunk.pageNumber || chunk.metadata?.pageNumber || null
+
+    if (pageNumber !== null && pageNumber !== undefined) {
+      const parsedPage = typeof pageNumber === 'string'
+        ? parseInt(pageNumber, 10)
+        : Number(pageNumber)
+      return isNaN(parsedPage) || parsedPage <= 0 ? null : parsedPage
+    }
+    return null
+  }
+
+  // Helper to find page number by filename
+  const getPageFromFilename = (filename: string): number | null => {
+    if (!componentProps.documentChunks) return null
+
+    const chunk = componentProps.documentChunks.find(chunk =>
+      chunk.documentName === filename ||
+      chunk.metadata?.title === filename
+    )
+
+    if (!chunk) return null
+
+    const pageNumber = chunk.pageNumber || chunk.metadata?.pageNumber || null
+    if (pageNumber !== null && pageNumber !== undefined) {
+      const parsedPage = typeof pageNumber === 'string'
+        ? parseInt(pageNumber, 10)
+        : Number(pageNumber)
+      return isNaN(parsedPage) || parsedPage <= 0 ? null : parsedPage
+    }
+    return null
   }
 
   /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -82,11 +125,12 @@ export function getCustomMarkdownComponents(
             const pdfMatch = part.match(/^<([^>]+\.pdf)>$/)
             if (pdfMatch) {
               const filename = pdfMatch[1]
+              const pageNumber = getPageFromFilename(filename)
               return (
                 <PDFReference
                   key={`pdf-${index}`}
                   filename={filename}
-                  onClick={() => componentProps.onPdfClick(filename)}
+                  onClick={() => componentProps.onPdfClick(filename, pageNumber || undefined)}
                 />
               )
             }
@@ -96,13 +140,14 @@ export function getCustomMarkdownComponents(
             if (docMatch) {
               const docNumber = parseInt(docMatch[1])
               const filename = getFilenameFromDocNumber(docNumber)
+              const pageNumber = getPageFromDocNumber(docNumber)
 
               if (filename) {
                 return (
                   <PDFReference
                     key={`doc-${index}`}
                     filename={filename}
-                    onClick={() => componentProps.onPdfClick(filename)}
+                    onClick={() => componentProps.onPdfClick(filename, pageNumber || undefined)}
                   />
                 )
               }
@@ -179,10 +224,11 @@ export function getCustomMarkdownComponents(
         const pdfMatch = children.match(/^([^.]+\.pdf)$/)
         if (pdfMatch) {
           const filename = pdfMatch[1]
+          const pageNumber = getPageFromFilename(filename)
           return (
             <PDFReference
               filename={filename}
-              onClick={() => componentProps.onPdfClick(filename)}
+              onClick={() => componentProps.onPdfClick(filename, pageNumber || undefined)}
             />
           )
         }

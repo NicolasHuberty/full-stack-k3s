@@ -331,7 +331,7 @@ export function ChatInterface({
     }
   }
 
-  const handlePdfClick = async (filename: string) => {
+  const handlePdfClick = async (filename: string, pageNumber?: number) => {
     try {
       const collectionIdToUse = collectionId || session?.collection?.id
       if (!collectionIdToUse) {
@@ -365,7 +365,7 @@ export function ChatInterface({
           documentId: document.id,
           documentName: document.originalName || document.filename,
           collectionId: collectionIdToUse,
-          initialPage: null,
+          initialPage: pageNumber || null,
         }
         setPdfViewer(pdfViewerData)
       } else {

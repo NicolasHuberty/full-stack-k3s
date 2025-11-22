@@ -6,37 +6,39 @@ import GitHub from 'next-auth/providers/github'
 import AzureAD from 'next-auth/providers/azure-ad'
 import bcrypt from 'bcryptjs'
 import { prisma } from '@/lib/prisma'
+import { authConfig } from './auth.config'
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  ...authConfig,
   adapter: PrismaAdapter(prisma),
   providers: [
     // OAuth providers (optional - only enabled if env vars are set)
     ...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
       ? [
-          Google({
-            clientId: process.env.GOOGLE_CLIENT_ID,
-            clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-          }),
-        ]
+        Google({
+          clientId: process.env.GOOGLE_CLIENT_ID,
+          clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+        }),
+      ]
       : []),
     ...(process.env.GITHUB_ID && process.env.GITHUB_SECRET
       ? [
-          GitHub({
-            clientId: process.env.GITHUB_ID,
-            clientSecret: process.env.GITHUB_SECRET,
-          }),
-        ]
+        GitHub({
+          clientId: process.env.GITHUB_ID,
+          clientSecret: process.env.GITHUB_SECRET,
+        }),
+      ]
       : []),
     ...(process.env.AZURE_AD_CLIENT_ID &&
-    process.env.AZURE_AD_CLIENT_SECRET &&
-    process.env.AZURE_AD_TENANT_ID
+      process.env.AZURE_AD_CLIENT_SECRET &&
+      process.env.AZURE_AD_TENANT_ID
       ? [
-          AzureAD({
-            clientId: process.env.AZURE_AD_CLIENT_ID,
-            clientSecret: process.env.AZURE_AD_CLIENT_SECRET,
-            issuer: `https://login.microsoftonline.com/${process.env.AZURE_AD_TENANT_ID}/v2.0`,
-          }),
-        ]
+        AzureAD({
+          clientId: process.env.AZURE_AD_CLIENT_ID,
+          clientSecret: process.env.AZURE_AD_CLIENT_SECRET,
+          issuer: `https://login.microsoftonline.com/${process.env.AZURE_AD_TENANT_ID}/v2.0`,
+        }),
+      ]
       : []),
     // Credentials provider (always enabled)
     Credentials({
@@ -78,6 +80,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     }),
   ],
   callbacks: {
+    ...authConfig.callbacks,
     async signIn({ user, account }) {
       // For OAuth sign-ins, link account to existing user if email matches
       if (account && account.provider !== 'credentials' && user.email) {
@@ -127,12 +130,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       }
       return true
     },
-    async jwt({ token, user }) {
-      if (user) {
-        token.id = user.id
-      }
-      return token
-    },
     async session({ session, token }) {
       if (token && session.user && token.id) {
         session.user.id = token.id as string
@@ -163,11 +160,5 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       }
       return session
     },
-  },
-  pages: {
-    signIn: '/login',
-  },
-  session: {
-    strategy: 'jwt',
   },
 })

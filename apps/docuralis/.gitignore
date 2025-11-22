@@ -41,3 +41,24 @@ yarn-error.log*
 next-env.d.ts
 
 /src/generated/prisma
+
+# Gradle build cache
+.gradle/
+*.lock
+*.bin
+*.properties
+gc.properties
+checksums.lock
+md5-checksums.bin
+sha1-checksums.bin
+executionHistory.lock
+last-build.bin
+filehashes.lock
+buildOutputCleanup.lock
+cache.properties
+
+# Backup files
+*.bak
+.env.bak
+.env2
+.PROD_env

@@ -12,7 +12,7 @@ export async function GET(_request: NextRequest) {
     // Get only active models for regular users
     const models = await prisma.lLMModel.findMany({
       where: { isActive: true },
-      orderBy: [{ isDefault: 'desc' }, { provider: 'asc' }, { name: 'asc' }],
+      orderBy: [{ isDefault: 'desc' }, { provider: { name: 'asc' } }, { name: 'asc' }],
       select: {
         id: true,
         name: true,

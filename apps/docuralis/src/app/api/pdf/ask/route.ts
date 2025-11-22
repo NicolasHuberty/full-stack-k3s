@@ -3,6 +3,8 @@ import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
 import { ChatOpenAI } from '@langchain/openai'
+import { ChatAnthropic } from '@langchain/anthropic'
+import { getSystemDefaultModel } from '@/lib/models/settings'
 import PDFParser from 'pdf2json'
 
 export const maxDuration = 60
@@ -158,12 +160,25 @@ Selected Text (from page ${validatedData.currentPage}):
 "${validatedData.selectedText}"
 `.trim()
 
-    // Call OpenAI API using LangChain (same as the rest of the app)
-    const model = new ChatOpenAI({
-      modelName: 'gpt-4o-mini',
-      temperature: 0.3,
-      maxTokens: 1024,
-    })
+    // Call LLM API using LangChain
+    const defaultModel = await getSystemDefaultModel()
+    let model: any
+
+    if (defaultModel.provider === 'anthropic') {
+      model = new ChatAnthropic({
+        modelName: defaultModel.name,
+        temperature: 0.3,
+        maxTokens: 1024,
+        anthropicApiKey: defaultModel.apiKey || process.env.ANTHROPIC_API_KEY,
+      })
+    } else {
+      model = new ChatOpenAI({
+        modelName: defaultModel.name,
+        temperature: 0.3,
+        maxTokens: 1024,
+        openAIApiKey: defaultModel.apiKey || process.env.OPENAI_API_KEY,
+      })
+    }
 
     const response = await model.invoke([
       {

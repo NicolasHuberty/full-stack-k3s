@@ -65,14 +65,14 @@ export function AgentActions({
   >([])
   const [selectedAgent, setSelectedAgent] = useState<string | null>(null)
   const [actionState, setActionState] = useState<Record<string, unknown>>({})
-  const [selectedModel, setSelectedModel] = useState<string>('gpt-4o-mini')
+  const [selectedModel, setSelectedModel] = useState<string>('')
   const [models, setModels] = useState<LLMModel[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     // Fetch models and agents, then auto-select
     const initialize = async () => {
-      let defaultModelName = 'gpt-4o-mini'
+      let defaultModelName = ''
 
       // Fetch models first
       try {
@@ -84,6 +84,10 @@ export function AgentActions({
           if (defaultModel) {
             defaultModelName = defaultModel.name
             setSelectedModel(defaultModel.name)
+          } else if (modelsData.length > 0) {
+            // Fallback to first available model if no default
+            defaultModelName = modelsData[0].name
+            setSelectedModel(modelsData[0].name)
           }
         }
       } catch (error) {
@@ -192,9 +196,7 @@ export function AgentActions({
     )
   }
 
-  if (collectionAgents.length === 0) {
-    return null
-  }
+
 
   const activeAgent = collectionAgents.find(
     (ca) => ca.agent.id === selectedAgent

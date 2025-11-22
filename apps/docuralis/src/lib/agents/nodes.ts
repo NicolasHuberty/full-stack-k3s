@@ -18,10 +18,26 @@ import {
 } from './prompts'
 import { searchDocuments } from '../rag/service'
 
-const model = new ChatOpenAI({
-  modelName: 'gpt-4o-mini',
-  temperature: 0,
-})
+import { ChatAnthropic } from '@langchain/anthropic'
+import { getSystemDefaultModel } from '@/lib/models/settings'
+
+async function getModel() {
+  const defaultModel = await getSystemDefaultModel()
+
+  if (defaultModel.provider === 'anthropic') {
+    return new ChatAnthropic({
+      modelName: defaultModel.name,
+      temperature: 0,
+      anthropicApiKey: defaultModel.apiKey || process.env.ANTHROPIC_API_KEY,
+    })
+  }
+
+  return new ChatOpenAI({
+    modelName: defaultModel.name,
+    temperature: 0,
+    openAIApiKey: defaultModel.apiKey || process.env.OPENAI_API_KEY,
+  })
+}
 
 export async function decomposeQuery(
   state: AgentState
@@ -29,6 +45,7 @@ export async function decomposeQuery(
   try {
     const prompt = DECOMPOSE_QUERY_PROMPT.replace('{query}', state.query)
 
+    const model = await getModel()
     const response = await model.invoke([
       {
         role: 'user',
@@ -130,6 +147,7 @@ export async function gradeDocumentsClassical(
         .replace('{document}', doc.pageContent)
         .replace('{question}', state.query)
 
+      const model = await getModel()
       const response = await model.invoke([{ role: 'user', content: prompt }])
 
       try {
@@ -180,6 +198,7 @@ export async function gradeDocumentsReflexion(
           .replace('{content}', doc.pageContent)
           .replace('{question}', state.query)
 
+        const model = await getModel()
         const response = await model.invoke([{ role: 'user', content: prompt }])
 
         // Extract JSON from markdown code blocks if present
@@ -241,7 +260,6 @@ export async function gradeDocumentsReflexion(
     >
 
     if (scoredDocs.length > 0) {
-      const scores = scoredDocs.map((d) => d.score)
       // Filter by threshold >= 2
       const passedThreshold = scoredDocs.filter((d) => d.score >= 2)
 
@@ -304,6 +322,7 @@ export async function generateResponse(
       formattedDocs
     ).replace('{question}', state.query)
 
+    const model = await getModel()
     const response = await model.invoke([
       { role: 'system', content: FINAL_RESPONSE_SYSTEM_PROMPT },
       { role: 'user', content: prompt },
@@ -348,6 +367,7 @@ export async function translateQuery(
     )
     const userPrompt = TRANSLATE_QUERY_PROMPT.replace('{query}', query)
 
+    const model = await getModel()
     const response = await model.invoke([
       { role: 'system', content: systemPrompt },
       { role: 'user', content: userPrompt },

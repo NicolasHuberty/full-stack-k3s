@@ -55,13 +55,13 @@ model User {
   id            String    @id @default(cuid())
   email         String    @unique
   name          String?
-  password      String?   // Optional for OAuth users
+  password      String? // Optional for OAuth users
   emailVerified DateTime?
   image         String?
   language      String    @default("en") // User's preferred language
 
   // Admin flag
-  isSystemAdmin Boolean   @default(false)
+  isSystemAdmin Boolean @default(false)
 
   // Plan information (for individual users)
   planType      PlanType   @default(FREE)
@@ -74,15 +74,15 @@ model User {
   storageLimit BigInt @default(5368709120) // 5GB in bytes for FREE
 
   // Billing (for individual users)
-  stripeCustomerId      String? @unique
-  stripeSubscriptionId  String? @unique
+  stripeCustomerId     String? @unique
+  stripeSubscriptionId String? @unique
 
   // OAuth accounts
-  accounts              Account[]
+  accounts Account[]
 
   // Organization memberships
-  organizationMembers   OrganizationMember[]
-  sentInvitations       OrganizationInvitation[]
+  organizationMembers OrganizationMember[]
+  sentInvitations     OrganizationInvitation[]
 
   // Collections owned
   collections           Collection[]
@@ -90,11 +90,11 @@ model User {
   permissionsGranted    CollectionPermission[] @relation("PermissionGranter")
 
   // Documents
-  uploadedDocuments     Document[] @relation("UploadedDocuments")
+  uploadedDocuments Document[] @relation("UploadedDocuments")
 
   // Chat sessions
-  chatSessions          ChatSession[] @relation("ChatSessions")
-  sharedChats           ChatSharedWith[] @relation("SharedChats")
+  chatSessions ChatSession[]    @relation("ChatSessions")
+  sharedChats  ChatSharedWith[] @relation("SharedChats")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -123,26 +123,26 @@ model Account {
 }
 
 model Organization {
-  id            String   @id @default(cuid())
-  name          String
-  slug          String   @unique
-  domain        String?
-  logo          String?
+  id     String  @id @default(cuid())
+  name   String
+  slug   String  @unique
+  domain String?
+  logo   String?
 
   // Plan & Billing
-  planType      OrganizationPlanType @default(FREE)
-  planStatus    PlanStatus           @default(TRIAL)
-  seatsTotal    Int                  @default(5)
-  seatsUsed     Int                  @default(0)
+  planType   OrganizationPlanType @default(FREE)
+  planStatus PlanStatus           @default(TRIAL)
+  seatsTotal Int                  @default(5)
+  seatsUsed  Int                  @default(0)
 
   // Storage
-  storageLimit  BigInt   @default(53687091200)  // 50GB
-  storageUsed   BigInt   @default(0)
+  storageLimit BigInt @default(53687091200) // 50GB
+  storageUsed  BigInt @default(0)
 
   // Billing details
   billingEmail         String?
-  stripeCustomerId     String?  @unique
-  stripeSubscriptionId String?  @unique
+  stripeCustomerId     String? @unique
+  stripeSubscriptionId String? @unique
 
   // Settings
   autoJoinEnabled Boolean @default(false)
@@ -151,34 +151,34 @@ model Organization {
   trialEndsAt   DateTime?
   planStartDate DateTime?
   planEndDate   DateTime?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
   // Relations
-  members       OrganizationMember[]
-  invitations   OrganizationInvitation[]
-  collections   Collection[]
+  members     OrganizationMember[]
+  invitations OrganizationInvitation[]
+  collections Collection[]
 
   @@index([slug])
   @@index([domain])
 }
 
 model OrganizationMember {
-  id             String   @id @default(cuid())
+  id String @id @default(cuid())
 
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
-  userId         String
-  user           User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  role           OrganizationRole @default(MEMBER)
-  isActive       Boolean  @default(true)
+  role     OrganizationRole @default(MEMBER)
+  isActive Boolean          @default(true)
 
-  joinedAt       DateTime @default(now())
-  deactivatedAt  DateTime?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  joinedAt      DateTime  @default(now())
+  deactivatedAt DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
   @@unique([organizationId, userId])
   @@index([organizationId])
@@ -186,22 +186,22 @@ model OrganizationMember {
 }
 
 model OrganizationInvitation {
-  id             String   @id @default(cuid())
+  id String @id @default(cuid())
 
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
-  email          String
-  role           OrganizationRole @default(MEMBER)
-  token          String   @unique
-  status         InvitationStatus @default(PENDING)
+  email  String
+  role   OrganizationRole @default(MEMBER)
+  token  String           @unique
+  status InvitationStatus @default(PENDING)
 
-  invitedById    String?
-  invitedBy      User? @relation(fields: [invitedById], references: [id], onDelete: SetNull)
+  invitedById String?
+  invitedBy   User?   @relation(fields: [invitedById], references: [id], onDelete: SetNull)
 
-  expiresAt      DateTime
-  acceptedAt     DateTime?
-  createdAt      DateTime @default(now())
+  expiresAt  DateTime
+  acceptedAt DateTime?
+  createdAt  DateTime  @default(now())
 
   @@unique([organizationId, email])
   @@index([token])
@@ -210,38 +210,38 @@ model OrganizationInvitation {
 }
 
 model Collection {
-  id             String   @id @default(cuid())
-  name           String
-  description    String?
+  id          String  @id @default(cuid())
+  name        String
+  description String?
 
   // Organization collection
   organizationId String?
   organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   // Personal collection
-  ownerId        String?
-  owner          User? @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  ownerId String?
+  owner   User?   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
 
   // Metadata
-  documentCount  Int      @default(0)
-  storageUsed    BigInt   @default(0)
-  visibility     CollectionVisibility @default(PRIVATE)
-  allowPublicRead Boolean @default(false)
+  documentCount   Int                  @default(0)
+  storageUsed     BigInt               @default(0)
+  visibility      CollectionVisibility @default(PRIVATE)
+  allowPublicRead Boolean              @default(false)
 
   // RAG Settings
   embeddingModel String @default("text-embedding-3-large")
-  chunkSize      Int @default(500)
-  chunkOverlap   Int @default(0)
+  chunkSize      Int    @default(500)
+  chunkOverlap   Int    @default(0)
 
   // Relations
-  documents      Document[]
-  permissions    CollectionPermission[]
-  tags           CollectionTag[]
-  chatSessions   ChatSession[]
-  agents         CollectionAgent[]
+  documents    Document[]
+  permissions  CollectionPermission[]
+  tags         CollectionTag[]
+  chatSessions ChatSession[]
+  agents       CollectionAgent[]
 
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([organizationId])
   @@index([ownerId])
@@ -249,20 +249,20 @@ model Collection {
 }
 
 model CollectionPermission {
-  id           String @id @default(cuid())
+  id String @id @default(cuid())
 
   collectionId String
   collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
 
-  userId       String
-  user         User @relation("CollectionPermissions", fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation("CollectionPermissions", fields: [userId], references: [id], onDelete: Cascade)
 
-  permission   CollectionPermissionLevel
+  permission CollectionPermissionLevel
 
-  grantedById  String?
-  grantedBy    User? @relation("PermissionGranter", fields: [grantedById], references: [id])
+  grantedById String?
+  grantedBy   User?   @relation("PermissionGranter", fields: [grantedById], references: [id])
 
-  createdAt    DateTime @default(now())
+  createdAt DateTime @default(now())
 
   @@unique([collectionId, userId])
   @@index([collectionId])
@@ -276,7 +276,7 @@ enum CollectionPermissionLevel {
 }
 
 model Document {
-  id           String @id @default(cuid())
+  id String @id @default(cuid())
 
   collectionId String
   collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
@@ -289,35 +289,35 @@ model Document {
   fileUrl      String
 
   // Processing status
-  status       DocumentStatus @default(PENDING)
+  status          DocumentStatus @default(PENDING)
   processingError String?
 
   // Metadata
-  title        String?
-  author       String?
-  pageCount    Int?
-  wordCount    Int?
-  language     String? @default("en")
+  title     String?
+  author    String?
+  pageCount Int?
+  wordCount Int?
+  language  String? @default("en")
 
   // Extracted text
   extractedText String? @db.Text
 
   // Embedding info
   embeddingModel String?
-  totalChunks   Int @default(0)
+  totalChunks    Int     @default(0)
 
   // User who uploaded
   uploadedById String
-  uploadedBy   User @relation("UploadedDocuments", fields: [uploadedById], references: [id])
+  uploadedBy   User   @relation("UploadedDocuments", fields: [uploadedById], references: [id])
 
   // Relations
-  chunks       DocumentChunk[]
-  tags         DocumentTag[]
+  chunks        DocumentChunk[]
+  tags          DocumentTag[]
   processingJob ProcessingJob?
 
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  processedAt  DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  processedAt DateTime?
 
   @@index([collectionId])
   @@index([status])
@@ -332,7 +332,7 @@ enum DocumentStatus {
 }
 
 model DocumentChunk {
-  id         String @id @default(cuid())
+  id String @id @default(cuid())
 
   documentId String
   document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
@@ -342,47 +342,47 @@ model DocumentChunk {
   content    String @db.Text
 
   // Position in document
-  startPage  Int?
-  endPage    Int?
-  startChar  Int?
-  endChar    Int?
+  startPage Int?
+  endPage   Int?
+  startChar Int?
+  endChar   Int?
 
   // Vector ID in Qdrant
-  vectorId   String?
+  vectorId String?
 
   // Metadata
   tokenCount Int?
 
-  createdAt  DateTime @default(now())
+  createdAt DateTime @default(now())
 
   @@unique([documentId, chunkIndex])
   @@index([documentId])
 }
 
 model CollectionTag {
-  id           String @id @default(cuid())
-  name         String
-  color        String?
+  id    String  @id @default(cuid())
+  name  String
+  color String?
 
   collectionId String
   collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
 
-  documents    DocumentTag[]
+  documents DocumentTag[]
 
-  createdAt    DateTime @default(now())
+  createdAt DateTime @default(now())
 
   @@unique([collectionId, name])
   @@index([collectionId])
 }
 
 model DocumentTag {
-  id         String @id @default(cuid())
+  id String @id @default(cuid())
 
   documentId String
   document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
 
-  tagId      String
-  tag        CollectionTag @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  tagId String
+  tag   CollectionTag @relation(fields: [tagId], references: [id], onDelete: Cascade)
 
   @@unique([documentId, tagId])
   @@index([documentId])
@@ -390,19 +390,19 @@ model DocumentTag {
 }
 
 model ProcessingJob {
-  id         String @id @default(cuid())
+  id String @id @default(cuid())
 
-  documentId String @unique
+  documentId String   @unique
   document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
 
-  status     JobStatus @default(QUEUED)
-  priority   Int @default(0)
+  status   JobStatus @default(QUEUED)
+  priority Int       @default(0)
 
-  attempts   Int @default(0)
+  attempts    Int @default(0)
   maxAttempts Int @default(10)
 
   // pg-boss integration
-  pgBossJobId String? @unique
+  pgBossJobId String?   @unique
   workerId    String?
   retryAfter  DateTime?
   failedAt    DateTime?
@@ -411,11 +411,11 @@ model ProcessingJob {
   metadata    Json?
   currentStep String?
 
-  error      String? @db.Text
+  error String? @db.Text
 
-  startedAt  DateTime?
+  startedAt   DateTime?
   completedAt DateTime?
-  createdAt  DateTime @default(now())
+  createdAt   DateTime  @default(now())
 
   @@index([status, priority, createdAt])
   @@index([pgBossJobId])
@@ -429,41 +429,41 @@ enum JobStatus {
 }
 
 model ChatMessage {
-  id           String @id @default(cuid())
+  id String @id @default(cuid())
 
-  sessionId    String
-  session      ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  sessionId String
+  session   ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 
-  role         MessageRole
-  content      String @db.Text
+  role    MessageRole
+  content String      @db.Text
 
   // RAG context
   documentChunks Json?
 
   // Per-message agent configuration
-  agentId      String?
-  modelUsed    String?  // Model used for this specific message
-  actionState  Json?    // Agent action state for this message
+  agentId     String?
+  modelUsed   String? // Model used for this specific message
+  actionState Json? // Agent action state for this message
 
   // Token usage
   promptTokens     Int?
   completionTokens Int?
 
-  createdAt    DateTime @default(now())
+  createdAt DateTime @default(now())
 
   @@index([sessionId])
 }
 
 model ChatSharedWith {
-  id        String @id @default(cuid())
+  id String @id @default(cuid())
 
   sessionId String
   session   ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 
-  userId    String
-  user      User @relation("SharedChats", fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation("SharedChats", fields: [userId], references: [id], onDelete: Cascade)
 
-  sharedAt  DateTime @default(now())
+  sharedAt DateTime @default(now())
 
   @@unique([sessionId, userId])
   @@index([userId])
@@ -490,99 +490,129 @@ enum AgentActionType {
 }
 
 model Agent {
-  id          String @id @default(cuid())
+  id String @id @default(cuid())
 
   name        String
-  description String @db.Text
+  description String  @db.Text
   icon        String?
 
-  status      AgentStatus @default(DRAFT)
+  status AgentStatus @default(DRAFT)
 
   // Agent configuration
   systemPrompt String @db.Text
-  temperature  Float @default(0.0)
+  temperature  Float  @default(0.0)
   model        String @default("gpt-4o-mini")
 
   // LangGraph configuration
-  graphConfig  Json?
+  graphConfig Json?
 
   // Marketplace
-  isPublic     Boolean @default(true)
-  featured     Boolean @default(false)
+  isPublic Boolean @default(true)
+  featured Boolean @default(false)
 
   // Stats
   installCount Int @default(0)
 
   // Actions/buttons for this agent
-  actions      AgentAction[]
+  actions AgentAction[]
 
   // Collection activations
   collectionAgents CollectionAgent[]
 
   // Chat sessions using this agent
-  chatSessions     ChatSession[]
+  chatSessions ChatSession[]
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([status])
   @@index([featured])
 }
 
 model AgentAction {
-  id       String @id @default(cuid())
+  id String @id @default(cuid())
 
-  agentId  String
-  agent    Agent @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  agentId String
+  agent   Agent  @relation(fields: [agentId], references: [id], onDelete: Cascade)
 
-  name     String // e.g. "translator_mode", "smart_mode"
-  label    String // e.g. "Translator Mode"
-  icon     String // Icon name from lucide-react
-  type     AgentActionType @default(TOGGLE)
+  name  String // e.g. "translator_mode", "smart_mode"
+  label String // e.g. "Translator Mode"
+  icon  String // Icon name from lucide-react
+  type  AgentActionType @default(TOGGLE)
 
   // For SELECT type
-  options  Json?
+  options Json?
 
   // Default value
   defaultValue String?
 
   // Order in UI
-  order    Int @default(0)
+  order Int @default(0)
 
   createdAt DateTime @default(now())
 
-  @@index([agentId])
   @@unique([agentId, name])
+  @@index([agentId])
 }
 
 model CollectionAgent {
-  id           String @id @default(cuid())
+  id String @id @default(cuid())
 
   collectionId String
   collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
 
-  agentId      String
-  agent        Agent @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  agentId String
+  agent   Agent  @relation(fields: [agentId], references: [id], onDelete: Cascade)
 
-  isActive     Boolean @default(true)
+  isActive Boolean @default(true)
 
   // Action state for this collection (e.g. {"translator_mode": true, "smart_mode": false})
-  actionState  Json?
+  actionState Json?
 
-  activatedAt  DateTime @default(now())
-  createdAt    DateTime @default(now())
+  activatedAt DateTime @default(now())
+  createdAt   DateTime @default(now())
 
   @@unique([collectionId, agentId])
   @@index([collectionId])
   @@index([agentId])
 }
 
-model LLMModel {
-  id          String @id @default(cuid())
+model LLMProvider {
+  id String @id @default(cuid())
 
-  name        String @unique  // e.g. "gpt-4o-mini"
-  displayName String          // e.g. "GPT-4o Mini"
-  provider    String          // e.g. "openai", "anthropic"
+  name        String @unique // e.g. "openai", "anthropic"
+  displayName String // e.g. "OpenAI", "Anthropic"
+
+  // API Configuration
+  baseUrl String? // Custom API endpoint (optional)
+  apiKey  String? // Encrypted API key (optional)
+
+  // Status
+  isActive Boolean @default(true)
+
+  // Metadata
+  description String?
+  logoUrl     String?
+
+  // Relations
+  models LLMModel[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([name])
+  @@index([isActive])
+}
+
+model LLMModel {
+  id String @id @default(cuid())
+
+  name        String @unique // e.g. "gpt-4o-mini"
+  displayName String // e.g. "GPT-4o Mini"
+
+  // Provider relation
+  providerId String
+  provider   LLMProvider @relation(fields: [providerId], references: [id], onDelete: Cascade)
 
   // Model specs
   contextWindow Int?
@@ -593,35 +623,35 @@ model LLMModel {
   outputPrice Float?
 
   // Availability
-  isActive    Boolean @default(true)
-  isDefault   Boolean @default(false)
+  isActive  Boolean @default(true)
+  isDefault Boolean @default(false)
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  @@index([provider])
+  @@index([providerId])
   @@index([isActive])
 }
 
 model ChatSession {
-  id           String @id @default(cuid())
+  id String @id @default(cuid())
 
   collectionId String?
   collection   Collection? @relation(fields: [collectionId], references: [id], onDelete: SetNull)
 
-  userId       String
-  user         User @relation("ChatSessions", fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation("ChatSessions", fields: [userId], references: [id], onDelete: Cascade)
 
-  agentId      String?
-  agent        Agent? @relation(fields: [agentId], references: [id], onDelete: SetNull)
+  agentId String?
+  agent   Agent?  @relation(fields: [agentId], references: [id], onDelete: SetNull)
 
-  title        String?
+  title String?
 
-  messages     ChatMessage[]
-  sharedWith   ChatSharedWith[]
+  messages   ChatMessage[]
+  sharedWith ChatSharedWith[]
 
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([userId])
   @@index([collectionId])

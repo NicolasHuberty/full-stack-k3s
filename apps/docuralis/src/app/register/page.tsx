@@ -24,15 +24,24 @@ export default function RegisterPage() {
     // Detect browser language
     const browserLanguage = navigator.language.split('-')[0] || 'en'
     formData.append('language', browserLanguage)
-
+    console.log('Submitting registration form...')
     const result = await register(formData)
 
     if (result.error) {
+      console.error('Registration failed:', result.error)
       setError(result.error)
       setLoading(false)
     } else {
-      router.push(callbackUrl)
-      router.refresh()
+      console.log('Registration successful, signing in...')
+      // Auto-login after successful registration
+      const email = formData.get('email') as string
+      const password = formData.get('password') as string
+
+      await signIn('credentials', {
+        email,
+        password,
+        callbackUrl,
+      })
     }
   }
 

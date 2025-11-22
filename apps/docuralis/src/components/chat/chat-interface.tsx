@@ -73,7 +73,7 @@ export function ChatInterface({
   const [agentActionState, setAgentActionState] = useState<Record<string, any>>(
     {}
   )
-  const [selectedModel, setSelectedModel] = useState<string>('gpt-4o-mini')
+  const [selectedModel, setSelectedModel] = useState<string>('')
   const [pdfViewer, setPdfViewer] = useState<{
     documentId: string
     documentName: string
@@ -106,6 +106,27 @@ export function ChatInterface({
   useEffect(() => {
     scrollToBottom()
   }, [session?.messages, optimisticMessage, loading])
+
+  useEffect(() => {
+    // Fetch default model on mount
+    const fetchDefaultModel = async () => {
+      try {
+        const res = await fetch('/api/models')
+        if (res.ok) {
+          const models = await res.json()
+          const defaultModel = models.find((m: any) => m.isDefault)
+          if (defaultModel) {
+            setSelectedModel(defaultModel.name)
+          } else if (models.length > 0) {
+            setSelectedModel(models[0].name)
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch default model:', error)
+      }
+    }
+    fetchDefaultModel()
+  }, [])
 
   const loadCurrentUser = async () => {
     try {
@@ -447,11 +468,10 @@ export function ChatInterface({
             )}
 
             <Card
-              className={`max-w-[80%] ${
-                msg.role === 'USER'
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-white border-gray-200'
-              }`}
+              className={`max-w-[80%] ${msg.role === 'USER'
+                ? 'bg-blue-500 text-white'
+                : 'bg-white border-gray-200'
+                }`}
             >
               <CardContent className="p-3">
                 <div className="max-w-none">
@@ -539,12 +559,12 @@ export function ChatInterface({
                                   </span>
                                   {(chunk?.pageNumber ||
                                     chunk?.metadata?.pageNumber) && (
-                                    <span className="text-xs text-blue-600 font-medium">
-                                      Page{' '}
-                                      {chunk.pageNumber ||
-                                        chunk.metadata.pageNumber}
-                                    </span>
-                                  )}
+                                      <span className="text-xs text-blue-600 font-medium">
+                                        Page{' '}
+                                        {chunk.pageNumber ||
+                                          chunk.metadata.pageNumber}
+                                      </span>
+                                    )}
                                 </div>
                               </div>
                               <ExternalLink className="h-4 w-4 text-gray-400 group-hover:text-blue-600 flex-shrink-0 mt-1" />

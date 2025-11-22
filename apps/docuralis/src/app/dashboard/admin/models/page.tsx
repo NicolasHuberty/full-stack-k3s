@@ -21,14 +21,28 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
 import * as Icons from 'lucide-react'
+
+interface LLMProvider {
+  id: string
+  name: string
+  displayName: string
+}
 
 interface LLMModel {
   id: string
   name: string
   displayName: string
-  provider: string
+  providerId: string
+  provider: LLMProvider
   contextWindow?: number
   maxTokens?: number
   inputPrice?: number
@@ -40,23 +54,32 @@ interface LLMModel {
 
 export default function AdminModelsPage() {
   const [models, setModels] = useState<LLMModel[]>([])
+  const [providers, setProviders] = useState<LLMProvider[]>([])
   const [loading, setLoading] = useState(true)
   const [editingModel, setEditingModel] = useState<LLMModel | null>(null)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
 
   useEffect(() => {
-    fetchModels()
+    fetchData()
   }, [])
 
-  const fetchModels = async () => {
+  const fetchData = async () => {
     try {
-      const response = await fetch('/api/admin/models')
-      if (response.ok) {
-        const data = await response.json()
+      const [modelsRes, providersRes] = await Promise.all([
+        fetch('/api/admin/models'),
+        fetch('/api/admin/providers'),
+      ])
+
+      if (modelsRes.ok) {
+        const data = await modelsRes.json()
         setModels(data)
       }
+      if (providersRes.ok) {
+        const data = await providersRes.json()
+        setProviders(data)
+      }
     } catch (error) {
-      console.error('Failed to fetch models:', error)
+      console.error('Failed to fetch data:', error)
     } finally {
       setLoading(false)
     }
@@ -76,7 +99,7 @@ export default function AdminModelsPage() {
       })
 
       if (response.ok) {
-        fetchModels()
+        fetchData()
         setIsDialogOpen(false)
         setEditingModel(null)
       }
@@ -94,7 +117,7 @@ export default function AdminModelsPage() {
       })
 
       if (response.ok) {
-        fetchModels()
+        fetchData()
       }
     } catch (error) {
       console.error('Failed to delete model:', error)
@@ -110,7 +133,7 @@ export default function AdminModelsPage() {
       })
 
       if (response.ok) {
-        fetchModels()
+        fetchData()
       }
     } catch (error) {
       console.error('Failed to toggle model:', error)
@@ -153,6 +176,7 @@ export default function AdminModelsPage() {
               </DialogHeader>
               <ModelForm
                 model={editingModel}
+                providers={providers}
                 onSave={handleSave}
                 onCancel={() => {
                   setIsDialogOpen(false)
@@ -177,7 +201,7 @@ export default function AdminModelsPage() {
                       )}
                     </div>
                     <CardDescription>
-                      {model.name} • {model.provider}
+                      {model.name} • {model.provider?.displayName || 'Unknown Provider'}
                     </CardDescription>
                   </div>
                   <div className="flex items-center gap-2">
@@ -253,17 +277,19 @@ export default function AdminModelsPage() {
 
 function ModelForm({
   model,
+  providers,
   onSave,
   onCancel,
 }: {
   model: LLMModel | null
+  providers: LLMProvider[]
   onSave: (model: Partial<LLMModel>) => void
   onCancel: () => void
 }) {
   const [formData, setFormData] = useState({
     name: model?.name || '',
     displayName: model?.displayName || '',
-    provider: model?.provider || 'openai',
+    providerId: model?.providerId || (providers.length > 0 ? providers[0].id : ''),
     contextWindow: model?.contextWindow || 128000,
     maxTokens: model?.maxTokens || 4096,
     inputPrice: model?.inputPrice || 0,
@@ -272,6 +298,34 @@ function ModelForm({
     isDefault: model?.isDefault ?? false,
   })
 
+  const [availableModels, setAvailableModels] = useState<string[]>([])
+  const [fetchingModels, setFetchingModels] = useState(false)
+
+  // Fetch models when provider changes or on mount if provider is selected
+  useEffect(() => {
+    if (formData.providerId) {
+      fetchProviderModels(formData.providerId)
+    }
+  }, [formData.providerId])
+
+  const fetchProviderModels = async (providerId: string) => {
+    setFetchingModels(true)
+    try {
+      const response = await fetch(`/api/admin/providers/${providerId}/models`)
+      if (response.ok) {
+        const data = await response.json()
+        setAvailableModels(data.models || [])
+      } else {
+        setAvailableModels([])
+      }
+    } catch (error) {
+      console.error('Failed to fetch provider models:', error)
+      setAvailableModels([])
+    } finally {
+      setFetchingModels(false)
+    }
+  }
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     onSave(model ? { ...formData, id: model.id } : formData)
@@ -279,16 +333,74 @@ function ModelForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      <div>
+        <Label htmlFor="provider">Provider</Label>
+        <Select
+          value={formData.providerId}
+          onValueChange={(value) =>
+            setFormData({ ...formData, providerId: value })
+          }
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select a provider" />
+          </SelectTrigger>
+          <SelectContent>
+            {providers.map((provider) => (
+              <SelectItem key={provider.id} value={provider.id}>
+                {provider.displayName}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
       <div className="grid grid-cols-2 gap-4">
         <div>
           <Label htmlFor="name">Model Name</Label>
-          <Input
-            id="name"
-            value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            placeholder="gpt-4o-mini"
-            required
-          />
+          <div className="flex gap-2">
+            {availableModels.length > 0 ? (
+              <Select
+                value={formData.name}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, name: value, displayName: value }) // Auto-fill display name too
+                }
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select a model" />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableModels.map((modelName) => (
+                    <SelectItem key={modelName} value={modelName}>
+                      {modelName}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            ) : (
+              <Input
+                id="name"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                placeholder="gpt-4o-mini"
+                required
+              />
+            )}
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              onClick={() => fetchProviderModels(formData.providerId)}
+              disabled={fetchingModels || !formData.providerId}
+              title="Refresh models"
+            >
+              <Icons.RefreshCw className={`h-4 w-4 ${fetchingModels ? 'animate-spin' : ''}`} />
+            </Button>
+          </div>
+          {availableModels.length === 0 && !fetchingModels && formData.providerId && (
+            <p className="text-xs text-muted-foreground mt-1">
+              No models found or API not supported. Enter manually.
+            </p>
+          )}
         </div>
         <div>
           <Label htmlFor="displayName">Display Name</Label>
@@ -302,19 +414,6 @@ function ModelForm({
             required
           />
         </div>
-      </div>
-
-      <div>
-        <Label htmlFor="provider">Provider</Label>
-        <Input
-          id="provider"
-          value={formData.provider}
-          onChange={(e) =>
-            setFormData({ ...formData, provider: e.target.value })
-          }
-          placeholder="openai"
-          required
-        />
       </div>
 
       <div className="grid grid-cols-2 gap-4">

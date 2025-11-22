@@ -90,10 +90,16 @@ export default function JobDetailsPage() {
 
   useEffect(() => {
     fetchJobDetails()
+
+    // Only poll if job is in a non-terminal state
+    if (job && (job.status === 'COMPLETED' || job.status === 'FAILED')) {
+      return
+    }
+
     // Auto-refresh every 5 seconds
     const interval = setInterval(fetchJobDetails, 5000)
     return () => clearInterval(interval)
-  }, [fetchJobDetails])
+  }, [fetchJobDetails, job?.status])
 
   const retryJob = async () => {
     if (!job) return

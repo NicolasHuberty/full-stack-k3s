@@ -6,7 +6,7 @@ import { z } from 'zod'
 const modelSchema = z.object({
   name: z.string().min(1),
   displayName: z.string().min(1),
-  provider: z.string().min(1),
+  providerId: z.string().min(1),
   contextWindow: z.number().optional(),
   maxTokens: z.number().optional(),
   inputPrice: z.number().optional(),
@@ -33,7 +33,10 @@ export async function GET(_request: NextRequest) {
     }
 
     const models = await prisma.lLMModel.findMany({
-      orderBy: [{ isDefault: 'desc' }, { provider: 'asc' }, { name: 'asc' }],
+      include: {
+        provider: true,
+      },
+      orderBy: [{ isDefault: 'desc' }, { name: 'asc' }],
     })
 
     return NextResponse.json(models)

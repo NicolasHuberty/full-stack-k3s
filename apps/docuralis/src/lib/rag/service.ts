@@ -3,7 +3,9 @@ import { prisma } from '@/lib/prisma'
 import { getQdrantClient } from '@/lib/vector/qdrant'
 import { getEmbeddingService } from '@/lib/processing/embeddings'
 import { hasCollectionAccess } from '@/lib/collections/permissions'
+import { getSystemDefaultModel } from '@/lib/models/settings'
 import OpenAI from 'openai'
+import Anthropic from '@anthropic-ai/sdk'
 
 export interface SearchQuery {
   query: string
@@ -50,10 +52,14 @@ export interface ChatResponse {
 
 export class RAGService {
   private openai: OpenAI
+  private anthropic: Anthropic
 
   constructor() {
     this.openai = new OpenAI({
       apiKey: process.env.OPENAI_API_KEY,
+    })
+    this.anthropic = new Anthropic({
+      apiKey: process.env.ANTHROPIC_API_KEY || '',
     })
   }
 
@@ -213,7 +219,7 @@ export class RAGService {
           context = relevantChunks
             .map(
               (chunk, i) =>
-                `[${i + 1}] From "${chunk.documentName}":\n${chunk.content}`
+                `[${i + 1}] From "${chunk.documentName}": \n${chunk.content} `
             )
             .join('\n\n')
         } else {
@@ -223,54 +229,155 @@ export class RAGService {
         console.warn('No collection ID provided for RAG search')
       }
 
-      // Build messages for OpenAI
-      const messages: ChatMessage[] = []
 
-      // System message with context
-      if (context) {
-        messages.push({
-          role: 'system',
-          content: `You are a helpful assistant that answers questions based on the provided documents. Use the following context to answer the user's question. If the answer is not in the context, say so.
 
-Context:
-${context}`,
-        })
-      } else {
-        messages.push({
-          role: 'system',
-          content: 'You are a helpful assistant.',
-        })
+      // ... existing imports
+
+      // ... inside chat method
+
+      // Determine provider based on model name or fetch from DB
+      let providerName = 'openai'
+      let providerApiKey: string | null = null
+      let modelName = params.model
+
+      if (!modelName) {
+        const defaultModel = await getSystemDefaultModel()
+        modelName = defaultModel.name
       }
 
-      // Add conversation history
-      session.messages.forEach((msg: any) => {
-        messages.push({
-          role: msg.role.toLowerCase() as 'user' | 'assistant',
-          content: msg.content,
+      // Ensure modelName is a string for subsequent calls
+      const safeModelName = modelName as string
+
+      // Fetch model details to get provider
+      // We need to cast to any because the generated Prisma types might not fully reflect the relation yet
+      // or there's a mismatch in how we're accessing it.
+      const modelDetails = await prisma.lLMModel.findUnique({
+        where: { name: safeModelName },
+        include: { provider: true },
+      }) as any
+
+      if (modelDetails?.provider?.name) {
+        providerName = modelDetails.provider.name.toLowerCase()
+        providerApiKey = modelDetails.provider.apiKey
+      } else {
+        // Fallback heuristics if model not found in DB (legacy support)
+        if (modelName.startsWith('claude')) {
+          providerName = 'anthropic'
+        }
+      }
+
+      let assistantMessage = ''
+      let usage = {
+        promptTokens: 0,
+        completionTokens: 0,
+        totalTokens: 0,
+      }
+
+      if (providerName === 'anthropic') {
+        // --- ANTHROPIC LOGIC ---
+        const apiKey = providerApiKey || process.env.ANTHROPIC_API_KEY
+
+        if (!apiKey) {
+          throw new Error('Anthropic API key not found. Please set it in the Admin Panel or .env file.')
+        }
+
+        // Instantiate client on demand to use the correct key
+        const anthropicClient = new Anthropic({
+          apiKey: apiKey,
         })
-      })
 
-      // Add current message
-      messages.push({
-        role: 'user',
-        content: params.message,
-      })
+        const systemMessage = context
+          ? `You are a helpful assistant that answers questions based on the provided documents. Use the following context to answer the user's question. If the answer is not in the context, say so.\n\nContext:\n${context}`
+          : 'You are a helpful assistant.'
 
-      // Call OpenAI
-      const completion = await this.openai.chat.completions.create({
-        model: params.model || 'gpt-4o-mini',
-        messages,
-        max_completion_tokens: params.maxTokens || 1000,
-      })
+        const anthropicMessages: any[] = []
 
-      const assistantMessage = completion.choices[0]?.message?.content || ''
+        // Add conversation history
+        session.messages.forEach((msg: any) => {
+          // Anthropic doesn't support 'system' role in messages array, it goes to top-level system param
+          if (msg.role.toLowerCase() !== 'system') {
+            anthropicMessages.push({
+              role: msg.role.toLowerCase() === 'user' ? 'user' : 'assistant',
+              content: msg.content,
+            })
+          }
+        })
+
+        // Add current message
+        anthropicMessages.push({
+          role: 'user',
+          content: params.message,
+        })
+
+        const response = await anthropicClient.messages.create({
+          model: safeModelName,
+          max_tokens: params.maxTokens || 1000,
+          system: systemMessage,
+          messages: anthropicMessages,
+        })
+
+        assistantMessage = (response.content[0] as any).text || ''
+        usage = {
+          promptTokens: response.usage.input_tokens,
+          completionTokens: response.usage.output_tokens,
+          totalTokens: response.usage.input_tokens + response.usage.output_tokens
+        }
+
+      } else {
+        // --- OPENAI LOGIC (Default) ---
+        // Check if we have a specific API key for OpenAI in DB
+        if (providerName === 'openai' && providerApiKey) {
+          this.openai = new OpenAI({ apiKey: providerApiKey })
+        }
+
+        const messages: ChatMessage[] = []
+
+        // System message with context
+        if (context) {
+          messages.push({
+            role: 'system',
+            content: `You are a helpful assistant that answers questions based on the provided documents. Use the following context to answer the user's question. If the answer is not in the context, say so.
+
+  Context:
+  ${context}`,
+          })
+        } else {
+          messages.push({
+            role: 'system',
+            content: 'You are a helpful assistant.',
+          })
+        }
+
+        // Add conversation history
+        session.messages.forEach((msg: any) => {
+          messages.push({
+            role: msg.role.toLowerCase() as 'user' | 'assistant',
+            content: msg.content,
+          })
+        })
+
+        // Add current message
+        messages.push({
+          role: 'user',
+          content: params.message,
+        })
+
+        const completion = await this.openai.chat.completions.create({
+          model: safeModelName,
+          messages,
+          max_completion_tokens: params.maxTokens || 1000,
+        })
+
+        assistantMessage = completion.choices[0]?.message?.content || ''
+        usage = {
+          promptTokens: completion.usage?.prompt_tokens || 0,
+          completionTokens: completion.usage?.completion_tokens || 0,
+          totalTokens: completion.usage?.total_tokens || 0
+        }
+      }
 
       if (!assistantMessage) {
-        console.error(
-          'No content in OpenAI response!',
-          JSON.stringify(completion, null, 2)
-        )
-        throw new Error('OpenAI returned empty response')
+        throw new Error('Provider returned empty response')
       }
 
       // Save user message (without chunks)
@@ -292,8 +399,9 @@ ${context}`,
             relevantChunks.length > 0
               ? JSON.parse(JSON.stringify(relevantChunks))
               : undefined,
-          promptTokens: completion.usage?.prompt_tokens || 0,
-          completionTokens: completion.usage?.completion_tokens || 0,
+          promptTokens: usage.promptTokens,
+          completionTokens: usage.completionTokens,
+          modelUsed: modelName,
         },
       })
 
@@ -309,11 +417,7 @@ ${context}`,
         sessionId: session.id,
         message: assistantMessage,
         chunks: relevantChunks,
-        usage: {
-          promptTokens: completion.usage?.prompt_tokens || 0,
-          completionTokens: completion.usage?.completion_tokens || 0,
-          totalTokens: completion.usage?.total_tokens || 0,
-        },
+        usage: usage,
       }
     } catch (error) {
       console.error('Chat failed:', error)

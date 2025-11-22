@@ -6,7 +6,7 @@ import { z } from 'zod'
 const modelSchema = z.object({
   name: z.string().min(1).optional(),
   displayName: z.string().min(1).optional(),
-  provider: z.string().min(1).optional(),
+  providerId: z.string().min(1).optional(),
   contextWindow: z.number().optional(),
   maxTokens: z.number().optional(),
   inputPrice: z.number().optional(),

@@ -207,6 +207,12 @@ export default function AdminDashboardPage() {
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <Button asChild className="w-full">
+                <Link href="/dashboard/admin/providers">
+                  <Icons.Cpu className="h-4 w-4 mr-2" />
+                  LLM Providers
+                </Link>
+              </Button>
+              <Button asChild variant="outline" className="w-full">
                 <Link href="/dashboard/admin/models">
                   <Icons.Settings className="h-4 w-4 mr-2" />
                   Manage Models

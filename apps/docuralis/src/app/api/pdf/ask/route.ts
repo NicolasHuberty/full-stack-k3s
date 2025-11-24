@@ -162,7 +162,7 @@ Selected Text (from page ${validatedData.currentPage}):
 
     // Call LLM API using LangChain
     const defaultModel = await getSystemDefaultModel()
-    let model: any
+    let model: ChatAnthropic | ChatOpenAI
 
     if (defaultModel.provider === 'anthropic') {
       model = new ChatAnthropic({

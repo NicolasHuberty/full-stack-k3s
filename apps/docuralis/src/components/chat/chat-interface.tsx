@@ -23,6 +23,7 @@ import ReactMarkdown from 'react-markdown'
 import { AgentActions } from './agent-actions'
 import { PDFViewer } from '@/components/pdf-viewer'
 import { getCustomMarkdownComponents } from './markdown-components'
+import { AudioRecorder } from './audio-recorder'
 
 interface Message {
   id: string
@@ -468,10 +469,11 @@ export function ChatInterface({
             )}
 
             <Card
-              className={`max-w-[80%] ${msg.role === 'USER'
-                ? 'bg-blue-500 text-white'
-                : 'bg-white border-gray-200'
-                }`}
+              className={`max-w-[80%] ${
+                msg.role === 'USER'
+                  ? 'bg-blue-500 text-white'
+                  : 'bg-white border-gray-200'
+              }`}
             >
               <CardContent className="p-3">
                 <div className="max-w-none">
@@ -559,12 +561,12 @@ export function ChatInterface({
                                   </span>
                                   {(chunk?.pageNumber ||
                                     chunk?.metadata?.pageNumber) && (
-                                      <span className="text-xs text-blue-600 font-medium">
-                                        Page{' '}
-                                        {chunk.pageNumber ||
-                                          chunk.metadata.pageNumber}
-                                      </span>
-                                    )}
+                                    <span className="text-xs text-blue-600 font-medium">
+                                      Page{' '}
+                                      {chunk.pageNumber ||
+                                        chunk.metadata.pageNumber}
+                                    </span>
+                                  )}
                                 </div>
                               </div>
                               <ExternalLink className="h-4 w-4 text-gray-400 group-hover:text-blue-600 flex-shrink-0 mt-1" />
@@ -786,6 +788,12 @@ export function ChatInterface({
               <Send className="h-4 w-4" />
             )}
           </Button>
+          <AudioRecorder
+            onTranscriptionComplete={(text) =>
+              setMessage((prev) => prev + (prev ? ' ' : '') + text)
+            }
+            className="self-end"
+          />
         </div>
       </div>
 

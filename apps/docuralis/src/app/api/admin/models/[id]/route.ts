@@ -13,6 +13,7 @@ const modelSchema = z.object({
   outputPrice: z.number().optional(),
   isActive: z.boolean().optional(),
   isDefault: z.boolean().optional(),
+  type: z.enum(['CHAT', 'STT', 'EMBEDDING']).optional(),
 })
 
 export async function PATCH(
@@ -39,12 +40,28 @@ export async function PATCH(
     const body = await request.json()
     const data = modelSchema.parse(body)
 
-    // If setting as default, unset other defaults
+    // If setting as default, unset other defaults of the same type
     if (data.isDefault) {
-      await prisma.lLMModel.updateMany({
-        where: { isDefault: true, NOT: { id } },
-        data: { isDefault: false },
-      })
+      // First get the model type if not provided in update
+      let type = data.type
+      if (!type) {
+        const existingModel = await prisma.lLMModel.findUnique({
+          where: { id },
+          select: { type: true },
+        })
+        type = existingModel?.type
+      }
+
+      if (type) {
+        await prisma.lLMModel.updateMany({
+          where: {
+            isDefault: true,
+            type: type,
+            NOT: { id },
+          },
+          data: { isDefault: false },
+        })
+      }
     }
 
     const model = await prisma.lLMModel.update({

@@ -73,10 +73,16 @@ async function main() {
   ]
 
   for (const model of models) {
+    const { provider, ...modelData } = model
     await prisma.lLMModel.upsert({
       where: { name: model.name },
-      update: model,
-      create: model,
+      update: modelData,
+      create: {
+        ...modelData,
+        provider: {
+          connect: { name: provider },
+        },
+      },
     })
   }
 }

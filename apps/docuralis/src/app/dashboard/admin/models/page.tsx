@@ -43,6 +43,7 @@ interface LLMModel {
   displayName: string
   providerId: string
   provider: LLMProvider
+  type: 'CHAT' | 'STT' | 'EMBEDDING'
   contextWindow?: number
   maxTokens?: number
   inputPrice?: number
@@ -195,13 +196,15 @@ export default function AdminModelsPage() {
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
                       <CardTitle>{model.displayName}</CardTitle>
+                      <Badge variant="outline">{model.type}</Badge>
                       {model.isDefault && <Badge>Default</Badge>}
                       {!model.isActive && (
                         <Badge variant="secondary">Inactive</Badge>
                       )}
                     </div>
                     <CardDescription>
-                      {model.name} • {model.provider?.displayName || 'Unknown Provider'}
+                      {model.name} •{' '}
+                      {model.provider?.displayName || 'Unknown Provider'}
                     </CardDescription>
                   </div>
                   <div className="flex items-center gap-2">
@@ -289,7 +292,9 @@ function ModelForm({
   const [formData, setFormData] = useState({
     name: model?.name || '',
     displayName: model?.displayName || '',
-    providerId: model?.providerId || (providers.length > 0 ? providers[0].id : ''),
+    providerId:
+      model?.providerId || (providers.length > 0 ? providers[0].id : ''),
+    type: model?.type || 'CHAT',
     contextWindow: model?.contextWindow || 128000,
     maxTokens: model?.maxTokens || 4096,
     inputPrice: model?.inputPrice || 0,
@@ -354,6 +359,28 @@ function ModelForm({
         </Select>
       </div>
 
+      <div>
+        <Label htmlFor="type">Model Type</Label>
+        <Select
+          value={formData.type}
+          onValueChange={(value) =>
+            setFormData({
+              ...formData,
+              type: value as 'CHAT' | 'STT' | 'EMBEDDING',
+            })
+          }
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select type" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="CHAT">Chat</SelectItem>
+            <SelectItem value="STT">Speech-to-Text</SelectItem>
+            <SelectItem value="EMBEDDING">Embedding</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
       <div className="grid grid-cols-2 gap-4">
         <div>
           <Label htmlFor="name">Model Name</Label>
@@ -361,8 +388,13 @@ function ModelForm({
             {availableModels.length > 0 ? (
               <Select
                 value={formData.name}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, name: value, displayName: value }) // Auto-fill display name too
+                onValueChange={
+                  (value) =>
+                    setFormData({
+                      ...formData,
+                      name: value,
+                      displayName: value,
+                    }) // Auto-fill display name too
                 }
               >
                 <SelectTrigger className="w-full">
@@ -380,7 +412,9 @@ function ModelForm({
               <Input
                 id="name"
                 value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
                 placeholder="gpt-4o-mini"
                 required
               />
@@ -393,14 +427,18 @@ function ModelForm({
               disabled={fetchingModels || !formData.providerId}
               title="Refresh models"
             >
-              <Icons.RefreshCw className={`h-4 w-4 ${fetchingModels ? 'animate-spin' : ''}`} />
+              <Icons.RefreshCw
+                className={`h-4 w-4 ${fetchingModels ? 'animate-spin' : ''}`}
+              />
             </Button>
           </div>
-          {availableModels.length === 0 && !fetchingModels && formData.providerId && (
-            <p className="text-xs text-muted-foreground mt-1">
-              No models found or API not supported. Enter manually.
-            </p>
-          )}
+          {availableModels.length === 0 &&
+            !fetchingModels &&
+            formData.providerId && (
+              <p className="text-xs text-muted-foreground mt-1">
+                No models found or API not supported. Enter manually.
+              </p>
+            )}
         </div>
         <div>
           <Label htmlFor="displayName">Display Name</Label>

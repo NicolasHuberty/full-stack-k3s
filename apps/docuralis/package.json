@@ -31,6 +31,7 @@
     "@langchain/core": "^0.3.0",
     "@langchain/langgraph": "^0.2.0",
     "@langchain/openai": "^0.3.0",
+    "@mistralai/mistralai": "^1.10.0",
     "@prisma/client": "^6.17.1",
     "@qdrant/js-client-rest": "^1.15.1",
     "@radix-ui/react-accordion": "^1.2.12",
@@ -84,6 +85,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
+    "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",

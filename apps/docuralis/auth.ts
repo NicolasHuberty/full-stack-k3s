@@ -15,30 +15,30 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     // OAuth providers (optional - only enabled if env vars are set)
     ...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
       ? [
-        Google({
-          clientId: process.env.GOOGLE_CLIENT_ID,
-          clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-        }),
-      ]
+          Google({
+            clientId: process.env.GOOGLE_CLIENT_ID,
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+          }),
+        ]
       : []),
     ...(process.env.GITHUB_ID && process.env.GITHUB_SECRET
       ? [
-        GitHub({
-          clientId: process.env.GITHUB_ID,
-          clientSecret: process.env.GITHUB_SECRET,
-        }),
-      ]
+          GitHub({
+            clientId: process.env.GITHUB_ID,
+            clientSecret: process.env.GITHUB_SECRET,
+          }),
+        ]
       : []),
     ...(process.env.AZURE_AD_CLIENT_ID &&
-      process.env.AZURE_AD_CLIENT_SECRET &&
-      process.env.AZURE_AD_TENANT_ID
+    process.env.AZURE_AD_CLIENT_SECRET &&
+    process.env.AZURE_AD_TENANT_ID
       ? [
-        AzureAD({
-          clientId: process.env.AZURE_AD_CLIENT_ID,
-          clientSecret: process.env.AZURE_AD_CLIENT_SECRET,
-          issuer: `https://login.microsoftonline.com/${process.env.AZURE_AD_TENANT_ID}/v2.0`,
-        }),
-      ]
+          AzureAD({
+            clientId: process.env.AZURE_AD_CLIENT_ID,
+            clientSecret: process.env.AZURE_AD_CLIENT_SECRET,
+            issuer: `https://login.microsoftonline.com/${process.env.AZURE_AD_TENANT_ID}/v2.0`,
+          }),
+        ]
       : []),
     // Credentials provider (always enabled)
     Credentials({

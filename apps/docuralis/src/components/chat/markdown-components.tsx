@@ -56,9 +56,10 @@ export function getCustomMarkdownComponents(
     const pageNumber = chunk.pageNumber || chunk.metadata?.pageNumber || null
 
     if (pageNumber !== null && pageNumber !== undefined) {
-      const parsedPage = typeof pageNumber === 'string'
-        ? parseInt(pageNumber, 10)
-        : Number(pageNumber)
+      const parsedPage =
+        typeof pageNumber === 'string'
+          ? parseInt(pageNumber, 10)
+          : Number(pageNumber)
       return isNaN(parsedPage) || parsedPage <= 0 ? null : parsedPage
     }
     return null
@@ -68,18 +69,19 @@ export function getCustomMarkdownComponents(
   const getPageFromFilename = (filename: string): number | null => {
     if (!componentProps.documentChunks) return null
 
-    const chunk = componentProps.documentChunks.find(chunk =>
-      chunk.documentName === filename ||
-      chunk.metadata?.title === filename
+    const chunk = componentProps.documentChunks.find(
+      (chunk) =>
+        chunk.documentName === filename || chunk.metadata?.title === filename
     )
 
     if (!chunk) return null
 
     const pageNumber = chunk.pageNumber || chunk.metadata?.pageNumber || null
     if (pageNumber !== null && pageNumber !== undefined) {
-      const parsedPage = typeof pageNumber === 'string'
-        ? parseInt(pageNumber, 10)
-        : Number(pageNumber)
+      const parsedPage =
+        typeof pageNumber === 'string'
+          ? parseInt(pageNumber, 10)
+          : Number(pageNumber)
       return isNaN(parsedPage) || parsedPage <= 0 ? null : parsedPage
     }
     return null
@@ -130,7 +132,9 @@ export function getCustomMarkdownComponents(
                 <PDFReference
                   key={`pdf-${index}`}
                   filename={filename}
-                  onClick={() => componentProps.onPdfClick(filename, pageNumber || undefined)}
+                  onClick={() =>
+                    componentProps.onPdfClick(filename, pageNumber || undefined)
+                  }
                 />
               )
             }
@@ -147,7 +151,12 @@ export function getCustomMarkdownComponents(
                   <PDFReference
                     key={`doc-${index}`}
                     filename={filename}
-                    onClick={() => componentProps.onPdfClick(filename, pageNumber || undefined)}
+                    onClick={() =>
+                      componentProps.onPdfClick(
+                        filename,
+                        pageNumber || undefined
+                      )
+                    }
                   />
                 )
               }
@@ -228,7 +237,9 @@ export function getCustomMarkdownComponents(
           return (
             <PDFReference
               filename={filename}
-              onClick={() => componentProps.onPdfClick(filename, pageNumber || undefined)}
+              onClick={() =>
+                componentProps.onPdfClick(filename, pageNumber || undefined)
+              }
             />
           )
         }

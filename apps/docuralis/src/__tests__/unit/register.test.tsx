@@ -10,9 +10,10 @@ jest.mock('@/app/actions/auth', () => ({
 
 const mockRegister = register as jest.MockedFunction<typeof register>
 
-// Mock next-auth
+// Mock next-auth with a factory function
+const mockSignIn = jest.fn()
 jest.mock('next-auth/react', () => ({
-  signIn: jest.fn(),
+  signIn: (...args: unknown[]) => mockSignIn(...args),
 }))
 
 // Mock next/navigation
@@ -29,6 +30,15 @@ jest.mock('next/navigation', () => ({
 describe('RegisterPage Component', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    // Mock signIn to simulate successful authentication and redirect
+    mockSignIn.mockImplementation(async (provider, options) => {
+      // Simulate the redirect behavior of signIn
+      if (options?.callbackUrl) {
+        mockPush(options.callbackUrl)
+        mockRefresh()
+      }
+      return { ok: true, error: null, status: 200, url: options?.callbackUrl }
+    })
     // Mock navigator.language if window is available
     if (typeof window !== 'undefined') {
       Object.defineProperty(window.navigator, 'language', {

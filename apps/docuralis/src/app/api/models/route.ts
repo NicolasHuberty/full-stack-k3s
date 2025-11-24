@@ -9,10 +9,17 @@ export async function GET(_request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Get only active models for regular users
+    // Get only active CHAT models for regular users
     const models = await prisma.lLMModel.findMany({
-      where: { isActive: true },
-      orderBy: [{ isDefault: 'desc' }, { provider: { name: 'asc' } }, { name: 'asc' }],
+      where: {
+        isActive: true,
+        type: 'CHAT',
+      },
+      orderBy: [
+        { isDefault: 'desc' },
+        { provider: { name: 'asc' } },
+        { name: 'asc' },
+      ],
       select: {
         id: true,
         name: true,

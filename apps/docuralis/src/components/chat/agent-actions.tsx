@@ -196,8 +196,6 @@ export function AgentActions({
     )
   }
 
-
-
   const activeAgent = collectionAgents.find(
     (ca) => ca.agent.id === selectedAgent
   )

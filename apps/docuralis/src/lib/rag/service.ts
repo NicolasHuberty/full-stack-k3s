@@ -6,6 +6,7 @@ import { hasCollectionAccess } from '@/lib/collections/permissions'
 import { getSystemDefaultModel } from '@/lib/models/settings'
 import OpenAI from 'openai'
 import Anthropic from '@anthropic-ai/sdk'
+import { decrypt } from '@/lib/encryption'
 
 export interface SearchQuery {
   query: string
@@ -229,8 +230,6 @@ export class RAGService {
         console.warn('No collection ID provided for RAG search')
       }
 
-
-
       // ... existing imports
 
       // ... inside chat method
@@ -251,14 +250,14 @@ export class RAGService {
       // Fetch model details to get provider
       // We need to cast to any because the generated Prisma types might not fully reflect the relation yet
       // or there's a mismatch in how we're accessing it.
-      const modelDetails = await prisma.lLMModel.findUnique({
+      const modelDetails = (await prisma.lLMModel.findUnique({
         where: { name: safeModelName },
         include: { provider: true },
-      }) as any
+      })) as any
 
       if (modelDetails?.provider?.name) {
         providerName = modelDetails.provider.name.toLowerCase()
-        providerApiKey = modelDetails.provider.apiKey
+        providerApiKey = decrypt(modelDetails.provider.apiKey || '')
       } else {
         // Fallback heuristics if model not found in DB (legacy support)
         if (modelName.startsWith('claude')) {
@@ -278,7 +277,9 @@ export class RAGService {
         const apiKey = providerApiKey || process.env.ANTHROPIC_API_KEY
 
         if (!apiKey) {
-          throw new Error('Anthropic API key not found. Please set it in the Admin Panel or .env file.')
+          throw new Error(
+            'Anthropic API key not found. Please set it in the Admin Panel or .env file.'
+          )
         }
 
         // Instantiate client on demand to use the correct key
@@ -320,9 +321,9 @@ export class RAGService {
         usage = {
           promptTokens: response.usage.input_tokens,
           completionTokens: response.usage.output_tokens,
-          totalTokens: response.usage.input_tokens + response.usage.output_tokens
+          totalTokens:
+            response.usage.input_tokens + response.usage.output_tokens,
         }
-
       } else {
         // --- OPENAI LOGIC (Default) ---
         // Check if we have a specific API key for OpenAI in DB
@@ -372,7 +373,7 @@ export class RAGService {
         usage = {
           promptTokens: completion.usage?.prompt_tokens || 0,
           completionTokens: completion.usage?.completion_tokens || 0,
-          totalTokens: completion.usage?.total_tokens || 0
+          totalTokens: completion.usage?.total_tokens || 0,
         }
       }
 

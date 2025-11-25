@@ -52,6 +52,7 @@ interface LLMProvider {
 
 export default function AdminProvidersPage() {
   const router = useRouter()
+  const { toast } = useToast()
   const [providers, setProviders] = useState<LLMProvider[]>([])
   const [loading, setLoading] = useState(true)
   const [editingProvider, setEditingProvider] = useState<LLMProvider | null>(
@@ -97,9 +98,30 @@ export default function AdminProvidersPage() {
         fetchProviders()
         setIsDialogOpen(false)
         setEditingProvider(null)
+        toast({
+          title: 'Success',
+          description: `Provider ${provider.id ? 'updated' : 'created'} successfully`,
+        })
+      } else {
+        // Parse error response
+        const errorData = await response.json()
+        const errorMessage =
+          errorData.error || 'Failed to save provider. Please try again.'
+
+        toast({
+          title: 'Error',
+          description: errorMessage,
+          variant: 'destructive',
+        })
+        console.error('Failed to save provider:', errorData)
       }
     } catch (error) {
       console.error('Failed to save provider:', error)
+      toast({
+        title: 'Error',
+        description: 'An unexpected error occurred. Please try again.',
+        variant: 'destructive',
+      })
     }
   }
 
@@ -334,13 +356,67 @@ function ProviderForm({
   }
 
   const handleTestConnection = async () => {
-    if (!provider?.id) return
+    // We can test if we have at least a name and API key (or if it's an existing provider)
+    if (!formData.name) {
+      toast({
+        title: 'Error',
+        description: 'Provider Name is required for testing',
+        variant: 'destructive',
+      })
+      return
+    }
 
     try {
       setIsTesting(true)
-      const response = await fetch(`/api/admin/providers/${provider.id}/test`, {
-        method: 'POST',
-      })
+      let response
+
+      if (provider?.id) {
+        // For existing providers, we can use the specific endpoint
+        // BUT, if the user changed the API key in the form, we should probably test with that instead.
+        // To be consistent and allow testing changes before saving, let's use the new generic endpoint for everything
+        // if the form has data.
+        // However, the existing endpoint handles decryption of the stored key if the user didn't enter a new one.
+        // So: if apiKey field is empty, use existing endpoint (uses stored key).
+        // If apiKey field is NOT empty, use generic endpoint (uses new key).
+
+        if (formData.apiKey) {
+          response = await fetch('/api/admin/providers/test', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              name: formData.name,
+              baseUrl: formData.baseUrl,
+              apiKey: formData.apiKey,
+            }),
+          })
+        } else {
+          // Use stored key
+          response = await fetch(`/api/admin/providers/${provider.id}/test`, {
+            method: 'POST',
+          })
+        }
+      } else {
+        // New provider
+        if (!formData.apiKey) {
+          toast({
+            title: 'Error',
+            description: 'API Key is required for testing',
+            variant: 'destructive',
+          })
+          setIsTesting(false)
+          return
+        }
+
+        response = await fetch('/api/admin/providers/test', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: formData.name,
+            baseUrl: formData.baseUrl,
+            apiKey: formData.apiKey,
+          }),
+        })
+      }
 
       const data = await response.json()
 
@@ -471,23 +547,22 @@ function ProviderForm({
           >
             Cancel
           </Button>
-          {provider?.id && (
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleTestConnection}
-              disabled={isTesting}
-            >
-              {isTesting ? (
-                <>
-                  <Icons.Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Testing...
-                </>
-              ) : (
-                'Test Connection'
-              )}
-            </Button>
-          )}
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleTestConnection}
+            disabled={isTesting}
+          >
+            {isTesting ? (
+              <>
+                <Icons.Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Testing...
+              </>
+            ) : (
+              'Test Connection'
+            )}
+          </Button>
+
           <Button type="submit" disabled={isTesting}>
             Save
           </Button>

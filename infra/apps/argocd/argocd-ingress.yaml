@@ -11,14 +11,14 @@ metadata:
     cert-manager.io/cluster-issuer: "letsencrypt-prod"
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
     traefik.ingress.kubernetes.io/router.tls: "true"
-    external-dns.alpha.kubernetes.io/hostname: argocd.huberty.pro  # CHANGE THIS
+    external-dns.alpha.kubernetes.io/hostname: argocd.docuralis.com
     # Argo CD needs these special annotations
     nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
     nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
 spec:
   ingressClassName: traefik
   rules:
-    - host: argocd.huberty.pro  # CHANGE THIS to your domain
+    - host: argocd.docuralis.com
       http:
         paths:
           - path: /
@@ -30,5 +30,5 @@ spec:
                   number: 80
   tls:
     - hosts:
-        - argocd.huberty.pro  # CHANGE THIS to your domain
+        - argocd.docuralis.com
       secretName: argocd-tls

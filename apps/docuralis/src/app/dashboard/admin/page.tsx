@@ -212,6 +212,12 @@ export default function AdminDashboardPage() {
                   LLM Providers
                 </Link>
               </Button>
+              <Button asChild className="w-full bg-blue-600 hover:bg-blue-700">
+                <Link href="/dashboard/admin/costs">
+                  <Icons.DollarSign className="h-4 w-4 mr-2" />
+                  LLM Costs
+                </Link>
+              </Button>
               <Button asChild variant="outline" className="w-full">
                 <Link href="/dashboard/admin/models">
                   <Icons.Settings className="h-4 w-4 mr-2" />

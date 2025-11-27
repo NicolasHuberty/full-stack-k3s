@@ -1,2 +1,3 @@
 scripts/setup-vault-secrets.sh
 apps/docuralis/jurisprudence/
+apps/docuralis/prisma/dev.db

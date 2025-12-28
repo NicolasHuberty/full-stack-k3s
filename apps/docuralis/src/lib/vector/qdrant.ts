@@ -87,6 +87,12 @@ class QdrantService {
         },
       })
 
+      // Create payload indexes for faster filtering
+      console.log(
+        `Creating payload indexes for collection ${collectionName}...`
+      )
+      await this.createPayloadIndexes(collectionName)
+
       console.log(
         `Collection ${collectionName} created with vector size ${vectorSize}`
       )
@@ -95,6 +101,76 @@ class QdrantService {
       throw new Error(
         `Failed to create collection: ${error instanceof Error ? error.message : 'Unknown error'}`
       )
+    }
+  }
+
+  /**
+   * Create payload indexes for faster filtering
+   */
+  async createPayloadIndexes(collectionName: string): Promise<void> {
+    try {
+      // Index collectionId for filtering (most important for multi-tenant)
+      await this.client.createPayloadIndex(collectionName, {
+        field_name: 'collectionId',
+        field_schema: 'keyword',
+        wait: true,
+      })
+      console.log(`  ✓ Created index on 'collectionId'`)
+
+      // Index documentId for document-level filtering
+      await this.client.createPayloadIndex(collectionName, {
+        field_name: 'documentId',
+        field_schema: 'keyword',
+        wait: true,
+      })
+      console.log(`  ✓ Created index on 'documentId'`)
+
+      // Index chunkIndex for ordering
+      await this.client.createPayloadIndex(collectionName, {
+        field_name: 'chunkIndex',
+        field_schema: 'integer',
+        wait: true,
+      })
+      console.log(`  ✓ Created index on 'chunkIndex'`)
+    } catch (error) {
+      console.error('Failed to create payload indexes:', error)
+      // Don't throw - indexes are optional optimization
+    }
+  }
+
+  /**
+   * Ensure indexes exist on a collection (for existing collections)
+   */
+  async ensurePayloadIndexes(collectionName: string): Promise<void> {
+    try {
+      const info = await this.client.getCollection(collectionName)
+      const existingIndexes = Object.keys(info.payload_schema || {})
+
+      if (!existingIndexes.includes('collectionId')) {
+        console.log(
+          `Creating missing index 'collectionId' on ${collectionName}...`
+        )
+        await this.client.createPayloadIndex(collectionName, {
+          field_name: 'collectionId',
+          field_schema: 'keyword',
+          wait: true,
+        })
+      }
+
+      if (!existingIndexes.includes('documentId')) {
+        console.log(
+          `Creating missing index 'documentId' on ${collectionName}...`
+        )
+        await this.client.createPayloadIndex(collectionName, {
+          field_name: 'documentId',
+          field_schema: 'keyword',
+          wait: true,
+        })
+      }
+
+      console.log(`Indexes verified for collection ${collectionName}`)
+    } catch (error) {
+      console.error('Failed to ensure payload indexes:', error)
     }
   }
 
@@ -285,6 +361,16 @@ class QdrantService {
         }
       }
 
+      // DEBUG: Log search parameters
+      console.log('\n' + '='.repeat(80))
+      console.log('[Qdrant DEBUG] Search Parameters:')
+      console.log('  Collection:', collectionName)
+      console.log('  Query vector length:', queryVector.length)
+      console.log('  Query vector sample (first 5):', queryVector.slice(0, 5))
+      console.log('  Limit:', limit)
+      console.log('  Filter:', JSON.stringify(filter, null, 2))
+      console.log('='.repeat(80))
+
       const results = await this.client.search(collectionName, {
         vector: queryVector,
         limit,
@@ -298,16 +384,38 @@ class QdrantService {
         payload: result.payload as any,
       }))
 
-      // Debug log first result to see structure
-      if (mappedResults.length > 0) {
-        console.log('[Qdrant] First search result structure:', {
-          id: mappedResults[0].id,
-          score: mappedResults[0].score,
-          payloadKeys: Object.keys(mappedResults[0].payload),
-          pageNumber: mappedResults[0].payload.page_number,
-          fullPayload: mappedResults[0].payload,
-        })
-      }
+      // DEBUG: Log ALL results with scores
+      console.log('\n' + '='.repeat(80))
+      console.log(
+        `[Qdrant DEBUG] Search Results (${mappedResults.length} total):`
+      )
+      console.log('-'.repeat(80))
+
+      // Score distribution
+      const scores = mappedResults.map((r) => r.score)
+      console.log('  Score distribution:')
+      console.log('    Min:', Math.min(...scores).toFixed(4))
+      console.log('    Max:', Math.max(...scores).toFixed(4))
+      console.log(
+        '    Avg:',
+        (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(4)
+      )
+      console.log('-'.repeat(80))
+
+      // Log each result
+      mappedResults.forEach((result, idx) => {
+        const contentPreview =
+          result.payload.content?.substring(0, 150)?.replace(/\n/g, ' ') ||
+          'N/A'
+        console.log(`  [${idx + 1}] Score: ${result.score.toFixed(4)}`)
+        console.log(`      Doc: ${result.payload.documentId}`)
+        console.log(
+          `      Page: ${result.payload.page_number || result.payload.pageNumber || 'N/A'}`
+        )
+        console.log(`      Content: ${contentPreview}...`)
+        console.log('')
+      })
+      console.log('='.repeat(80) + '\n')
 
       return mappedResults
     } catch (error) {

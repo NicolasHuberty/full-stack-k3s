@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma'
 import { createAgentGraph } from './graph'
+import { getBelgianLawAgentService } from './belgian-law-service'
 import type { AgentState, DocumentChunk } from './types'
 
 const BUCKET_NAME = process.env.MINIO_BUCKET_NAME || 'docuralis'
@@ -41,6 +42,93 @@ export class AgentService {
 
       if (!agent) {
         throw new Error('Agent not found')
+      }
+
+      // Check if this is the Belgian Law ReAct agent
+      const graphConfig = agent.graphConfig as Record<string, unknown> | null
+      if (graphConfig?.type === 'belgian-law-react') {
+        console.log('[AgentService] Using Belgian Law ReAct Agent')
+        const belgianLawService = getBelgianLawAgentService()
+
+        const result = await belgianLawService.executeAgent(
+          query,
+          userId,
+          {
+            collectionId,
+            sessionId,
+            maxIterations: (graphConfig.maxIterations as number) || 15, // Increased for comprehensive multi-angle search
+          },
+          // Map progress events to the expected format
+          async (event) => {
+            try {
+              if (event.type === 'plan') {
+                const data = event.data as {
+                  thought?: string
+                  action?: string
+                  reasoning?: string
+                  toolCalls?: unknown[]
+                }
+                await onProgress?.({
+                  type: 'decompose',
+                  data: {
+                    message: `🔍 ${data.action || 'Planification'}`,
+                    subQueries: data.thought ? [data.thought] : [],
+                    toolCalls: data.toolCalls,
+                  },
+                })
+              } else if (event.type === 'execute') {
+                const data = event.data as {
+                  observation?: string
+                  jurisprudenceCount?: number
+                  legislationCount?: number
+                  toolCalls?: unknown[]
+                }
+                await onProgress?.({
+                  type: 'retrieve',
+                  data: {
+                    message: data.observation || 'Exécution des recherches...',
+                    count:
+                      (data.jurisprudenceCount || 0) +
+                      (data.legislationCount || 0),
+                    toolCalls: data.toolCalls,
+                  },
+                })
+              } else if (event.type === 'generate') {
+                await onProgress?.({
+                  type: 'generate',
+                  data: {
+                    message: 'Génération de la réponse finale...',
+                  },
+                })
+              }
+            } catch (e) {
+              console.error(
+                '[AgentService] Error sending Belgian Law progress:',
+                e
+              )
+            }
+          }
+        )
+
+        // Format sources for the Belgian Law agent
+        const sources = result.sources.map((source, index) => ({
+          documentId: `belgian-law-${source.type}-${index}`,
+          documentName: source.title,
+          documentUrl: source.url || null,
+          collectionId: collectionId,
+          content: source.excerpt || '',
+          score: 0.8, // Default relevance score
+          justification: `Source ${source.type}: ${source.title}`,
+          pageNumber: null,
+          metadata: { type: source.type },
+        }))
+
+        return {
+          answer: result.answer,
+          sources,
+          inputTokens: result.inputTokens,
+          outputTokens: result.outputTokens,
+        }
       }
 
       // Get collection agent settings

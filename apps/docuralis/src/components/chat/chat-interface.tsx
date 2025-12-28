@@ -79,7 +79,7 @@ export function ChatInterface({
     documentId: string
     documentName: string
     collectionId?: string
-    initialPage?: number | null
+    initialPage?: number
     highlightText?: string
   } | null>(null)
   const [agentThoughts, setAgentThoughts] = useState<
@@ -353,7 +353,11 @@ export function ChatInterface({
     }
   }
 
-  const handlePdfClick = async (filename: string, pageNumber?: number) => {
+  const handlePdfClick = async (
+    filename: string,
+    pageNumber?: number,
+    highlightContent?: string
+  ) => {
     try {
       const collectionIdToUse = collectionId || session?.collection?.id
       if (!collectionIdToUse) {
@@ -387,7 +391,8 @@ export function ChatInterface({
           documentId: document.id,
           documentName: document.originalName || document.filename,
           collectionId: collectionIdToUse,
-          initialPage: pageNumber || null,
+          initialPage: pageNumber || 1,
+          highlightText: highlightContent,
         }
         setPdfViewer(pdfViewerData)
       } else {
@@ -484,6 +489,8 @@ export function ChatInterface({
                       components={getCustomMarkdownComponents({
                         onPdfClick: handlePdfClick,
                         documentChunks: msg.documentChunks,
+                        // Pass sources for inline citation rendering
+                        sources: msg.documentChunks,
                       })}
                     >
                       {msg.content}
@@ -500,79 +507,175 @@ export function ChatInterface({
                         </span>
                       </div>
                       <div className="space-y-2">
-                        {msg.documentChunks.map((chunk: any, i: number) => (
-                          <button
-                            key={i}
-                            onClick={() => {
-                              if (chunk?.documentId && chunk?.documentName) {
-                                // Use chunk's collectionId if available, otherwise fall back to session's collection ID
-                                const effectiveCollectionId =
-                                  chunk.collectionId || session?.collection?.id
-                                // Extract page number if available
-                                let pageNumber =
-                                  chunk.pageNumber ||
-                                  chunk.metadata?.pageNumber ||
-                                  null
+                        {msg.documentChunks.map((source: any, i: number) => {
+                          // Detect source type - check metadata.type first, then type, then infer from fields
+                          let sourceType = source.metadata?.type || source.type
+                          if (!sourceType) {
+                            // Infer from fields
+                            const docName = source.documentName || ''
+                            if (source.ecli || docName.includes('ECLI:')) {
+                              sourceType = 'jurisprudence'
+                            } else if (
+                              source.numac ||
+                              source.documentType === 'LOI' ||
+                              source.documentType === 'ARRETE' ||
+                              docName.includes('CODE CIVIL') ||
+                              docName.includes('LOI') ||
+                              docName.includes('ARRETE')
+                            ) {
+                              sourceType = 'legislation'
+                            } else {
+                              sourceType = 'rag'
+                            }
+                          }
 
-                                // Convert to number and validate
-                                if (
-                                  pageNumber !== null &&
-                                  pageNumber !== undefined
-                                ) {
-                                  pageNumber =
-                                    typeof pageNumber === 'string'
-                                      ? parseInt(pageNumber, 10)
-                                      : Number(pageNumber)
-                                  if (isNaN(pageNumber) || pageNumber <= 0) {
-                                    pageNumber = null
-                                  }
+                          // Get URL - check documentUrl first, then url
+                          const sourceUrl = source.documentUrl || source.url
+
+                          // Jurisprudence source
+                          if (sourceType === 'jurisprudence') {
+                            // Extract ECLI from documentName if not present
+                            const ecli =
+                              source.ecli ||
+                              source.documentName?.match(/ECLI:[^\s]+/)?.[0]
+                            return (
+                              <a
+                                key={i}
+                                href={
+                                  sourceUrl ||
+                                  (ecli
+                                    ? `https://juportal.be/content/${encodeURIComponent(ecli)}`
+                                    : '#')
                                 }
-                                setPdfViewer({
-                                  documentId: chunk.documentId,
-                                  documentName: chunk.documentName,
-                                  collectionId: effectiveCollectionId,
-                                  initialPage: pageNumber,
-                                  highlightText: chunk.content,
-                                })
-                              }
-                            }}
-                            className="w-full text-left p-3 rounded-lg border border-gray-200 hover:border-blue-400 hover:bg-blue-50 transition-all group"
-                          >
-                            <div className="flex items-start justify-between gap-2">
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2 mb-1">
-                                  <FileText className="h-4 w-4 text-blue-600 flex-shrink-0" />
-                                  <span className="font-medium text-sm text-gray-900 truncate">
-                                    {chunk?.documentName || 'Unknown Document'}
-                                  </span>
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="block w-full text-left p-3 rounded-lg border border-gray-200 hover:border-gray-400 hover:bg-gray-50 transition-all group"
+                              >
+                                <div className="flex items-start justify-between gap-2">
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-2 mb-1">
+                                      <span className="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-0.5 rounded">
+                                        Jurisprudence
+                                      </span>
+                                    </div>
+                                    <p className="font-medium text-sm text-gray-800 truncate pl-0">
+                                      {source.documentName ||
+                                        ecli ||
+                                        'Jurisprudence'}
+                                    </p>
+                                    {(source.content || source.excerpt) && (
+                                      <p className="text-xs text-gray-500 line-clamp-2 mt-1">
+                                        {(
+                                          source.content || source.excerpt
+                                        )?.substring(0, 150)}
+                                        ...
+                                      </p>
+                                    )}
+                                  </div>
+                                  <ExternalLink className="h-4 w-4 text-gray-400 group-hover:text-gray-600 flex-shrink-0 mt-1" />
                                 </div>
-                                <p className="text-xs text-gray-500 line-clamp-2 pl-6">
-                                  {chunk?.content?.substring(0, 150) ||
-                                    'No preview available'}
-                                  ...
-                                </p>
-                                <div className="flex items-center gap-3 mt-2 pl-6">
-                                  <span className="text-xs text-gray-400">
-                                    Score:{' '}
-                                    {chunk?.score
-                                      ? (chunk.score * 100).toFixed(1)
-                                      : '0.0'}
-                                    %
-                                  </span>
-                                  {(chunk?.pageNumber ||
-                                    chunk?.metadata?.pageNumber) && (
-                                    <span className="text-xs text-blue-600 font-medium">
-                                      Page{' '}
-                                      {chunk.pageNumber ||
-                                        chunk.metadata.pageNumber}
+                              </a>
+                            )
+                          }
+
+                          // Legislation source
+                          if (sourceType === 'legislation') {
+                            return (
+                              <a
+                                key={i}
+                                href={sourceUrl || '#'}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="block w-full text-left p-3 rounded-lg border border-gray-200 hover:border-gray-400 hover:bg-gray-50 transition-all group"
+                              >
+                                <div className="flex items-start justify-between gap-2">
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-2 mb-1">
+                                      <span className="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-0.5 rounded">
+                                        Législation
+                                      </span>
+                                    </div>
+                                    <p className="font-medium text-sm text-gray-800 truncate pl-0">
+                                      {source.documentName ||
+                                        source.title ||
+                                        'Législation'}
+                                    </p>
+                                    {(source.content || source.excerpt) && (
+                                      <p className="text-xs text-gray-500 line-clamp-2 mt-1">
+                                        {(
+                                          source.content || source.excerpt
+                                        )?.substring(0, 150)}
+                                        ...
+                                      </p>
+                                    )}
+                                  </div>
+                                  <ExternalLink className="h-4 w-4 text-gray-400 group-hover:text-gray-600 flex-shrink-0 mt-1" />
+                                </div>
+                              </a>
+                            )
+                          }
+
+                          // RAG/Document source (default)
+                          return (
+                            <button
+                              key={i}
+                              onClick={() => {
+                                const docName =
+                                  source.documentName || source.title
+                                if (docName) {
+                                  let pageNumber = source.pageNumber || null
+                                  if (
+                                    pageNumber !== null &&
+                                    pageNumber !== undefined
+                                  ) {
+                                    pageNumber =
+                                      typeof pageNumber === 'string'
+                                        ? parseInt(pageNumber, 10)
+                                        : Number(pageNumber)
+                                    if (isNaN(pageNumber) || pageNumber <= 0) {
+                                      pageNumber = null
+                                    }
+                                  }
+                                  handlePdfClick(
+                                    docName,
+                                    pageNumber || undefined,
+                                    source.excerpt || source.content
+                                  )
+                                }
+                              }}
+                              className="w-full text-left p-3 rounded-lg border border-gray-200 hover:border-gray-400 hover:bg-gray-50 transition-all group"
+                            >
+                              <div className="flex items-start justify-between gap-2">
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <span className="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-0.5 rounded">
+                                      Document
                                     </span>
+                                    {source.pageNumber && (
+                                      <span className="text-xs text-gray-500">
+                                        Page {source.pageNumber}
+                                      </span>
+                                    )}
+                                  </div>
+                                  <p className="font-medium text-sm text-gray-800 truncate pl-0">
+                                    {source.documentName ||
+                                      source.title ||
+                                      'Document'}
+                                  </p>
+                                  {(source.excerpt || source.content) && (
+                                    <p className="text-xs text-gray-500 line-clamp-2 mt-1">
+                                      {(
+                                        source.excerpt || source.content
+                                      )?.substring(0, 150)}
+                                      ...
+                                    </p>
                                   )}
                                 </div>
+                                <ExternalLink className="h-4 w-4 text-gray-400 group-hover:text-gray-600 flex-shrink-0 mt-1" />
                               </div>
-                              <ExternalLink className="h-4 w-4 text-gray-400 group-hover:text-blue-600 flex-shrink-0 mt-1" />
-                            </div>
-                          </button>
-                        ))}
+                            </button>
+                          )
+                        })}
                       </div>
                     </div>
                   )}

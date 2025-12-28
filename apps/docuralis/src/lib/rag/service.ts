@@ -639,6 +639,15 @@ export async function searchDocuments(
   }>
 > {
   try {
+    // DEBUG: Log the incoming query
+    console.log('\n' + '#'.repeat(80))
+    console.log('[searchDocuments DEBUG] Incoming Search Request:')
+    console.log('  Collection ID:', collectionId)
+    console.log('  Original Query:', query)
+    console.log('  Query Length:', query.length, 'characters')
+    console.log('  Limit:', limit)
+    console.log('#'.repeat(80))
+
     // Get collection
     const collection = await prisma.collection.findUnique({
       where: { id: collectionId },
@@ -648,11 +657,21 @@ export async function searchDocuments(
       throw new Error('Collection not found')
     }
 
+    console.log('[searchDocuments DEBUG] Collection found:')
+    console.log('  Name:', collection.name)
+    console.log('  Embedding Model:', collection.embeddingModel)
+    console.log('  Chunk Size:', collection.chunkSize)
+
     // Generate query embedding
     const embeddingService = getEmbeddingService()
+    console.log('[searchDocuments DEBUG] Generating embedding for query...')
     const queryEmbedding = await embeddingService.generateQueryEmbedding(
       query,
       collection.embeddingModel as any
+    )
+    console.log(
+      '[searchDocuments DEBUG] Embedding generated, length:',
+      queryEmbedding.length
     )
 
     // Search in Qdrant

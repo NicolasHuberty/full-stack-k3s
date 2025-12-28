@@ -43,6 +43,12 @@ export async function decomposeQuery(
   state: AgentState
 ): Promise<Partial<AgentState>> {
   try {
+    // DEBUG: Log input query
+    console.log('\n' + '+'.repeat(80))
+    console.log('[Agent decomposeQuery DEBUG] Input:')
+    console.log('  Original Query:', state.query)
+    console.log('+'.repeat(80))
+
     const prompt = DECOMPOSE_QUERY_PROMPT.replace('{query}', state.query)
 
     const model = await getModel()
@@ -59,6 +65,16 @@ export async function decomposeQuery(
       .split('\n')
       .map((line) => line.trim())
       .filter((line) => line.length > 0)
+
+    // DEBUG: Log decomposed queries
+    console.log('\n' + '+'.repeat(80))
+    console.log('[Agent decomposeQuery DEBUG] Output:')
+    console.log('  Number of sub-queries:', subQueries.length)
+    console.log('  Sub-queries:')
+    subQueries.forEach((q, idx) => {
+      console.log(`    [${idx + 1}] ${q}`)
+    })
+    console.log('+'.repeat(80) + '\n')
 
     return {
       subQueries,
@@ -82,12 +98,30 @@ export async function retrieveDocuments(
     // Determine number of docs per query based on mode
     const docsPerQuery = state.smartMode || state.reflexion ? 30 : 10
 
+    // DEBUG: Log retrieval parameters
+    console.log('\n' + '*'.repeat(80))
+    console.log('[Agent retrieveDocuments DEBUG] Starting document retrieval:')
+    console.log('  Original Query:', state.query)
+    console.log('  Sub-queries:', queriesToSearch)
+    console.log('  Number of sub-queries:', queriesToSearch.length)
+    console.log('  Docs per query:', docsPerQuery)
+    console.log('  Smart Mode:', state.smartMode)
+    console.log('  Reflexion Mode:', state.reflexion)
+    console.log('  Translator Mode:', state.translatorMode)
+    console.log('  Multilingual:', state.multilingual)
+    console.log('*'.repeat(80))
+
     for (const query of queriesToSearch) {
+      console.log(`\n[Agent DEBUG] Searching for query: "${query}"`)
+
       // Retrieve French documents
       const frenchDocs = await searchDocuments(
         state.collectionId,
         query,
         docsPerQuery
+      )
+      console.log(
+        `[Agent DEBUG] Found ${frenchDocs.length} French docs for query`
       )
       allDocs.push(...frenchDocs)
 
@@ -121,6 +155,29 @@ export async function retrieveDocuments(
         uniqueDocs.push(doc)
       }
     }
+
+    // DEBUG: Log final retrieval results
+    console.log('\n' + '*'.repeat(80))
+    console.log('[Agent retrieveDocuments DEBUG] Final Results:')
+    console.log('  Total docs before dedup:', allDocs.length)
+    console.log('  Unique docs after dedup:', uniqueDocs.length)
+    console.log(
+      '  Score range:',
+      uniqueDocs.length > 0
+        ? `${Math.min(...uniqueDocs.map((d) => d.metadata.similarity || 0)).toFixed(4)} - ${Math.max(...uniqueDocs.map((d) => d.metadata.similarity || 0)).toFixed(4)}`
+        : 'N/A'
+    )
+    console.log('\n  Top 5 retrieved documents:')
+    uniqueDocs.slice(0, 5).forEach((doc, idx) => {
+      console.log(
+        `    [${idx + 1}] ${doc.metadata.title} (Page ${doc.metadata.pageNumber}) - Score: ${(doc.metadata.similarity || 0).toFixed(4)}`
+      )
+      console.log(
+        `        Content preview: ${doc.pageContent.substring(0, 100).replace(/\n/g, ' ')}...`
+      )
+    })
+    console.log('*'.repeat(80) + '\n')
+
     return {
       retrievedDocs: uniqueDocs,
     }
@@ -151,7 +208,14 @@ export async function gradeDocumentsClassical(
       const response = await model.invoke([{ role: 'user', content: prompt }])
 
       try {
-        const result = JSON.parse(response.content.toString()) as GradingResult
+        // Strip markdown code blocks if present
+        let jsonStr = response.content.toString().trim()
+        if (jsonStr.startsWith('```')) {
+          jsonStr = jsonStr
+            .replace(/^```(?:json)?\s*/, '')
+            .replace(/\s*```$/, '')
+        }
+        const result = JSON.parse(jsonStr) as GradingResult
 
         if (result.pertinence === 'oui') {
           relevantDocs.push({

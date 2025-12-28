@@ -78,3 +78,15 @@ export interface ReflexionGradingResult {
   pertinenceScore: number
   justification: string
 }
+
+export interface ToolCallInfo {
+  id: string
+  name: string
+  status: 'pending' | 'running' | 'completed' | 'error'
+  startedAt?: string
+  completedAt?: string
+  durationMs?: number
+  args?: Record<string, unknown>
+  resultSummary?: string
+  error?: string
+}

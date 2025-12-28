@@ -378,7 +378,7 @@ export async function executeMoniteurBelgeSearch(
 
     // Add remaining docs without enrichment
     for (const doc of documents.slice(5)) {
-      enrichedDocs.push(doc)
+      enrichedDocs.push({ ...doc, summary: doc.summary })
     }
 
     const durationMs = Date.now() - startTime

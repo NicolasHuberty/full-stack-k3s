@@ -62,3 +62,7 @@ cache.properties
 .env.bak
 .env2
 .PROD_env
+
+kubeconfig-docuralis.yml
+
+

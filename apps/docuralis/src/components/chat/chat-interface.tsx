@@ -483,18 +483,22 @@ export function ChatInterface({
               <CardContent className="p-3">
                 <div className="max-w-none">
                   {msg.role === 'USER' ? (
-                    <p className="m-0 whitespace-pre-wrap">{msg.content}</p>
-                  ) : (
-                    <ReactMarkdown
-                      components={getCustomMarkdownComponents({
-                        onPdfClick: handlePdfClick,
-                        documentChunks: msg.documentChunks,
-                        // Pass sources for inline citation rendering
-                        sources: msg.documentChunks,
-                      })}
-                    >
+                    <p className="m-0 whitespace-pre-wrap break-words">
                       {msg.content}
-                    </ReactMarkdown>
+                    </p>
+                  ) : (
+                    <div className="break-words">
+                      <ReactMarkdown
+                        components={getCustomMarkdownComponents({
+                          onPdfClick: handlePdfClick,
+                          documentChunks: msg.documentChunks,
+                          // Pass sources for inline citation rendering
+                          sources: msg.documentChunks,
+                        })}
+                      >
+                        {msg.content}
+                      </ReactMarkdown>
+                    </div>
                   )}
                 </div>
                 {Array.isArray(msg.documentChunks) &&

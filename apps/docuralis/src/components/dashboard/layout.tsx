@@ -99,8 +99,8 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
             <Image
               src="/docuralis.png"
               alt="Docuralis"
-              width={50}
-              height={50}
+              width={190}
+              height={65}
               className="h-16 w-auto"
             />
           </Link>

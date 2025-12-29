@@ -449,11 +449,42 @@ export function getCustomMarkdownComponents(
     p: (props: any) => {
       const { children, ...htmlProps } = props
       return (
-        <p className="mb-4 text-gray-700 leading-relaxed" {...htmlProps}>
+        <p
+          className="mb-4 text-gray-700 leading-relaxed break-words"
+          {...htmlProps}
+        >
           {processChildren(children, 'p')}
         </p>
       )
     },
+
+    // Tables
+    table: (props: any) => (
+      <div className="my-4 w-full overflow-x-auto">
+        <table
+          className="min-w-full divide-y divide-gray-300 border border-gray-200"
+          {...props}
+        />
+      </div>
+    ),
+    thead: (props: any) => <thead className="bg-gray-50" {...props} />,
+    tbody: (props: any) => (
+      <tbody className="divide-y divide-gray-200 bg-white" {...props} />
+    ),
+    tr: (props: any) => <tr {...props} />,
+    th: (props: any) => (
+      <th
+        className="px-3 py-2 text-left text-sm font-semibold text-gray-900"
+        {...props}
+      >
+        {processChildren(props.children, 'th')}
+      </th>
+    ),
+    td: (props: any) => (
+      <td className="px-3 py-2 text-sm text-gray-700" {...props}>
+        {processChildren(props.children, 'td')}
+      </td>
+    ),
 
     // Text formatting
     strong: (props: any) => (
@@ -471,18 +502,26 @@ export function getCustomMarkdownComponents(
 
     // Lists
     ul: (props: any) => (
-      <ul className="list-disc list-inside my-4 space-y-2" {...props} />
+      <ul
+        className="list-disc list-inside my-4 space-y-2 break-words"
+        {...props}
+      />
     ),
     ol: (props: any) => (
-      <ol className="list-decimal list-inside my-4 space-y-2" {...props} />
+      <ol
+        className="list-decimal list-inside my-4 space-y-2 break-words"
+        {...props}
+      />
     ),
     li: (props: any) => (
-      <li className="text-gray-700">{processChildren(props.children, 'li')}</li>
+      <li className="text-gray-700 break-words">
+        {processChildren(props.children, 'li')}
+      </li>
     ),
 
     // Blockquotes
     blockquote: (props: any) => (
-      <blockquote className="border-l-4 border-blue-500 pl-4 py-2 mb-4 italic bg-gray-50 text-gray-700">
+      <blockquote className="border-l-4 border-blue-500 pl-4 py-2 mb-4 italic bg-gray-50 text-gray-700 break-words">
         {processChildren(props.children, 'blockquote')}
       </blockquote>
     ),
@@ -496,7 +535,7 @@ export function getCustomMarkdownComponents(
     a: (props: any) => (
       <a
         {...props}
-        className="text-blue-600 hover:text-blue-800 underline"
+        className="text-blue-600 hover:text-blue-800 underline break-words"
         target="_blank"
         rel="noopener noreferrer"
       />
@@ -538,7 +577,7 @@ export function getCustomMarkdownComponents(
 
       return (
         <code
-          className="bg-gray-100 text-gray-800 px-1.5 py-0.5 rounded text-sm font-mono"
+          className="bg-gray-100 text-gray-800 px-1.5 py-0.5 rounded text-sm font-mono break-all"
           {...htmlProps}
         >
           {children}

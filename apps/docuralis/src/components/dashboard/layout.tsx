@@ -102,6 +102,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
               width={190}
               height={65}
               className="h-16 w-auto"
+              unoptimized
             />
           </Link>
         </div>

@@ -27,6 +27,7 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.70.1",
     "@auth/prisma-adapter": "^2.11.0",
+    "@aws-sdk/client-s3": "^3.700.0",
     "@langchain/anthropic": "^1.1.1",
     "@langchain/core": "^0.3.0",
     "@langchain/langgraph": "^0.2.0",
@@ -48,7 +49,6 @@
     "@radix-ui/react-slot": "^1.2.3",
     "@radix-ui/react-switch": "^1.1.0",
     "@radix-ui/react-tooltip": "^1.2.8",
-    "aws-sdk": "^2.1692.0",
     "bcryptjs": "^3.0.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -63,6 +63,7 @@
     "next-auth": "^5.0.0-beta.29",
     "next-intl": "^4.3.12",
     "nodemailer": "^7.0.9",
+    "officeparser": "^6.0.1",
     "openai": "^6.6.0",
     "pdf-parse": "^2.4.5",
     "pdf2json": "^4.0.0",

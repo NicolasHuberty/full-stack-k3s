@@ -2,7 +2,20 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/auth'
 import { hasCollectionAccess } from '@/lib/collections/permissions'
 import { prisma } from '@/lib/prisma'
-import { getMinioClient } from '@/lib/storage/minio'
+import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3'
+
+// S3 client configuration
+const s3Client = new S3Client({
+  endpoint: `https://${process.env.S3_ENDPOINT || 's3.docuralis.com'}`,
+  region: process.env.S3_REGION || 'us-east-1',
+  credentials: {
+    accessKeyId: process.env.S3_ACCESS_KEY || 'minioadmin',
+    secretAccessKey: process.env.S3_SECRET_KEY || 'minioadmin123',
+  },
+  forcePathStyle: true,
+})
+
+const BUCKET_NAME = process.env.S3_BUCKET || 'docuralis'
 
 export async function GET(
   request: NextRequest,
@@ -47,19 +60,19 @@ export async function GET(
       )
     }
 
-    // Get MinIO client
-    const minioClient = getMinioClient()
-    const bucketName = process.env.MINIO_BUCKET_NAME || 'docuralis'
-
     // Extract filename from fileUrl or use document.filename
     // fileUrl format: http://localhost:9000/docuralis/collection-id/file.pdf
     const urlParts = document.fileUrl.split('/')
     const filename = urlParts.slice(-2).join('/') // Get collection-id/file.pdf
 
     try {
-      // Check if file exists first
-      const exists = await minioClient.fileExists(filename)
-      if (!exists) {
+      const command = new GetObjectCommand({
+        Bucket: BUCKET_NAME,
+        Key: filename,
+      })
+      const response = await s3Client.send(command)
+
+      if (!response.Body) {
         return NextResponse.json(
           {
             error:
@@ -69,26 +82,18 @@ export async function GET(
         )
       }
 
-      // Get file from MinIO
-      const stream = await minioClient.getObject(bucketName, filename)
-
-      // Convert stream to buffer
-      const chunks: Buffer[] = []
-      for await (const chunk of stream) {
-        chunks.push(Buffer.from(chunk))
-      }
-      const buffer = Buffer.concat(chunks)
+      const bytes = await response.Body.transformToByteArray()
 
       // Return file with appropriate headers
-      return new NextResponse(buffer, {
+      return new Response(bytes.buffer as ArrayBuffer, {
         headers: {
           'Content-Type': document.mimeType,
           'Content-Disposition': `inline; filename="${encodeURIComponent(document.originalName)}"`,
-          'Content-Length': buffer.length.toString(),
+          'Content-Length': bytes.length.toString(),
         },
       })
     } catch (fileError) {
-      console.error('Failed to retrieve file from MinIO:', fileError)
+      console.error('Failed to retrieve file from S3:', fileError)
       return NextResponse.json(
         {
           error:

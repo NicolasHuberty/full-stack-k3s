@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import mammoth from 'mammoth'
 import PDFParser from 'pdf2json'
+import { OfficeParser } from 'officeparser'
 import { isScannedPDF, performPDFOCR, performImageOCR } from './ocr'
 import { logger } from '@/lib/logger'
 
@@ -255,6 +256,52 @@ export class TextExtractor {
   }
 
   /**
+   * Extract text from a PowerPoint file (PPTX)
+   */
+  async extractFromPPTX(buffer: Buffer): Promise<ExtractionResult> {
+    try {
+      logger.info('Extracting text from PPTX')
+      const ast = await OfficeParser.parseOffice(buffer)
+      const text = ast.toText()
+
+      return {
+        text: text || '',
+        metadata: {
+          wordCount: this.countWords(text || ''),
+        },
+      }
+    } catch (error) {
+      logger.error('Failed to extract text from PPTX', error)
+      throw new Error(
+        `PPTX extraction failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+      )
+    }
+  }
+
+  /**
+   * Extract text from an Excel file (XLSX)
+   */
+  async extractFromXLSX(buffer: Buffer): Promise<ExtractionResult> {
+    try {
+      logger.info('Extracting text from XLSX')
+      const ast = await OfficeParser.parseOffice(buffer)
+      const text = ast.toText()
+
+      return {
+        text: text || '',
+        metadata: {
+          wordCount: this.countWords(text || ''),
+        },
+      }
+    } catch (error) {
+      logger.error('Failed to extract text from XLSX', error)
+      throw new Error(
+        `XLSX extraction failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+      )
+    }
+  }
+
+  /**
    * Main extraction method that routes to the appropriate extractor
    */
   async extractText(
@@ -284,6 +331,14 @@ export class TextExtractor {
         case 'image/bmp':
           return await this.extractFromImage(buffer)
 
+        case 'application/vnd.openxmlformats-officedocument.presentationml.presentation':
+        case 'application/vnd.ms-powerpoint':
+          return await this.extractFromPPTX(buffer)
+
+        case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
+        case 'application/vnd.ms-excel':
+          return await this.extractFromXLSX(buffer)
+
         default:
           // Try to extract as plain text for unknown types
           try {
@@ -310,10 +365,12 @@ export class TextExtractor {
   }
 
   /**
-   * Clean extracted text (remove excessive whitespace, etc.)
+   * Clean extracted text (remove excessive whitespace, null bytes, etc.)
    */
   cleanText(text: string): string {
     return text
+      .replace(/\x00/g, '') // Remove null bytes (causes PostgreSQL UTF-8 errors)
+      .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '') // Remove other control characters
       .replace(/\r\n/g, '\n') // Normalize line endings
       .replace(/\n{3,}/g, '\n\n') // Remove excessive line breaks
       .replace(/[ \t]{2,}/g, ' ') // Remove excessive spaces

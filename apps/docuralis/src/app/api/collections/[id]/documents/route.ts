@@ -42,6 +42,19 @@ export async function POST(
       return NextResponse.json({ error: 'No file provided' }, { status: 400 })
     }
 
+    // Filter out system files and unsupported files
+    const filename = file.name.toLowerCase()
+    const blockedFiles = ['.ds_store', 'thumbs.db', 'desktop.ini', '.gitignore']
+    if (
+      blockedFiles.some((blocked) => filename.endsWith(blocked)) ||
+      filename.startsWith('._') // macOS resource fork files
+    ) {
+      return NextResponse.json(
+        { error: 'System files are not allowed' },
+        { status: 400 }
+      )
+    }
+
     // Convert file to buffer
     const arrayBuffer = await file.arrayBuffer()
     const buffer = Buffer.from(arrayBuffer)

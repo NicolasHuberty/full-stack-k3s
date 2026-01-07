@@ -1,6 +1,36 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/auth'
-import AWS from 'aws-sdk'
+import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3'
+
+// S3 client configuration
+const s3Client = new S3Client({
+  endpoint: `https://${process.env.S3_ENDPOINT || 's3.docuralis.com'}`,
+  region: process.env.S3_REGION || 'us-east-1',
+  credentials: {
+    accessKeyId: process.env.S3_ACCESS_KEY || 'minioadmin',
+    secretAccessKey: process.env.S3_SECRET_KEY || 'minioadmin123',
+  },
+  forcePathStyle: true,
+})
+
+const BUCKET_NAME = process.env.S3_BUCKET || 'docuralis'
+
+async function downloadFromS3(key: string): Promise<Buffer | null> {
+  try {
+    const command = new GetObjectCommand({
+      Bucket: BUCKET_NAME,
+      Key: key,
+    })
+    const response = await s3Client.send(command)
+    if (response.Body) {
+      const bytes = await response.Body.transformToByteArray()
+      return Buffer.from(bytes)
+    }
+  } catch {
+    return null
+  }
+  return null
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -19,86 +49,60 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Use AWS S3 SDK for proper authentication
-    const bucketName = process.env.MINIO_BUCKET_NAME || 'docuralis'
-    const accessKey = process.env.MINIO_ACCESS_KEY || 'minioadmin'
-    const secretKey = process.env.MINIO_SECRET_KEY || 'minioadmin'
-
-    // Configure S3 client for MinIO
-    const s3 = new AWS.S3({
-      accessKeyId: accessKey,
-      secretAccessKey: secretKey,
-      endpoint: 'https://s3.docuralis.com',
-      region: 'us-east-1',
-      s3ForcePathStyle: true,
-      signatureVersion: 'v4',
-    })
+    // Clean up filename - remove query parameters
+    const cleanFilename = filename.split('?')[0]
+    // Decode URL-encoded filenames
+    const decodedFilename = cleanFilename.includes('%')
+      ? decodeURIComponent(cleanFilename)
+      : cleanFilename
 
     // Try different filename patterns
     const possiblePaths = [
       // With collection ID if provided
-      collectionId ? `${collectionId}/${filename}` : null,
+      collectionId ? `${collectionId}/${decodedFilename}` : null,
       // Direct filename
-      filename,
-      // Without query parameters
-      filename.split('?')[0],
-      // Try to extract collection from URL patterns
-      ...(filename.includes('%2F') ? [decodeURIComponent(filename)] : []),
-      // Common MinIO collection patterns - try with hardcoded collection ID if no collectionId provided
-      !collectionId ? `cmhxblm5p00018001iwvrwdxq/${filename}` : null,
-    ].filter(Boolean)
+      decodedFilename,
+      // If filename already contains a path separator, try as-is
+      decodedFilename.includes('/') ? decodedFilename : null,
+    ].filter((p): p is string => p !== null)
 
     let pdfBuffer: Buffer | null = null
-    let foundPath: string | null = null
 
-    // Try each possible path with AWS S3 SDK
+    // Try each possible path
     for (const path of possiblePaths) {
-      try {
-        const params = {
-          Bucket: bucketName,
-          Key: path as string,
-        }
+      const buffer = await downloadFromS3(path)
+      if (!buffer) continue
 
-        const data = await s3.getObject(params).promise()
+      // Check if it's actually a PDF (not HTML)
+      const isPDF =
+        buffer.length > 4 &&
+        buffer[0] === 0x25 && // %
+        buffer[1] === 0x50 && // P
+        buffer[2] === 0x44 && // D
+        buffer[3] === 0x46 // F
 
-        if (data.Body) {
-          const buffer = Buffer.from(data.Body as Uint8Array)
-
-          // Check if it's actually a PDF (not HTML)
-          const isPDF =
-            buffer.length > 4 &&
-            buffer[0] === 0x25 && // %
-            buffer[1] === 0x50 && // P
-            buffer[2] === 0x44 && // D
-            buffer[3] === 0x46 // F
-
-          if (isPDF) {
-            pdfBuffer = buffer
-            foundPath = path
-            break
-          }
-        }
-      } catch (pathError: unknown) {
-        continue // Try next path
+      if (isPDF) {
+        pdfBuffer = buffer
+        break
       }
     }
 
     if (!pdfBuffer) {
       return NextResponse.json(
         {
-          error: 'File not found in storage. Tried multiple paths.',
-          paths: possiblePaths,
+          error: 'File not found in storage.',
+          triedPaths: possiblePaths,
         },
         { status: 404 }
       )
     }
 
-    return new NextResponse(pdfBuffer as BodyInit, {
+    return new Response(new Uint8Array(pdfBuffer), {
       headers: {
         'Content-Type': 'application/pdf',
         'Content-Length': pdfBuffer.length.toString(),
-        'Content-Disposition': `inline; filename="${encodeURIComponent(filename)}"`,
-        'Cache-Control': 'public, max-age=3600', // Cache for 1 hour
+        'Content-Disposition': `inline; filename="${encodeURIComponent(decodedFilename.split('/').pop() || decodedFilename)}"`,
+        'Cache-Control': 'public, max-age=3600',
       },
     })
   } catch (error) {
